@@ -1,4 +1,4 @@
-function [v,phi,el,k,sigmaV,sigmaPhi]=...
+function [v,phi,el,k,sigmaV,sigmaPhi,bootV,bootPhi,bootEl,bootK]=...
     RWaveSingle(ETMYX_out,ETMYY_out,ETMYZ_out,BRSY_out,...
     quad,errFreq,transXErr,transYErr,transZErr,tiltErr,sampf)
     %% Single Station
@@ -27,6 +27,10 @@ function [v,phi,el,k,sigmaV,sigmaPhi]=...
         sgnZ=1;
     end
 
+    bootV=[];
+    bootPhi=[];
+    bootEl=[];
+    bootK=[];
     seriesX=[];
     seriesY=[];
     seriesZ=[];
@@ -64,6 +68,11 @@ function [v,phi,el,k,sigmaV,sigmaPhi]=...
     % sgnRX=sgnZ*sign(BRSY_out(find(abs(ETMYZ_out-mean(ETMYZ_out))==max(abs(ETMYZ_out-mean(ETMYZ_out)))))-mean(BRSY_out));
     % sgnZ=1;
     for i=0:100
+        tempBV=[];
+        tempBPhi=[];
+        tempBEl=[];
+        tempBK=[];
+        
         freq1=(startFreq1+i*freqStep1);
         [indx indx]=min(abs(errFreq-freq1));
         sigmaX=transXErr(indx);
@@ -135,7 +144,48 @@ function [v,phi,el,k,sigmaV,sigmaPhi]=...
     %     tempY=smooth(tempY);
     %     tempZ=smooth(tempZ);
     %     tempRX=smooth(tempRX);
+        for i=1:100
+                N=0;
+                sumX=0;
+                sumY=0;
+                sumZ=0;
+                sumRX=0;
+                avgPhi=0;
+                avgK=0;
+                avgEl=0;
+                avgV=0;
+                sumSigmaPhi=0;
+                sumSigmaV=0;
+                threshold=2e-6;
+                btempX=bootstrapData(tempX);
+                btempY=bootstrapData(tempY);
+                btempZ=bootstrapData(tempZ);
+                btempRX=bootstrapData(tempRX);
+                for l=1:min([length(btempX) length(btempY) length(btempZ) length(btempRX)])
+                    if(abs(btempZ(l))>=threshold)
+                        avgPhi=avgPhi+atan2(btempY(l),btempX(l))*180/pi;
+                        avgK=avgK+btempRX(l)./btempZ(l)./sin(atan2(btempY(l),btempX(l)));
+                        avgV=avgV+2*pi*freq1.*btempZ(l)./(btempRX(l)).*sin(atan2(btempY(l),btempX(l)));%(ang(i+1)*pi/180+180);%
+            %             avgV=avgV+2*pi*freq1.*btempY(l)./(btempRX(l)).*btempZ(l)./btempY(l).*sin(atan2(btempY(l),btempX(l)));
+                        avgEl=avgEl+acot(btempZ(l)/btempY(l).*sin(atan2(btempY(l),btempX(l))));
+                        N=N+1;
+                    end
+                end   
 
+                avgPhi=avgPhi/N;
+                avgK=avgK/N;
+                avgV=avgV/N;
+                avgEl=avgEl/N;
+
+            tempBV=[tempBV; avgV];
+            tempBPhi=[tempBPhi; avgPhi];
+            tempBEl=[tempBEl; avgEl];
+            tempBK=[tempBK; avgK];
+        end
+        bootV=[bootV; tempBV'];
+        bootPhi=[bootPhi; tempBPhi'];
+        bootEl=[bootEl; tempBEl'];
+        bootK=[bootK; tempBK'];
         N=0;
         sumX=0;
         sumY=0;
