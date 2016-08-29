@@ -1,5 +1,6 @@
 function [v,phi,el,k,sigmaV,sigmaPhi]=...
-    RWaveSingle(ETMYX_out,ETMYY_out,ETMYZ_out,BRSY_out,quad,errFreq,transErr,tiltErr,sampf)
+    RWaveSingle(ETMYX_out,ETMYY_out,ETMYZ_out,BRSY_out,...
+    quad,errFreq,transXErr,transYErr,transZErr,tiltErr,sampf)
     %% Single Station
     if quad=='E'
         sgnX=1;
@@ -64,10 +65,11 @@ function [v,phi,el,k,sigmaV,sigmaPhi]=...
     % sgnZ=1;
     for i=0:100
         freq1=(startFreq1+i*freqStep1);
-        sigmaX=transErr(find(errFreq==freq1));
-        sigmaY=sigmaX;
-        sigmaZ=sigmaX;
-        sigmaRX=tiltErr(find(errFreq==freq1));
+        [indx indx]=min(abs(errFreq-freq1));
+        sigmaX=transXErr(indx);
+        sigmaY=transYErr(indx);
+        sigmaZ=transZErr(indx);
+        sigmaRX=tiltErr(indx);
     %     [bb,aa] = butter(2,[(startFreq+i*freqStep)/sampf, (startFreq+(i+1)*freqStep)/sampf]);
         d = designfilt('bandpassiir', ...
           'StopbandFrequency1',freq1*.8,'PassbandFrequency1', freq1*.9, ...
@@ -186,7 +188,7 @@ function [v,phi,el,k,sigmaV,sigmaPhi]=...
         v=[v; avgV];
         el=[el; avgEl];
         sigmaPhi=[sigmaPhi; sqrt(sumSigmaPhi)/N*180/pi];
-        sigmaV=[sigmaV; sqrt(sumSigmaV)/N];
+        sigmaV=[sigmaV, sqrt(sumSigmaV)/N];
     end
 
     % 
