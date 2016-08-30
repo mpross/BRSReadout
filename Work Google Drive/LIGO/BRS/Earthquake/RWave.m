@@ -1,8 +1,8 @@
 sampf =8;
 [errFreq,transXErr,transYErr,transZErr,tiltErr]=RWaveMeasErr;
-[ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=...
-      RWaveDataIn('GPS1144888165_7_8Earthquake.mat');
-%     RWaveDataIn('GPS1143962787_6_9Earthquake.mat');
+[ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=...    
+    RWaveDataIn('GPS1143962787_6_9Earthquake.mat');
+%       RWaveDataIn('GPS1144888165_7_8Earthquake.mat');
 %     RWaveDataIn('GPS1149323500_Quite.mat');
 %     RWaveDataIn('GPS1149331885_6_2Earthquake.mat');       
 %     RWaveDataIn('GPS1149581095_5_2Earthquake.mat');      
@@ -29,7 +29,7 @@ hold on
 errorbar(((0:length(v)-1))*freqStep1+startFreq1,abs(v),-sigmaV,sigmaV)
 errorbar(((0:length(vel)-1))*freqStep2+startFreq2,vel,-sigmaVel,sigmaVel)
 errorbar(((0:length(phi)-1))*freqStep1+startFreq1,mean(bootV'),-std(bootV'),std(bootV'))
-errorbar(((0:length(phi)-1))*freqStep1+startFreq1,mean(bootVel),-std(bootVel),std(bootVel))
+errorbar(((0:length(phi)-1))*freqStep1+startFreq1,mean(bootVel'),-std(bootVel'),std(bootVel'))
 ylabel('Velocity (m/s)')
 xlabel('Frequency (Hz)')
 legend('Single Station','Array','Single Station Bootstrapping','Array Bootstrapping')
@@ -43,7 +43,7 @@ hold on
 errorbar(((0:length(phi)-1))*freqStep1+startFreq1,phi,-sigmaPhi,sigmaPhi)
 errorbar(((0:length(ang)-1))*freqStep2+startFreq2,ang,-sigmaAng,sigmaAng)
 errorbar(((0:length(phi)-1))*freqStep1+startFreq1,mean(bootPhi'),-std(bootPhi'),std(bootPhi'))
-errorbar(((0:length(phi)-1))*freqStep1+startFreq1,mean(bootAng),-std(bootAng),std(bootAng))
+errorbar(((0:length(phi)-1))*freqStep1+startFreq1,mean(bootAng'),-std(bootAng'),std(bootAng'))
 ylabel('Angle of Incidence (degrees)')
 xlabel('Frequency (Hz)')
 legend('Single Station','Array','Single Station Bootstrapping','Array Bootstrapping')
