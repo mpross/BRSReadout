@@ -1,4 +1,4 @@
-function [vel, ang, sigmaVel,sigmaAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sampf)
+function [vel, ang, sigmaVel,sigmaAng,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sampf)
 %% Array
     Astop1 = 10;
     Apass  = 1;
@@ -49,13 +49,15 @@ function [vel, ang, sigmaVel,sigmaAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,
     %     X=ETMXZ_out(startTime*sampf:length(ETMXZ_out));
     %     Y=ETMYZ_out(startTime*sampf:length(ETMYZ_out));
     %     C=ITMYZ_out(startTime*sampf:length(ITMYZ_out));
-    for i=1:floor(length(X)*(freq2/sampf))-2
-        if max(C>=threshold)            
-            i
-            [crossY,~] = xcorr(C(floor(j/(freq2/sampf)):floor((j+1)/(freq2/sampf))...
-                ,Y(floor(j/(freq2/sampf)):floor((j+1)/(freq2/sampf)))));
-            [crossX,lags]=xcorr(C(floor(j/(freq2/sampf)):floor((j+1)/(freq2/sampf))...
-                ,X(floor(j/(freq2/sampf)):floor((j+1)/(freq2/sampf)))));
+%     for j=1:floor(length(X)*(freq2/sampf))-2
+    for j=1:floor(length(X)/10000)-2
+        if max(C>=threshold)          
+%             [crossY,~] = xcorr(C(floor(j/(freq2/sampf)):floor((j+1)/(freq2/sampf))...
+%                 ,Y(floor(j/(freq2/sampf)):floor((j+1)/(freq2/sampf)))));
+%             [crossX,lags]=xcorr(C(floor(j/(freq2/sampf)):floor((j+1)/(freq2/sampf))...
+%                 ,X(floor(j/(freq2/sampf)):floor((j+1)/(freq2/sampf)))));
+            [crossY,~] = xcorr(C(j*10000:(j+1)*10000),Y(j*10000:(j+1)*10000));
+            [crossX,lags]=xcorr(C(j*10000:(j+1)*10000),X(j*10000:(j+1)*10000));
             crossX=abs(crossX);
             crossY=abs(crossY);
             peak=crossX(floor(.9995*find(crossX==max(crossX))):floor(1.0005*find(crossX==max(crossX))));
@@ -78,6 +80,8 @@ function [vel, ang, sigmaVel,sigmaAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,
             delta_t_Y=[delta_t_Y nan];
         end
     end
+    bootVel=0;
+    bootAng=0;
     %     delta_t_X=(lags(find(crossX==max(crossX))))/sampf;
     %     delta_t_Y=(lags(find(crossY==max(crossY))))/sampf;
     %     delta_t_X=(sum(crossX.*lags)/sum(crossX))/sampf;
@@ -87,7 +91,7 @@ function [vel, ang, sigmaVel,sigmaAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,
 %         lagsY=[lagsY delta_t_Y];
 
         ang=[ang mean(atan2(delta_t_Y,delta_t_X)*180/pi)];
-        vel=[vel mean(4e3/sqrt((delta_t_X).^2+(delta_t_Y).^2))];
+        vel=[vel mean(4e3./sqrt((delta_t_X).^2+(delta_t_Y).^2))];
         sigmaAng=[sigmaAng sqrt(delta_t_X.^2.*sigmaTY.^2+delta_t_Y.^2.*sigmaTX.^2)/(delta_t_X.^2+delta_t_Y.^2)*180/pi];
         sigmaVel=[sigmaVel 2*4e3*sqrt(delta_t_X.^2.*sigmaTX.^2+delta_t_Y.^2.*sigmaTY.^2)/(delta_t_X.^2+delta_t_Y.^2).^2];
     end

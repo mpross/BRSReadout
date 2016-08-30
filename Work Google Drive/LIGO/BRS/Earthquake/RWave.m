@@ -14,7 +14,7 @@ seed=randn(1,length(ETMYZ));
 RWaveSingle(ETMYX_out,ETMYY_out,ETMYZ_out,BRSY_out,...
     'S',errFreq,transXErr,transYErr,transZErr,tiltErr,sampf);
 
-[vel, ang, sigmaVel,sigmaAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sampf);
+[vel, ang, sigmaVel,sigmaAng,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sampf);
 
 
 % figure(1)

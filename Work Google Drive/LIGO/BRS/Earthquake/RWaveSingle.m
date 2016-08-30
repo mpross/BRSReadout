@@ -162,7 +162,7 @@ function [v,phi,el,k,sigmaV,sigmaPhi,bootV,bootPhi,bootEl,bootK]=...
             btempZ=bootstrapData(tempZ');
             btempRX=bootstrapData(tempRX');
             for l=1:min([length(btempX) length(btempY) length(btempZ) length(btempRX)])
-                if(abs(btempZ(l))>=threshold)
+                if(abs(btempX(l))>=threshold && abs(btempY(l))>=threshold && abs(btempZ(l))>=threshold)
                     avgPhi=avgPhi+atan2(btempY(l),btempX(l))*180/pi;
                     avgK=avgK+btempRX(l)./btempZ(l)./sin(atan2(btempY(l),btempX(l)));
                     avgV=avgV+2*pi*freq1.*btempZ(l)./(btempRX(l)).*sin(atan2(btempY(l),btempX(l)));%(ang(i+1)*pi/180+180);%
