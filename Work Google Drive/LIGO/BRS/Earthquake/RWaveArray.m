@@ -21,6 +21,8 @@ function [vel, ang, sigmaVel,sigmaAng,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMY
     endTime=length(ETMYZ_out);
     delta_t_X=[];
     delta_t_Y=[];
+    bootVel=[];
+    bootAng=[];
     for i=0:100
         freq2=(startFreq2+i*freqStep2);
     %     [bb,aa] = butter(2,[(0.032+i*0.005)/sampf, (0.032+(i+1)*0.005)/sampf]);
@@ -80,8 +82,12 @@ function [vel, ang, sigmaVel,sigmaAng,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMY
             delta_t_Y=[delta_t_Y nan];
         end
     end
-    bootVel=0;
-    bootAng=0;
+    for k=0:10
+        bootTX=bootstrapData(delta_t_X);
+        bootTY=bootstrapData(delta_t_Y);
+        bootAng=[bootAng; (atan2(bootTY,bootTX)*180/pi)'];
+        bootVel=[bootVel; (4e3./sqrt((bootTX).^2+(bootTY).^2))'];
+    end
     %     delta_t_X=(lags(find(crossX==max(crossX))))/sampf;
     %     delta_t_Y=(lags(find(crossY==max(crossY))))/sampf;
     %     delta_t_X=(sum(crossX.*lags)/sum(crossX))/sampf;
