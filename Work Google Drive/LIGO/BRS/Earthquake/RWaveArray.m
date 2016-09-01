@@ -54,26 +54,30 @@ function [vel, ang, sigmaVel,sigmaAng,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMY
 %     for j=1:floor(length(X)*(freq2/sampf))-2
     delta_t_X=[];
     delta_t_Y=[];
-    for j=1:floor(length(X)/10000)-1          
+    for j=1:floor(length(X)/1000)-1          
 %         if max(C>=threshold)          
 %             [crossY,~] = xcorr(C(floor(j/(freq2/sampf)):floor((j+1)/(freq2/sampf))...
 %                 ,Y(floor(j/(freq2/sampf)):floor((j+1)/(freq2/sampf)))));
 %             [crossX,lags]=xcorr(C(floor(j/(freq2/sampf)):floor((j+1)/(freq2/sampf))...
 %                 ,X(floor(j/(freq2/sampf)):floor((j+1)/(freq2/sampf)))));
-            [crossY,~] = xcorr(C(j*10000:(j+1)*10000),Y(j*10000:(j+1)*10000));
-            [crossX,lags]=xcorr(C(j*10000:(j+1)*10000),X(j*10000:(j+1)*10000));
+            [crossY,~] = xcorr(C(j*1000:(j+1)*1000),Y(j*1000:(j+1)*1000));
+            [crossX,lags]=xcorr(C(j*1000:(j+1)*1000),X(j*1000:(j+1)*1000));
             crossX=abs(crossX);
             crossY=abs(crossY);
-            peak=crossX(floor(.999*find(crossX==max(crossX))):floor(1.001*find(crossX==max(crossX))));
-            peakLags=lags(floor(.999*find(crossX==max(crossX))):floor(1.001*find(crossX==max(crossX))))';
+%             peak=crossX(floor(.95*find(crossX==max(crossX))):floor(1.05*find(crossX==max(crossX))));
+%             peakLags=lags(floor(.95*find(crossX==max(crossX))):floor(1.05*find(crossX==max(crossX))))';
+            peak=crossX(floor(find(crossX==max(crossX))-1.5/freq2):floor(find(crossX==max(crossX))+1.5/freq2));
+            peakLags=lags(floor(find(crossX==max(crossX))-1.5/freq2):floor(find(crossX==max(crossX))+1.5/freq2))';
             [fit,s]=polyfit(peakLags,peak,2);  
             delta_t_X=[delta_t_X -fit(2)/(2*fit(1))/sampf];        
     %         sigmaTX=std(peak-(fit(1)*peakLags.^2+fit(2)*peakLags+fit(3)));
     %         errFit= sqrt(diag(inv(s.R)*inv(s.R'))./s.normr.^2./s.df);
     %         sigmaTX=sqrt((-1/(2*fit(1))/sampf)^2*errFit(2)^2+(fit(2)/(2*fit(1)^2)/sampf)^2*errFit(1)^2);
 
-            peak=crossY(floor(.99*find(crossY==max(crossY))):floor(1.01*find(crossY==max(crossY))));
-            peakLags=lags(floor(.99*find(crossY==max(crossY))):floor(1.01*find(crossY==max(crossY))))';
+%             peak=crossY(floor(.95*find(crossY==max(crossY))):floor(1.05*find(crossY==max(crossY))));
+%             peakLags=lags(floor(.95*find(crossY==max(crossY))):floor(1.05*find(crossY==max(crossY))))'; 
+            peak=crossY(floor(find(crossY==max(crossY))-1.5/freq2):floor(find(crossY==max(crossY))+1.5/freq2));
+            peakLags=lags(floor(find(crossY==max(crossY))-1.5/freq2):floor(find(crossY==max(crossY))+1.5/freq2))';
             [fit,s]=polyfit(peakLags,peak,2);  
             delta_t_Y=[delta_t_Y -fit(2)/(2*fit(1))/sampf];       
     %         sigmaTY=std(peak-(fit(1)*peakLags.^2+fit(2)*peakLags+fit(3)));
@@ -83,7 +87,9 @@ function [vel, ang, sigmaVel,sigmaAng,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMY
 %             delta_t_X=[delta_t_X nan];
 %             delta_t_Y=[delta_t_Y nan];
 %         end
-    end    
+    end   
+    figure(8)
+    plot(lags,crossY,peakLags,peak)
     tempBAng=[];
     tempBVel=[];
     for k=0:1000
@@ -103,6 +109,8 @@ function [vel, ang, sigmaVel,sigmaAng,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMY
 %         lagsY=[lagsY delta_t_Y];
         delta_t_X=mean(delta_t_X);
         delta_t_Y=mean(delta_t_Y);
+        sigmaTX=std(delta_t_X);
+        sigmaTY=std(delta_t_Y);
         ang=[ang atan2(delta_t_Y,delta_t_X)*180/pi];
         vel=[vel 4e3./sqrt((delta_t_X).^2+(delta_t_Y).^2)];
         sigmaAng=[sigmaAng sqrt(delta_t_X.^2.*sigmaTY.^2+delta_t_Y.^2.*sigmaTX.^2)/(delta_t_X.^2+delta_t_Y.^2)*180/pi];

@@ -1,4 +1,6 @@
 sampf =8;
+freqStep=0.001;
+startFreq=0.03;
 [errFreq,transXErr,transYErr,transZErr,tiltErr]=RWaveMeasErr;
 [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=...    
     RWaveDataIn('GPS1143962787_6_9Earthquake.mat');
@@ -8,11 +10,11 @@ sampf =8;
 %     RWaveDataIn('GPS1149581095_5_2Earthquake.mat');      
 bootVel=[];
 bootAng=[];
-seed=randn(1,length(ETMYZ));
+% seed=randn(1,length(ETMYZ_out));
 
 [v,phi,el,k,sigmaV,sigmaPhi,bootV,bootPhi,bootEl,bootK]=...
 RWaveSingle(ETMYX_out,ETMYY_out,ETMYZ_out,BRSY_out,...
-    'S',errFreq,transXErr,transYErr,transZErr,tiltErr,sampf);
+    'E',errFreq,transXErr,transYErr,transZErr,tiltErr,sampf);
 
 [vel, ang, sigmaVel,sigmaAng,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sampf);
 
@@ -26,10 +28,10 @@ RWaveSingle(ETMYX_out,ETMYY_out,ETMYZ_out,BRSY_out,...
 
 figure(2)
 hold on
-errorbar(((0:length(v)-1))*freqStep1+startFreq1,abs(v),-sigmaV,sigmaV)
-errorbar(((0:length(vel)-1))*freqStep2+startFreq2,vel,-sigmaVel,sigmaVel)
-errorbar(((0:length(phi)-1))*freqStep1+startFreq1,mean(bootV'),-std(bootV'),std(bootV'))
-errorbar(((0:length(phi)-1))*freqStep1+startFreq1,mean(bootVel'),-std(bootVel'),std(bootVel'))
+errorbar(((0:length(v)-1))*freqStep+startFreq,abs(v),-sigmaV,sigmaV)
+errorbar(((0:length(vel)-1))*freqStep+startFreq,vel,-sigmaVel,sigmaVel)
+errorbar(((0:length(phi)-1))*freqStep+startFreq,mean(bootV'),-std(bootV'),std(bootV'))
+errorbar(((0:length(phi)-1))*freqStep+startFreq,mean(bootVel'),-std(bootVel'),std(bootVel'))
 ylabel('Velocity (m/s)')
 xlabel('Frequency (Hz)')
 legend('Single Station','Array','Single Station Bootstrapping','Array Bootstrapping')
@@ -40,10 +42,10 @@ hold off
 
 figure(3)
 hold on
-errorbar(((0:length(phi)-1))*freqStep1+startFreq1,phi,-sigmaPhi,sigmaPhi)
-errorbar(((0:length(ang)-1))*freqStep2+startFreq2,ang,-sigmaAng,sigmaAng)
-errorbar(((0:length(phi)-1))*freqStep1+startFreq1,mean(bootPhi'),-std(bootPhi'),std(bootPhi'))
-errorbar(((0:length(phi)-1))*freqStep1+startFreq1,mean(bootAng'),-std(bootAng'),std(bootAng'))
+errorbar(((0:length(phi)-1))*freqStep+startFreq,phi,-sigmaPhi,sigmaPhi)
+errorbar(((0:length(ang)-1))*freqStep+startFreq,ang,-sigmaAng,sigmaAng)
+errorbar(((0:length(phi)-1))*freqStep+startFreq,mean(bootPhi'),-std(bootPhi'),std(bootPhi'))
+errorbar(((0:length(phi)-1))*freqStep+startFreq,mean(bootAng'),-std(bootAng'),std(bootAng'))
 ylabel('Angle of Incidence (degrees)')
 xlabel('Frequency (Hz)')
 legend('Single Station','Array','Single Station Bootstrapping','Array Bootstrapping')
@@ -59,7 +61,7 @@ hold off
 % % xlim([.02 .0675])
 % % 
 % figure(5)
-% plot(((0:length(phi)-1))*freqStep1+startFreq1,el/pi)
+% plot(((0:length(phi)-1))*freqStep+startFreq,el/pi)
 % ylabel('Rayleigh Ellipticity (pi rad)')
 % xlabel('Frequency (Hz)')
 % grid on
