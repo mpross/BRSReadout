@@ -67,7 +67,7 @@ function [v,phi,el,k,sigmaV,sigmaPhi,bootV,bootPhi,bootEl,bootK]=...
     % sgnY=sgnZ*sign(ETMYY_out(find(abs(ETMYZ_out-mean(ETMYZ_out))==max(abs(ETMYZ_out-mean(ETMYZ_out)))))-mean(ETMYY_out));
     % sgnRX=sgnZ*sign(BRSY_out(find(abs(ETMYZ_out-mean(ETMYZ_out))==max(abs(ETMYZ_out-mean(ETMYZ_out)))))-mean(BRSY_out));
     % sgnZ=1;
-    for i=0:1000
+    for i=0:100
         tempBV=[];
         tempBPhi=[];
         tempBEl=[];
@@ -157,10 +157,12 @@ function [v,phi,el,k,sigmaV,sigmaPhi,bootV,bootPhi,bootEl,bootK]=...
             sumSigmaPhi=0;
             sumSigmaV=0;
             threshold=2e-6;
-            btempX=bootstrapData(tempX');
-            btempY=bootstrapData(tempY');
-            btempZ=bootstrapData(tempZ');
-            btempRX=bootstrapData(tempRX');
+            array=[tempX; tempY; tempZ; tempRX]; 
+            bootArray=bootstrapData(array');
+            btempX=bootArray(:,1)';
+            btempY=bootArray(:,2)';
+            btempZ=bootArray(:,3)';
+            btempRX=bootArray(:,4)';
             for l=1:min([length(btempX) length(btempY) length(btempZ) length(btempRX)])
                 if(abs(btempX(l))>=threshold && abs(btempY(l))>=threshold && abs(btempZ(l))>=threshold)
                     avgPhi=avgPhi+atan2(btempY(l),btempX(l))*180/pi;
