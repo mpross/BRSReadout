@@ -2,9 +2,9 @@ sampf =8;
 freqStep=0.001;
 startFreq=0.03;
 [errFreq,transXErr,transYErr,transZErr,tiltErr]=RWaveMeasErr;
-[ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=...    
+[ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=... 
     RWaveDataIn('GPS1143962787_6_9Earthquake.mat');
-%       RWaveDataIn('GPS1144888165_7_8Earthquake.mat');
+%     RWaveDataIn('GPS1144888165_7_8Earthquake.mat');
 %     RWaveDataIn('GPS1149323500_Quite.mat');
 %     RWaveDataIn('GPS1149331885_6_2Earthquake.mat');       
 %     RWaveDataIn('GPS1149581095_5_2Earthquake.mat');      
