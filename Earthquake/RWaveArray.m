@@ -54,9 +54,9 @@ function [vel, ang, sigmaVel,sigmaAng,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMY
 %     for j=1:floor(length(X)*(freq2/sampf))-2
     delta_t_X=[];
     delta_t_Y=[];
-    len=10000;
+    len=5000;
     for j=1:floor(length(X)/len)-1          
-        if max(C>=threshold)          
+        if (max(C(j*len:(j+1)*len))-min(C(j*len:(j+1)*len)))>=threshold          
 %             [crossY,~] = xcorr(C(floor(j/(freq2/sampf)):floor((j+1)/(freq2/sampf))...
 %                 ,Y(floor(j/(freq2/sampf)):floor((j+1)/(freq2/sampf)))));
 %             [crossX,lags]=xcorr(C(floor(j/(freq2/sampf)):floor((j+1)/(freq2/sampf))...
@@ -108,8 +108,8 @@ function [vel, ang, sigmaVel,sigmaAng,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMY
 
 %         lagsX=[lagsX delta_t_X];
 %         lagsY=[lagsY delta_t_Y];
-        sigmaTX=std(delta_t_X);
-        sigmaTY=std(delta_t_Y);
+        sigmaTX=std(delta_t_X)
+        sigmaTY=std(delta_t_Y)
         delta_t_X=mean(delta_t_X);
         delta_t_Y=mean(delta_t_Y);
         ang=[ang atan2(delta_t_Y,delta_t_X)*180/pi];    
