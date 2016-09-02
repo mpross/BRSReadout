@@ -1,22 +1,22 @@
+clear all;
 sampf =8;
 freqStep=0.001;
 startFreq=0.03;
 [errFreq,transXErr,transYErr,transZErr,tiltErr]=RWaveMeasErr;
-[ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=...
-        RWaveDataIn('GPS1144888165_7_8Earthquake.mat');
-%     RWaveDataIn('GPS1143962787_6_9Earthquake.mat');
-%     RWaveDataIn('GPS1149331885_6_2Earthquake.mat');     
+[ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=RWaveDataIn('GPS1149331885_6_2Earthquake.mat'); 
+% RWaveDataIn('GPS1143962787_6_9Earthquake.mat');
+% RWaveDataIn('GPS1144888165_7_8Earthquake.mat');
 %     RWaveDataIn('GPS1149323500_Quite.mat');    
 %     RWaveDataIn('GPS1149581095_5_2Earthquake.mat');      
 bootVel=[];
 bootAng=[];
 % seed=randn(1,length(ETMYZ_out));
 
+[vel, ang, sigmaVel,sigmaAng,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sampf);
+
 [v,phi,el,k,sigmaV,sigmaPhi,bootV,bootPhi,bootEl,bootK]=...
 RWaveSingle(ETMYX_out,ETMYY_out,ETMYZ_out,BRSY_out,...
-    'S',errFreq,transXErr,transYErr,transZErr,tiltErr,sampf);
-
-[vel, ang, sigmaVel,sigmaAng,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sampf);
+    'S',errFreq,transXErr,transYErr,transZErr,tiltErr,sampf,ang);
 
 
 % figure(1)
