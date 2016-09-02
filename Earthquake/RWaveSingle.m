@@ -67,7 +67,7 @@ function [v,phi,el,k,sigmaV,sigmaPhi,bootV,bootPhi,bootEl,bootK]=...
     % sgnY=sgnZ*sign(ETMYY_out(find(abs(ETMYZ_out-mean(ETMYZ_out))==max(abs(ETMYZ_out-mean(ETMYZ_out)))))-mean(ETMYY_out));
     % sgnRX=sgnZ*sign(BRSY_out(find(abs(ETMYZ_out-mean(ETMYZ_out))==max(abs(ETMYZ_out-mean(ETMYZ_out)))))-mean(BRSY_out));
     % sgnZ=1;
-    for i=0:100
+    for i=0:200
         tempBV=[];
         tempBPhi=[];
         tempBEl=[];
@@ -203,7 +203,7 @@ function [v,phi,el,k,sigmaV,sigmaPhi,bootV,bootPhi,bootEl,bootK]=...
         avgV=0;
         sumSigmaPhi=0;
         sumSigmaV=0;
-        threshold=2e-6;
+        threshold=1e-6;
         for l=1:min([length(tempX) length(tempY) length(tempZ) length(tempRX)])
             if(abs(tempZ(l))>=threshold)
     %         if l>=20
