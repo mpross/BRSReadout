@@ -1,6 +1,8 @@
 function [v,phi,el,k,sigmaV,sigmaPhi,bootV,bootPhi,bootEl,bootK]=...
     RWaveSingle(ETMYX_out,ETMYY_out,ETMYZ_out,BRSY_out,...
     quad,errFreq,transXErr,transYErr,transZErr,tiltErr,sampf,ang)
+
+    threshold=2e-5;
     %% Single Station
     if quad=='E'
         sgnX=1;
@@ -67,7 +69,7 @@ function [v,phi,el,k,sigmaV,sigmaPhi,bootV,bootPhi,bootEl,bootK]=...
     % sgnY=sgnZ*sign(ETMYY_out(find(abs(ETMYZ_out-mean(ETMYZ_out))==max(abs(ETMYZ_out-mean(ETMYZ_out)))))-mean(ETMYY_out));
     % sgnRX=sgnZ*sign(BRSY_out(find(abs(ETMYZ_out-mean(ETMYZ_out))==max(abs(ETMYZ_out-mean(ETMYZ_out)))))-mean(BRSY_out));
     % sgnZ=1;
-    for i=0:200
+    for i=0:100
         tempBV=[];
         tempBPhi=[];
         tempBEl=[];
@@ -148,7 +150,7 @@ function [v,phi,el,k,sigmaV,sigmaPhi,bootV,bootPhi,bootEl,bootK]=...
     %     tempY=smooth(tempY);
     %     tempZ=smooth(tempZ);
     %     tempRX=smooth(tempRX);
-        for p=1:1000
+        for p=1:10000
             N=0;
             sumX=0;
             sumY=0;
@@ -160,7 +162,6 @@ function [v,phi,el,k,sigmaV,sigmaPhi,bootV,bootPhi,bootEl,bootK]=...
             avgV=0;
             sumSigmaPhi=0;
             sumSigmaV=0;
-            threshold=2e-6;
             array=[tempX; tempY; tempZ; tempRX]; 
             bootArray=bootstrapData(array');
             btempX=bootArray(:,1)';
@@ -203,7 +204,6 @@ function [v,phi,el,k,sigmaV,sigmaPhi,bootV,bootPhi,bootEl,bootK]=...
         avgV=0;
         sumSigmaPhi=0;
         sumSigmaV=0;
-        threshold=1e-6;
         for l=1:min([length(tempX) length(tempY) length(tempZ) length(tempRX)])
             if(abs(tempZ(l))>=threshold)
     %         if l>=20
