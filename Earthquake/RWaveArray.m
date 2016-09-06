@@ -23,7 +23,7 @@ function [vel, ang, sigmaVel,sigmaAng,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMY
     delta_t_Y=[];
     bootVel=[];
     bootAng=[];
-    for i=0:100
+    for i=0:40
         freq2=(startFreq2+i*freqStep2);
     %     [bb,aa] = butter(2,[(0.032+i*0.005)/sampf, (0.032+(i+1)*0.005)/sampf]);
         d = designfilt('bandpassiir', ...
@@ -56,7 +56,7 @@ function [vel, ang, sigmaVel,sigmaAng,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMY
     delta_t_Y=[];
     len=3000;
     for j=1:floor(length(X)/len)-1          
-%         if (max(C(j*len:(j+1)*len))-min(C(j*len:(j+1)*len)))>=threshold   
+        if (max(C(j*len:(j+1)*len))-min(C(j*len:(j+1)*len)))>=threshold   
 %         if (max(C)-min(C))>=threshold    
 %             [crossY,~] = xcorr(C(floor(j/(freq2/sampf)):floor((j+1)/(freq2/sampf))...
 %                 ,Y(floor(j/(freq2/sampf)):floor((j+1)/(freq2/sampf)))));
@@ -94,14 +94,15 @@ function [vel, ang, sigmaVel,sigmaAng,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMY
 %         else
 %             delta_t_X=[delta_t_X nan];
 %             delta_t_Y=[delta_t_Y nan;
-%         end
+        end
     end   
     tempBAng=[];
     tempBVel=[];
     for k=0:10000
-        bootArray=bootstrapData([delta_t_X; delta_t_Y]);
-        bootTX=bootArray(1,:);
-        bootTY=bootArray(2,:);
+        array=[delta_t_X; delta_t_Y];
+        bootArray=bootstrapData(array');
+        bootTX=bootArray(:,1)';
+        bootTY=bootArray(:,2)';        
         bootTX=mean(bootTX);
         bootTY=mean(bootTY);
         tempBAng=[tempBAng; atan2(bootTY,bootTX)*180/pi];      

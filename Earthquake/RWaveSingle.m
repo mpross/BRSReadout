@@ -69,7 +69,7 @@ function [v,phi,el,k,sigmaV,sigmaPhi,bootV,bootPhi,bootEl,bootK]=...
     % sgnY=sgnZ*sign(ETMYY_out(find(abs(ETMYZ_out-mean(ETMYZ_out))==max(abs(ETMYZ_out-mean(ETMYZ_out)))))-mean(ETMYY_out));
     % sgnRX=sgnZ*sign(BRSY_out(find(abs(ETMYZ_out-mean(ETMYZ_out))==max(abs(ETMYZ_out-mean(ETMYZ_out)))))-mean(BRSY_out));
     % sgnZ=1;
-    for i=0:100
+    for i=0:40
         tempBV=[];
         tempBPhi=[];
         tempBEl=[];
@@ -98,10 +98,10 @@ function [v,phi,el,k,sigmaV,sigmaPhi,bootV,bootPhi,bootEl,bootK]=...
         filtData=filter(d,(BRSY_out-mean(BRSY_out))); 
         seriesRX=[seriesRX filtData(startTime:endTime)];%+10^-5*i+3*10^-6];  
         
-        if i==40
-            figure(8)
-            plot((startTime:endTime),seriesX(:,i),(startTime:endTime),seriesY(:,i),(startTime:endTime),seriesZ(:,i))
-        end
+%         if i==40
+%             figure(8)
+%             plot((startTime:endTime),seriesX(:,i),(startTime:endTime),seriesY(:,i),(startTime:endTime),seriesZ(:,i))
+%         end
         tempX=[];
         tempY=[];
         tempZ=[];
