@@ -15,7 +15,7 @@ function [vel, ang, sigmaVel,sigmaAng,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMY
     sigmaTY=0.0325;
     sigmaAng=[];
     sigmaVel=[];
-    threshold=2e-5;
+    threshold=2e-6;
     startTime=01*sampf;
     % endTime=800*sampf;
     endTime=length(ETMYZ_out);
@@ -54,18 +54,18 @@ function [vel, ang, sigmaVel,sigmaAng,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMY
 %     for j=1:floor(length(X)*(freq2/sampf))-2
     delta_t_X=[];
     delta_t_Y=[];
-%     len=5000;
-%     for j=1:floor(length(X)/len)-1          
+    len=3000;
+    for j=1:floor(length(X)/len)-1          
 %         if (max(C(j*len:(j+1)*len))-min(C(j*len:(j+1)*len)))>=threshold   
 %         if (max(C)-min(C))>=threshold    
 %             [crossY,~] = xcorr(C(floor(j/(freq2/sampf)):floor((j+1)/(freq2/sampf))...
 %                 ,Y(floor(j/(freq2/sampf)):floor((j+1)/(freq2/sampf)))));
 %             [crossX,lags]=xcorr(C(floor(j/(freq2/sampf)):floor((j+1)/(freq2/sampf))...
 %                 ,X(floor(j/(freq2/sampf)):floor((j+1)/(freq2/sampf)))));
-%             [crossY,~] = xcorr(C(j*len:(j+1)*len),Y(j*len:(j+1)*len));
-%             [crossX,lags]=xcorr(C(j*len:(j+1)*len),X(j*len:(j+1)*len));
-            [crossY,~] = xcorr(C,Y);
-            [crossX,lags]=xcorr(C,X);
+            [crossY,~] = xcorr(C(j*len:(j+1)*len),Y(j*len:(j+1)*len));
+            [crossX,lags]=xcorr(C(j*len:(j+1)*len),X(j*len:(j+1)*len));
+%             [crossY,~] = xcorr(C,Y);
+%             [crossX,lags]=xcorr(C,X);
             crossX=abs(crossX);
             crossY=abs(crossY);
 %             peak=crossX(floor(.95*find(crossX==max(crossX))):floor(1.05*find(crossX==max(crossX))));
@@ -95,23 +95,24 @@ function [vel, ang, sigmaVel,sigmaAng,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMY
 %             delta_t_X=[delta_t_X nan];
 %             delta_t_Y=[delta_t_Y nan;
 %         end
-%     end   
+    end   
     tempBAng=[];
     tempBVel=[];
     for k=0:10000
-        bootTX=bootstrapData(delta_t_X);
-        bootTY=bootstrapData(delta_t_Y);
+        bootArray=bootstrapData([delta_t_X; delta_t_Y]);
+        bootTX=bootArray(1,:);
+        bootTY=bootArray(2,:);
         bootTX=mean(bootTX);
         bootTY=mean(bootTY);
         tempBAng=[tempBAng; atan2(bootTY,bootTX)*180/pi];      
-        tempBVel=[tempBVel; mean(4e3./sqrt((bootTX).^2+(bootTY).^2))];
+        tempBVel=[tempBVel; 4e3./sqrt((bootTX).^2+(bootTY).^2)];
     end
 %     
-%     bootVel=[bootVel; tempBVel'];
-%     bootAng=[bootAng; tempBAng'];
-    
-        bootVel=[bootVel; nan];
-        bootAng=[bootAng; nan];
+    bootVel=[bootVel; tempBVel'];
+    bootAng=[bootAng; tempBAng'];
+%     
+%         bootVel=[bootVel; nan];
+%         bootAng=[bootAng; nan];
     %     delta_t_X=(lags(find(crossX==max(crossX))))/sampf;
     %     delta_t_Y=(lags(find(crossY==max(crossY))))/sampf;
     %     delta_t_X=(sum(crossX.*lags)/sum(crossX))/sampf;
@@ -123,8 +124,8 @@ function [vel, ang, sigmaVel,sigmaAng,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMY
 %         sigmaTY=std(delta_t_Y);
         sigmaTX=0;
         sigmaTY=0;
-%         delta_t_X=mean(delta_t_X);
-%         delta_t_Y=mean(delta_t_Y);
+        delta_t_X=mean(delta_t_X);
+        delta_t_Y=mean(delta_t_Y);
         ang=[ang atan2(delta_t_Y,delta_t_X)*180/pi];    
         vel=[vel 4e3./sqrt((delta_t_X).^2+(delta_t_Y).^2)];
         sigmaAng=[sigmaAng sqrt(delta_t_X.^2.*sigmaTY.^2+delta_t_Y.^2.*sigmaTX.^2)/(delta_t_X.^2+delta_t_Y.^2)*180/pi];

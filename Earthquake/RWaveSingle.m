@@ -2,7 +2,7 @@ function [v,phi,el,k,sigmaV,sigmaPhi,bootV,bootPhi,bootEl,bootK]=...
     RWaveSingle(ETMYX_out,ETMYY_out,ETMYZ_out,BRSY_out,...
     quad,errFreq,transXErr,transYErr,transZErr,tiltErr,sampf,ang)
 
-    threshold=2e-5;
+    threshold=2e-6;
     %% Single Station
     if quad=='E'
         sgnX=1;

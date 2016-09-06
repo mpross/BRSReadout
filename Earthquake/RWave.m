@@ -16,7 +16,7 @@ bootAng=[];
 
 [v,phi,el,k,sigmaV,sigmaPhi,bootV,bootPhi,bootEl,bootK]=...
 RWaveSingle(ETMYX_out,ETMYY_out,ETMYZ_out,BRSY_out,...
-    'S',errFreq,transXErr,transYErr,transZErr,tiltErr,sampf,ang);
+    'E',errFreq,transXErr,transYErr,transZErr,tiltErr,sampf,ang);
 
 % figure(1)
 % plot(Rot_time(startTime:length(BRSY_out)),seriesX,Rot_time(startTime:length(BRSY_out))...
@@ -30,7 +30,7 @@ hold on
 errorbar(((0:length(v)-1))*freqStep+startFreq,abs(v),-sigmaV,sigmaV)
 errorbar(((0:length(vel)-1))*freqStep+startFreq,vel,-sigmaVel,sigmaVel)
 errorbar(((0:length(v)-1))*freqStep+startFreq,abs(mean(bootV')),-std(bootV'),std(bootV'))
-% errorbar(((0:length(vel)-1))*freqStep+startFreq,mean(bootVel'),-std(bootVel'),std(bootVel'))
+errorbar(((0:length(vel)-1))*freqStep+startFreq,mean(bootVel'),-std(bootVel'),std(bootVel'))
 ylabel('Velocity (m/s)')
 xlabel('Frequency (Hz)')
 legend('Single Station','Array','Single Station Bootstrapping','Array Bootstrapping')
@@ -44,7 +44,7 @@ hold on
 errorbar(((0:length(phi)-1))*freqStep+startFreq,phi,-sigmaPhi,sigmaPhi)
 errorbar(((0:length(ang)-1))*freqStep+startFreq,ang,-sigmaAng,sigmaAng)
 errorbar(((0:length(phi)-1))*freqStep+startFreq,mean(bootPhi'),-std(bootPhi'),std(bootPhi'))
-% errorbar(((0:length(ang)-1))*freqStep+startFreq,mean(bootAng'),-std(bootAng'),std(bootAng'))
+errorbar(((0:length(ang)-1))*freqStep+startFreq,mean(bootAng'),-std(bootAng'),std(bootAng'))
 ylabel('Angle of Incidence (degrees)')
 xlabel('Frequency (Hz)')
 legend('Single Station','Array','Single Station Bootstrapping','Array Bootstrapping')
