@@ -57,8 +57,8 @@ function [v,phi,el,k,sigmaV,sigmaPhi,bootV,bootPhi,bootEl,bootK]=...
     Astop1 = 10;
     Apass  = 1;
     Astop2 = 10;
-    freqStep1=0.001;
-    startFreq1=0.03;
+    freqStep1=0.005;
+    startFreq1=0.04;
     startTime=01*sampf;
     % endTime=800*sampf;
     endTime=length(ETMYZ_out);
@@ -98,10 +98,10 @@ function [v,phi,el,k,sigmaV,sigmaPhi,bootV,bootPhi,bootEl,bootK]=...
         filtData=filter(d,(BRSY_out-mean(BRSY_out))); 
         seriesRX=[seriesRX filtData(startTime:endTime)];%+10^-5*i+3*10^-6];  
         
-%         if i==40
-%             figure(8)
-%             plot((startTime:endTime),seriesX(:,i),(startTime:endTime),seriesY(:,i),(startTime:endTime),seriesZ(:,i))
-%         end
+        if i==8
+            figure(8)
+            plot((startTime:endTime),seriesX(:,i),(startTime:endTime),seriesY(:,i),(startTime:endTime),seriesZ(:,i))
+        end
         tempX=[];
         tempY=[];
         tempZ=[];

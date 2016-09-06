@@ -1,7 +1,7 @@
 clear all;
 sampf =8;
-freqStep=0.001;
-startFreq=0.03;
+freqStep=0.005;
+startFreq=0.04;
 [errFreq,transXErr,transYErr,transZErr,tiltErr]=RWaveMeasErr;
 [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=RWaveDataIn('GPS1143962787_6_9Earthquake.mat');
 %     RWaveDataIn('GPS1149323500_Quite.mat');

@@ -9,8 +9,8 @@ function [vel, ang, sigmaVel,sigmaAng,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMY
     velTim=[];
     lagsX=[];
     lagsY=[];
-    startFreq2=0.03;
-    freqStep2=.001;
+    startFreq2=0.04;
+    freqStep2=.005;
     sigmaTX=0.0231;
     sigmaTY=0.0325;
     sigmaAng=[];
@@ -55,7 +55,7 @@ function [vel, ang, sigmaVel,sigmaAng,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMY
     delta_t_X=[];
     delta_t_Y=[];
     len=3000;
-    for j=1:floor(length(X)/len)-1          
+    for j=1:floor(length(X)/len)-1
         if (max(C(j*len:(j+1)*len))-min(C(j*len:(j+1)*len)))>=threshold   
 %         if (max(C)-min(C))>=threshold    
 %             [crossY,~] = xcorr(C(floor(j/(freq2/sampf)):floor((j+1)/(freq2/sampf))...
@@ -101,10 +101,15 @@ function [vel, ang, sigmaVel,sigmaAng,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMY
     for k=0:10000
         array=[delta_t_X; delta_t_Y];
         bootArray=bootstrapData(array');
-        bootTX=bootArray(:,1)';
-        bootTY=bootArray(:,2)';        
-        bootTX=mean(bootTX);
-        bootTY=mean(bootTY);
+        if length(bootArray)>0
+            bootTX=bootArray(:,1)';
+            bootTY=bootArray(:,2)';   
+            bootTX=mean(bootTX);
+            bootTY=mean(bootTY);
+        else
+            bootTX=nan;
+            bootTY=nan;
+        end
         tempBAng=[tempBAng; atan2(bootTY,bootTX)*180/pi];      
         tempBVel=[tempBVel; 4e3./sqrt((bootTX).^2+(bootTY).^2)];
     end
