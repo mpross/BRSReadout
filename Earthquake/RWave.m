@@ -1,7 +1,7 @@
 clear all;
 sampf =8;
-freqStep=0.005;
-startFreq=0.03;
+
+startFreq=0.015;
 [errFreq,transXErr,transYErr,transZErr,tiltErr]=RWaveMeasErr;
 [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=RWaveDataIn('GPS1143962787_6_9Earthquake.mat');
 %     RWaveDataIn('GPS1149323500_Quite.mat');
@@ -13,7 +13,7 @@ bootAng=[];
 % seed=randn(1,length(ETMYZ_out));
 
 [vel, ang, sigmaVel,sigmaAng,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sampf);
-
+freqStep=0.1/length(ang);
 [v,phi,el,k,sigmaV,sigmaPhi,bootV,bootPhi,bootEl,bootK]=...
 RWaveSingle(ETMYX_out,ETMYY_out,ETMYZ_out,BRSY_out,...
     'E',errFreq,transXErr,transYErr,transZErr,tiltErr,sampf,ang);
@@ -29,8 +29,8 @@ figure(2)
 hold on
 % errorbar(((0:length(v)-1))*freqStep+startFreq,abs(v),-sigmaV,sigmaV)
 % errorbar(((0:length(vel)-1))*freqStep+startFreq,vel,-sigmaVel,sigmaVel)
-errorbar(((0:length(v)-1))*freqStep+startFreq,abs(mean(bootV')),-std(bootV'),std(bootV'))
-errorbar(((0:length(vel)-1))*freqStep+startFreq,mean(bootVel'),-std(bootVel'),std(bootVel'))
+errorbar(((0:length(v)-1))*freqStep+startFreq,abs(v),-std(bootV'),std(bootV'))
+errorbar(((0:length(vel)-1))*freqStep+startFreq,vel,-std(bootVel'),std(bootVel'))
 ylabel('Velocity (m/s)')
 xlabel('Frequency (Hz)')
 legend('Single Station','Array','Single Station Bootstrapping','Array Bootstrapping')
@@ -43,8 +43,8 @@ figure(3)
 hold on
 % errorbar(((0:length(phi)-1))*freqStep+startFreq,phi,-sigmaPhi,sigmaPhi)
 % errorbar(((0:length(ang)-1))*freqStep+startFreq,ang,-sigmaAng,sigmaAng)
-errorbar(((0:length(phi)-1))*freqStep+startFreq,mean(bootPhi'),-std(bootPhi'),std(bootPhi'))
-errorbar(((0:length(ang)-1))*freqStep+startFreq,mean(bootAng'),-std(bootAng'),std(bootAng'))
+errorbar(((0:length(phi)-1))*freqStep+startFreq,phi,-std(bootPhi'),std(bootPhi'))
+errorbar(((0:length(ang)-1))*freqStep+startFreq,ang,-std(bootAng'),std(bootAng'))
 ylabel('Angle of Incidence (degrees)')
 xlabel('Frequency (Hz)')
 legend('Single Station','Array','Single Station Bootstrapping','Array Bootstrapping')
