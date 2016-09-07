@@ -1,8 +1,7 @@
 function [v,phi,el,k,sigmaV,sigmaPhi,bootV,bootPhi,bootEl,bootK]=...
     RWaveSingle(ETMYX_out,ETMYY_out,ETMYZ_out,BRSY_out,...
-    quad,errFreq,transXErr,transYErr,transZErr,tiltErr,sampf,ang)
+    quad,errFreq,transXErr,transYErr,transZErr,tiltErr,sampf,ang,threshold,startFreq,freqStep,iter)
 
-%     threshold=5e-6*0;
     %% Single Station
     if quad=='E'
         sgnX=1;
@@ -57,10 +56,7 @@ function [v,phi,el,k,sigmaV,sigmaPhi,bootV,bootPhi,bootEl,bootK]=...
     Astop1 = 10;
     Apass  = 1;
     Astop2 = 10;
-    freqStep1=0.1/length(ang);
-    startFreq1=0.015;
     startTime=01*sampf;
-    % endTime=800*sampf;
     endTime=length(ETMYZ_out);
     % startTime=2000*sampf;
     % endTime=2600*sampf;
@@ -69,14 +65,13 @@ function [v,phi,el,k,sigmaV,sigmaPhi,bootV,bootPhi,bootEl,bootK]=...
     % sgnY=sgnZ*sign(ETMYY_out(find(abs(ETMYZ_out-mean(ETMYZ_out))==max(abs(ETMYZ_out-mean(ETMYZ_out)))))-mean(ETMYY_out));
     % sgnRX=sgnZ*sign(BRSY_out(find(abs(ETMYZ_out-mean(ETMYZ_out))==max(abs(ETMYZ_out-mean(ETMYZ_out)))))-mean(BRSY_out));
     % sgnZ=1;
-    threshold=max(abs(ETMYZ_out))/3;
-    for i=0:length(ang)-1
+    for i=0:iter
         tempBV=[];
         tempBPhi=[];
         tempBEl=[];
         tempBK=[];
         
-        freq1=(startFreq1+i*freqStep1);
+        freq1=(startFreq+i*freqStep);
         [indx indx]=min(abs(errFreq-freq1));
         sigmaX=transXErr(indx);
         sigmaY=transYErr(indx);
@@ -84,8 +79,8 @@ function [v,phi,el,k,sigmaV,sigmaPhi,bootV,bootPhi,bootEl,bootK]=...
         sigmaRX=tiltErr(indx);
     %     [bb,aa] = butter(2,[(startFreq+i*freqStep)/sampf, (startFreq+(i+1)*freqStep)/sampf]);
         d = designfilt('bandpassiir', ...
-          'StopbandFrequency1',(i-2)*freqStep1+startFreq1,'PassbandFrequency1', (i-1)*freqStep1+startFreq1, ...
-          'PassbandFrequency2',(i+1)*freqStep1+startFreq1,'StopbandFrequency2', (i+2)*freqStep1+startFreq1, ...
+          'StopbandFrequency1',(i-2)*freqStep+startFreq,'PassbandFrequency1', (i-1)*freqStep+startFreq, ...
+          'PassbandFrequency2',(i+1)*freqStep+startFreq,'StopbandFrequency2', (i+2)*freqStep+startFreq, ...
           'StopbandAttenuation1',Astop1,'PassbandRipple', Apass, ...
           'StopbandAttenuation2',Astop2, ...
           'DesignMethod','butter','SampleRate',sampf);
@@ -170,7 +165,6 @@ function [v,phi,el,k,sigmaV,sigmaPhi,bootV,bootPhi,bootEl,bootK]=...
             btempZ=bootArray(:,3)';
             btempRX=bootArray(:,4)';
             for l=1:min([length(btempX) length(btempY) length(btempZ) length(btempRX)])
-%                 if(abs(btempX(l))>=threshold && abs(btempY(l))>=threshold && abs(btempZ(l))>=threshold)
                 if(abs(btempX(l))>=threshold && abs(btempY(l))>=threshold && abs(btempZ(l))>=threshold)
                     avgPhi=avgPhi+atan2(btempY(l),btempX(l))*180/pi;
                     avgK=avgK+btempRX(l)./btempZ(l)./sin(atan2(btempY(l),btempX(l)));

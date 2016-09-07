@@ -1,4 +1,4 @@
-function [vel, ang, sigmaVel,sigmaAng,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sampf)
+function [vel, ang, sigmaVel,sigmaAng,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sampf,threshold,startFreq,freqStep,iter)
 %% Array
     Astop1 = 10;
     Apass  = 1;
@@ -8,28 +8,24 @@ function [vel, ang, sigmaVel,sigmaAng,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMY
     angTim=[];
     velTim=[];
     lagsX=[];
-    lagsY=[];
-    startFreq2=0.015;
-    freqStep2=.005;
+    lagsY=[];    
     sigmaTX=0.0231;
     sigmaTY=0.0325;
     sigmaAng=[];
-    sigmaVel=[];
-%     threshold=5e-6;
-    threshold=max(abs(ETMYZ_out))/3;
-    startTime=01*sampf;
+    sigmaVel=[];    
+   startTime=01*sampf;
     % endTime=800*sampf;
     endTime=length(ETMYZ_out);
     delta_t_X=[];
     delta_t_Y=[];
     bootVel=[];
     bootAng=[];
-    for i=0:floor(0.1/freqStep2)
-        freq2=(startFreq2+i*freqStep2);
+    for i=0:iter
+        freq2=(startFreq+i*freqStep);
     %     [bb,aa] = butter(2,[(0.032+i*0.005)/sampf, (0.032+(i+1)*0.005)/sampf]);
         d = designfilt('bandpassiir', ...
-          'StopbandFrequency1',(i-2)*freqStep2+startFreq2,'PassbandFrequency1', (i-1)*freqStep2+startFreq2, ...
-          'PassbandFrequency2',(i+1)*freqStep2+startFreq2,'StopbandFrequency2', (i+2)*freqStep2+startFreq2, ...
+          'StopbandFrequency1',(i-2)*freqStep+startFreq,'PassbandFrequency1', (i-1)*freqStep+startFreq, ...
+          'PassbandFrequency2',(i+1)*freqStep+startFreq,'StopbandFrequency2', (i+2)*freqStep+startFreq, ...
           'StopbandAttenuation1',Astop1,'PassbandRipple', Apass, ...
           'StopbandAttenuation2',Astop2, ...
           'DesignMethod','butter','SampleRate',sampf);
