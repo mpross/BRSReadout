@@ -5,11 +5,11 @@ startFreq=0.015;
 freqStep=.005;
 iter=(.1-startFreq)/freqStep;
 [errFreq,transXErr,transYErr,transZErr,tiltErr]=RWaveMeasErr;
-[ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=RWaveDataIn('GPS1144888165_7_8Earthquake.mat');
+[ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]= RWaveDataIn('GPS1143962787_6_9Earthquake.mat');
 %     RWaveDataIn('GPS1149323500_Quite.mat');
-% RWaveDataIn('GPS1149331885_6_2Earthquake.mat');% 
-% RWaveDataIn('GPS1143962787_6_9Earthquake.mat');
-% RWaveDataIn('GPS1149581095_5_2Earthquake.mat'); 
+% RWaveDataIn('GPS1149581095_5_2Earthquake.mat');
+% RWaveDataIn('GPS1144888165_7_8Earthquake.mat');% 
+% RWaveDataIn('GPS1149331885_6_2Earthquake.mat');
 bootVel=[];
 bootAng=[];
 threshold=rms(ETMYZ_out)/2;
@@ -20,6 +20,14 @@ freqStep=0.1/length(ang);
 [v,phi,el,k,sigmaV,sigmaPhi,bootV,bootPhi,bootEl,bootK]=...
 RWaveSingle(ETMYX_out,ETMYY_out,ETMYZ_out,BRSY_out,...
     'S',errFreq,transXErr,transYErr,transZErr,tiltErr,sampf,ang,threshold,startFreq,freqStep,iter);
+
+cInd1=find((abs(v)+std(bootV')'>=abs(vel)'-std(bootVel')'));
+cInd2=find((abs(v)-std(bootV')'<=abs(vel)'+std(bootVel')'));
+cInd=intersect(cInd1,cInd2);
+v=v(cInd);
+vel=vel(cInd);
+bootV=bootV(cInd,:);
+bootVel=bootVel(cInd,:);
 
 % figure(1)
 % plot(Rot_time(startTime:length(BRSY_out)),seriesX,Rot_time(startTime:length(BRSY_out))...
@@ -32,8 +40,8 @@ figure(2)
 hold on
 % errorbar(((0:length(v)-1))*freqStep+startFreq,abs(v),-sigmaV,sigmaV)
 % errorbar(((0:length(vel)-1))*freqStep+startFreq,vel,-sigmaVel,sigmaVel)
-errorbar(((0:length(v)-1))*freqStep+startFreq,abs(v),-std(bootV'),std(bootV'))
-errorbar(((0:length(vel)-1))*freqStep+startFreq,vel,-std(bootVel'),std(bootVel'))
+errorbar(cInd*freqStep+startFreq,abs(v),-std(bootV'),std(bootV'))
+errorbar(cInd*freqStep+startFreq,vel,-std(bootVel'),std(bootVel'))
 ylabel('Velocity (m/s)')
 xlabel('Frequency (Hz)')
 legend('Single Station','Array','Single Station Bootstrapping','Array Bootstrapping')
