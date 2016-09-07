@@ -58,7 +58,7 @@ function [v,phi,el,k,sigmaV,sigmaPhi,bootV,bootPhi,bootEl,bootK]=...
     Apass  = 1;
     Astop2 = 10;
     freqStep1=0.005;
-    startFreq1=0.04;
+    startFreq1=0.03;
     startTime=01*sampf;
     % endTime=800*sampf;
     endTime=length(ETMYZ_out);
@@ -69,7 +69,7 @@ function [v,phi,el,k,sigmaV,sigmaPhi,bootV,bootPhi,bootEl,bootK]=...
     % sgnY=sgnZ*sign(ETMYY_out(find(abs(ETMYZ_out-mean(ETMYZ_out))==max(abs(ETMYZ_out-mean(ETMYZ_out)))))-mean(ETMYY_out));
     % sgnRX=sgnZ*sign(BRSY_out(find(abs(ETMYZ_out-mean(ETMYZ_out))==max(abs(ETMYZ_out-mean(ETMYZ_out)))))-mean(BRSY_out));
     % sgnZ=1;
-    for i=0:40
+    for i=0:length(ang)-1
         tempBV=[];
         tempBPhi=[];
         tempBEl=[];
@@ -83,8 +83,8 @@ function [v,phi,el,k,sigmaV,sigmaPhi,bootV,bootPhi,bootEl,bootK]=...
         sigmaRX=tiltErr(indx);
     %     [bb,aa] = butter(2,[(startFreq+i*freqStep)/sampf, (startFreq+(i+1)*freqStep)/sampf]);
         d = designfilt('bandpassiir', ...
-          'StopbandFrequency1',freq1*.8,'PassbandFrequency1', freq1*.9, ...
-          'PassbandFrequency2',freq1*1.1,'StopbandFrequency2', freq1*1.2, ...
+          'StopbandFrequency1',(i-2)*freqStep1+startFreq1,'PassbandFrequency1', (i-1)*freqStep1+startFreq1, ...
+          'PassbandFrequency2',(i+1)*freqStep1,'StopbandFrequency2', (i+2)*freqStep1+startFreq1, ...
           'StopbandAttenuation1',Astop1,'PassbandRipple', Apass, ...
           'StopbandAttenuation2',Astop2, ...
           'DesignMethod','butter','SampleRate',sampf);
@@ -150,7 +150,7 @@ function [v,phi,el,k,sigmaV,sigmaPhi,bootV,bootPhi,bootEl,bootK]=...
     %     tempY=smooth(tempY);
     %     tempZ=smooth(tempZ);
     %     tempRX=smooth(tempRX);
-        for p=1:10000
+        for p=1:1e4
             N=0;
             sumX=0;
             sumY=0;

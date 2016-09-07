@@ -1,7 +1,7 @@
 clear all;
 sampf =8;
 freqStep=0.005;
-startFreq=0.04;
+startFreq=0.03;
 [errFreq,transXErr,transYErr,transZErr,tiltErr]=RWaveMeasErr;
 [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=RWaveDataIn('GPS1143962787_6_9Earthquake.mat');
 %     RWaveDataIn('GPS1149323500_Quite.mat');
@@ -27,8 +27,8 @@ RWaveSingle(ETMYX_out,ETMYY_out,ETMYZ_out,BRSY_out,...
 
 figure(2)
 hold on
-errorbar(((0:length(v)-1))*freqStep+startFreq,abs(v),-sigmaV,sigmaV)
-errorbar(((0:length(vel)-1))*freqStep+startFreq,vel,-sigmaVel,sigmaVel)
+% errorbar(((0:length(v)-1))*freqStep+startFreq,abs(v),-sigmaV,sigmaV)
+% errorbar(((0:length(vel)-1))*freqStep+startFreq,vel,-sigmaVel,sigmaVel)
 errorbar(((0:length(v)-1))*freqStep+startFreq,abs(mean(bootV')),-std(bootV'),std(bootV'))
 errorbar(((0:length(vel)-1))*freqStep+startFreq,mean(bootVel'),-std(bootVel'),std(bootVel'))
 ylabel('Velocity (m/s)')
@@ -41,8 +41,8 @@ hold off
 
 figure(3)
 hold on
-errorbar(((0:length(phi)-1))*freqStep+startFreq,phi,-sigmaPhi,sigmaPhi)
-errorbar(((0:length(ang)-1))*freqStep+startFreq,ang,-sigmaAng,sigmaAng)
+% errorbar(((0:length(phi)-1))*freqStep+startFreq,phi,-sigmaPhi,sigmaPhi)
+% errorbar(((0:length(ang)-1))*freqStep+startFreq,ang,-sigmaAng,sigmaAng)
 errorbar(((0:length(phi)-1))*freqStep+startFreq,mean(bootPhi'),-std(bootPhi'),std(bootPhi'))
 errorbar(((0:length(ang)-1))*freqStep+startFreq,mean(bootAng'),-std(bootAng'),std(bootAng'))
 ylabel('Angle of Incidence (degrees)')
