@@ -29,10 +29,10 @@ for j=0:2
     RWaveSingle(ETMYX_out,ETMYY_out,ETMYZ_out,BRSY_out,...
         'S',errFreq,transXErr,transYErr,transZErr,tiltErr,sampf,ang,threshold,startFreq,freqStep,iter);
 
-    cInd1=find((abs(v)+2*std(bootV')'>=abs(vel)'-2*std(bootVel')'));
-    cInd2=find((abs(v)-2*std(bootV')'<=abs(vel)'+2*std(bootVel')'));
-    cInd3=find(std(bootVel')<=2000);
-    cInd4=find(std(bootV')<=2000);
+    cInd1=find((abs(v)+std(bootV')'>=abs(vel)'-std(bootVel')'));
+    cInd2=find((abs(v)-std(bootV')'<=abs(vel)'+std(bootVel')'));
+    cInd3=find(std(bootVel')<=1000);
+    cInd4=find(std(bootV')<=1000);
     cInd12=intersect(cInd1,cInd2);
     cInd123=intersect(cInd12,cInd3);
     cInd=intersect(cInd123,cInd4);
@@ -53,13 +53,13 @@ for j=0:2
     % errorbar(((0:length(v)-1))*freqStep+startFreq,abs(v),-sigmaV,sigmaV)
     % errorbar(((0:length(vel)-1))*freqStep+startFreq,vel,-sigmaVel,sigmaVel)
     l=errorbar(cInd*freqStep+startFreq,abs(v),-std(bootV'),std(bootV'));
-    ll=errorbar(cInd*freqStep+startFreq,vel,-std(bootVel'),std(bootVel'));
+    ll=errorbar(cInd*freqStep+startFreq,vel,-std(bootVel'),std(bootVel'),'--');
     ylabel('Velocity (m/s)')
     xlabel('Frequency (Hz)')
     legend('Single Station Vanuatu', 'Array Vanuatu','Single Station Ecuador','Array Ecuador','Single Station California','Array California')
     grid on
     % xlim([.01 .1])
-    ylim([0 1e4])
+    ylim([0 6e3])
     set(gca,'FontSize',12)
     set(l,'LineWidth',1.2)
     set(ll,'LineWidth',1.2)
