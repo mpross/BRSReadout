@@ -1,5 +1,5 @@
 function [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=RWaveDataIn(fileName)   
-    close all
+%     close all
     sampf = 8; % sampling frequency in Hz
 
     % % 

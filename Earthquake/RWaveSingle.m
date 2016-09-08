@@ -94,10 +94,10 @@ function [v,phi,el,k,sigmaV,sigmaPhi,bootV,bootPhi,bootEl,bootK]=...
         filtData=filter(d,(BRSY_out-mean(BRSY_out))); 
         seriesRX=[seriesRX filtData(startTime:endTime)];%+10^-5*i+3*10^-6];  
         
-        if i==8
-            figure(8)
-            plot((startTime:endTime),seriesX(:,i),(startTime:endTime),seriesY(:,i),(startTime:endTime),seriesZ(:,i))
-        end
+%         if i==8
+%             figure(8)
+%             plot((startTime:endTime),seriesX(:,i),(startTime:endTime),seriesY(:,i),(startTime:endTime),seriesZ(:,i))
+%         end
         tempX=[];
         tempY=[];
         tempZ=[];
