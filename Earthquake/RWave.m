@@ -1,9 +1,12 @@
 close all
-for j=0:2
+singVel=[0];
+singAng=[0];
+% for j=0:2
+j=0;
     sampf =8;
-    startFreq=0.015;
+    startFreq=0.03;
     freqStep=.005;
-    iter=floor((.2-startFreq)/freqStep);
+    iter=floor((.11-startFreq)/freqStep);
     [errFreq,transXErr,transYErr,transZErr,tiltErr]=RWaveMeasErr;
     if j==0
         [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]= RWaveDataIn('GPS1143962787_6_9Earthquake.mat');
@@ -20,7 +23,7 @@ for j=0:2
     end 
     bootVel=[];
     bootAng=[];
-    threshold=rms(ETMYZ_out)/2;
+    threshold=rms(ETMYZ_out)/4;
     % seed=randn(1,length(ETMYZ_out));
 
     [vel, ang, sigmaVel,sigmaAng,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sampf,threshold,startFreq,freqStep,iter);
@@ -29,8 +32,8 @@ for j=0:2
     RWaveSingle(ETMYX_out,ETMYY_out,ETMYZ_out,BRSY_out,...
         'S',errFreq,transXErr,transYErr,transZErr,tiltErr,sampf,ang,threshold,startFreq,freqStep,iter);
 
-    cInd1=find((abs(v)+std(bootV')'>=abs(vel)'-std(bootVel')'));
-    cInd2=find((abs(v)-std(bootV')'<=abs(vel)'+std(bootVel')'));
+    cInd1=find((abs(v)+2*std(bootV')'>=abs(vel)'-2*std(bootVel')'));
+    cInd2=find((abs(v)-2*std(bootV')'<=abs(vel)'+2*std(bootVel')'));
     cInd3=find(std(bootVel')<=1000);
     cInd4=find(std(bootV')<=1000);
     cInd12=intersect(cInd1,cInd2);
@@ -38,8 +41,13 @@ for j=0:2
     cInd=intersect(cInd123,cInd4);
     v=v(cInd);
     vel=vel(cInd);
+    ang=ang(cInd);
+    phi=phi(cInd);
     bootV=bootV(cInd,:);
     bootVel=bootVel(cInd,:);
+    
+    singVel=[singVel; mean(v)];
+    singAng=[singAng; mean(ang)];
 
     % figure(1)
     % plot(Rot_time(startTime:length(BRSY_out)),seriesX,Rot_time(startTime:length(BRSY_out))...
@@ -91,4 +99,18 @@ for j=0:2
     % xlabel('Frequency (Hz)')
     % grid on
     % xlim([.02 .0675])
-end
+% end
+%%
+% figure(6)
+% n=5;
+% r=(0:n)'/n;
+% singAng=sort(singAng);
+% singVel=sort(singVel);
+% singAng=[singAng; 360];
+% singVel=[singVel; 0];
+% X = r*cos(singAng'*pi/180-pi);
+% Y = r*sin(singAng'*pi/180-pi);
+% C=r./r*(abs(singVel.*cos(singAng*pi/180-pi)))';
+% pcolor(X,Y,C)
+% axis equal tight
+% colorbar
