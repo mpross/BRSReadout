@@ -1,8 +1,7 @@
 close all
 singVel=[0];
 singAng=[0];
-% for j=0:2
-j=0;
+for j=0:2
     sampf =8;
     startFreq=0.03;
     freqStep=.005;
@@ -23,7 +22,7 @@ j=0;
     end 
     bootVel=[];
     bootAng=[];
-    threshold=rms(ETMYZ_out)/4;
+    threshold=rms(ETMYZ_out)/2;
     % seed=randn(1,length(ETMYZ_out));
 
     [vel, ang, sigmaVel,sigmaAng,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sampf,threshold,startFreq,freqStep,iter);
@@ -36,9 +35,13 @@ j=0;
     cInd2=find((abs(v)-2*std(bootV')'<=abs(vel)'+2*std(bootVel')'));
     cInd3=find(std(bootVel')<=1000);
     cInd4=find(std(bootV')<=1000);
+    cInd5=find(std(bootVel')>=1);
+    cInd6=find(std(bootV')>=1);
     cInd12=intersect(cInd1,cInd2);
     cInd123=intersect(cInd12,cInd3);
-    cInd=intersect(cInd123,cInd4);
+    cInd1234=intersect(cInd123,cInd4);
+    cInd12345=intersect(cInd1234,cInd5);
+    cInd=intersect(cInd12345,cInd6);
     v=v(cInd);
     vel=vel(cInd);
     ang=ang(cInd);
@@ -67,7 +70,7 @@ j=0;
     legend('Single Station Vanuatu', 'Array Vanuatu','Single Station Ecuador','Array Ecuador','Single Station California','Array California')
     grid on
     % xlim([.01 .1])
-    ylim([0 6e3])
+    ylim([0 1e4])
     set(gca,'FontSize',12)
     set(l,'LineWidth',1.2)
     set(ll,'LineWidth',1.2)
@@ -99,7 +102,7 @@ j=0;
     % xlabel('Frequency (Hz)')
     % grid on
     % xlim([.02 .0675])
-% end
+end
 %%
 % figure(6)
 % n=5;
