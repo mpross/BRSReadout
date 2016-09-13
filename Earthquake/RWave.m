@@ -23,27 +23,20 @@ j=0;
     end 
     bootVel=[];
     bootAng=[];
+    startTime=250*sampf;
+    endTime=length(ETMXZ_out);
     [bb,aa] = butter(4,[2*0.01/sampf, 2*.1/sampf]);
 
     % seed=randn(1,length(ETMYZ_out));
     threshSeries=filter(bb,aa,ETMYZ_out);
+    threshSeries=threshSeries(300*sampf:length(threshSeries));    
+    threshold=rms(threshSeries)/2;
     
-    ETMXZ_out=ETMXZ_out(300*sampf:length(ETMXZ_out));
-    ETMYZ_out=ETMYZ_out(300*sampf:length(ETMYZ_out));
-    ITMYZ_out=ITMYZ_out(300*sampf:length(ITMYZ_out));
-    
-    ETMYX_out=ETMYX_out(300*sampf:length(ETMYX_out));
-    ETMYY_out=ETMYY_out(300*sampf:length(ETMYY_out));
-    BRSY_out=BRSY_out(300*sampf:length(BRSY_out));
-    threshSeries=threshSeries(300*sampf:length(threshSeries));
-    
-    threshold=rms(threshSeries)/4;
-    
-    [vel, ang,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sampf,threshold,startFreq,freqStep,iter);
+    [vel, ang,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sampf,threshold,startFreq,freqStep,iter,startTime,endTime);
     
     [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
     RWaveSingle(ETMYX_out,ETMYY_out,ETMYZ_out,BRSY_out,...
-        'S',errFreq,transXErr,transYErr,transZErr,tiltErr,sampf,ang,threshold,startFreq,freqStep,iter);
+        'S',errFreq,transXErr,transYErr,transZErr,tiltErr,sampf,ang,threshold,startFreq,freqStep,iter,startTime,endTime);
 
 %     cInd1=find((abs(v)+4*std(bootV')'>=abs(vel)'-4*std(bootVel')'));
 %     cInd2=find((abs(v)-4*std(bootV')'<=abs(vel)'+4*std(bootVel')'));

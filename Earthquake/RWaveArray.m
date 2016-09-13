@@ -1,4 +1,4 @@
-function [vel, ang, bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sampf,threshold,startFreq,freqStep,iter)
+function [vel, ang, bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sampf,threshold,startFreq,freqStep,iter,startTime,endTime)
 %% Array
     Astop1 = 10;
     Apass  = 1;
@@ -23,11 +23,11 @@ function [vel, ang, bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sa
           'DesignMethod','butter','SampleRate',sampf);
 
         filtData=filter(d,ETMXZ_out);
-        X=filtData;
+        X=filtData(startTime:endTime);
         filtData=filter(d,ETMYZ_out);
-        Y=filtData;
+        Y=filtData(startTime:endTime);
         filtData=filter(d,ITMYZ_out);
-        C=filtData;
+        C=filtData(startTime:endTime);
     %     injAng=150*pi/180;
     %     X=filter(d,seed(ceil(100*cos(injAng))+150:length(ETMXZ_out)+ceil(100*cos(injAng))+150))';
     %     Y=filter(d,seed(ceil(100*sin(injAng))+150:length(ETMXZ_out)+ceil(100*sin(injAng))+150))';
@@ -39,7 +39,7 @@ function [vel, ang, bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sa
 
     delta_t_X=[];
     delta_t_Y=[];
-    len=floor(10/freq2);
+    len=floor(200/freq2);
     for j=1:floor(length(X)/len)-1
         if (max(C(j*len:(j+1)*len))-min(C(j*len:(j+1)*len)))>=threshold
 

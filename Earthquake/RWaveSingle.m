@@ -1,6 +1,6 @@
 function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
     RWaveSingle(ETMYX_out,ETMYY_out,ETMYZ_out,BRSY_out,...
-    quad,errFreq,transXErr,transYErr,transZErr,tiltErr,sampf,ang,threshold,startFreq,freqStep,iter)
+    quad,errFreq,transXErr,transYErr,transZErr,tiltErr,sampf,ang,threshold,startFreq,freqStep,iter,startTime,endTime)
 
     %% Single Station
     if quad=='E'
@@ -46,9 +46,9 @@ function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
     el=[];
     v=[];
     lPhi=[];
-    Astop1 = 10;
+    Astop1 = 5;
     Apass  = 1;
-    Astop2 = 10;
+    Astop2 = 5;
     for i=0:iter
         tempBV=[];
         tempBPhi=[];
@@ -68,14 +68,18 @@ function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
           'StopbandAttenuation2',Astop2, ...
           'DesignMethod','butter','SampleRate',sampf);
 
-        filtData=filter(d,ETMYX_out-mean(ETMYX_out));  
-        seriesX=[seriesX filtData];
+        filtData=filter(d,ETMYX_out-mean(ETMYX_out));
+        if i==0
+            figure(3)
+            plot(filtData(startTime:endTime))
+        end
+        seriesX=[seriesX filtData(startTime:endTime)];
         filtData=filter(d,ETMYY_out-mean(ETMYY_out)); 
-        seriesY=[seriesY filtData];
+        seriesY=[seriesY filtData(startTime:endTime)];
         filtData=filter(d,ETMYZ_out-mean(ETMYZ_out)); 
-        seriesZ=[seriesZ filtData];
+        seriesZ=[seriesZ filtData(startTime:endTime)];
         filtData=filter(d,(BRSY_out-mean(BRSY_out))); 
-        seriesRX=[seriesRX filtData];
+        seriesRX=[seriesRX filtData(startTime:endTime)];
         
         tempX=[];
         tempY=[];
