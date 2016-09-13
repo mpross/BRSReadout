@@ -1,8 +1,8 @@
 function [vel, ang, bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sampf,threshold,startFreq,freqStep,iter,startTime,endTime)
 %% Array
-    Astop1 = 50;
-    Apass  = 1;
-    Astop2 = 50;
+    Astop1 = 5;
+    Apass  = .5;
+    Astop2 =5;
     vel=[];
     ang=[];
     angTim=[];
@@ -26,10 +26,10 @@ function [vel, ang, bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sa
         X=filtData(startTime:endTime);        
         filtData=filter(d,ETMYZ_out-mean(ETMYZ_out));
         Y=filtData(startTime:endTime);
-        if i==0
+        if i==floor(iter/2)
             figure(4)
             plot(Y)
-        end
+        end        
         filtData=filter(d,ITMYZ_out-mean(ITMYZ_out));
         C=filtData(startTime:endTime);
     %     injAng=150*pi/180;

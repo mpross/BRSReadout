@@ -4,9 +4,9 @@ singAng=[0];
 % for j=0:2
 j=0;
     sampf =8;
-    startFreq=0.03;
+    startFreq=0.015;
     freqStep=.005;
-    iter=floor((.11-startFreq)/freqStep);
+    iter=floor((.15-startFreq)/freqStep);
     [errFreq,transXErr,transYErr,transZErr,tiltErr]=RWaveMeasErr;
     if j==0
         [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]= RWaveDataIn('GPS1143962787_6_9Earthquake.mat');
@@ -21,16 +21,20 @@ j=0;
     if j==3
         [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=RWaveDataIn('GPS1149331885_6_2Earthquake.mat');
     end 
+    ETMXZ_out=ETMXZ_out(300*sampf:length(ETMXZ_out));
+    ETMYZ_out=ETMYZ_out(300*sampf:length(ETMYZ_out));
+    ITMYZ_out=ITMYZ_out(300*sampf:length(ITMYZ_out));
+    
+    ETMYX_out=ETMYX_out(300*sampf:length(ETMYX_out));
+    ETMYY_out=ETMYY_out(300*sampf:length(ETMYY_out));
+    BRSY_out=BRSY_out(300*sampf:length(BRSY_out));
     bootVel=[];
     bootAng=[];
-    startTime=1;
+    startTime=1000*sampf;
     endTime=length(ETMXZ_out);
-    [bb,aa] = butter(4,[2*0.01/sampf, 2*.1/sampf]);
-
     % seed=randn(1,length(ETMYZ_out));
-    threshSeries=filter(bb,aa,ETMYZ_out);
-    threshSeries=threshSeries(300*sampf:length(threshSeries));    
-    threshold=rms(threshSeries)/2;
+       
+    threshold=rms(ETMYZ_out)/3;
     
     [vel, ang,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sampf,threshold,startFreq,freqStep,iter,startTime,endTime);
     

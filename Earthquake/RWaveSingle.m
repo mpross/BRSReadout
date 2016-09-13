@@ -46,9 +46,9 @@ function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
     el=[];
     v=[];
     lPhi=[];
-    Astop1 = 50;
-    Apass  = 1;
-    Astop2 = 50;
+    Astop1 = 5;
+    Apass  = .5;
+    Astop2 = 5;
     for i=0:iter
         tempBV=[];
         tempBPhi=[];
@@ -73,10 +73,10 @@ function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
         filtData=filter(d,ETMYY_out-mean(ETMYY_out)); 
         seriesY=[seriesY filtData(startTime:endTime)];
         filtData=filter(d,ETMYZ_out-mean(ETMYZ_out));
-        if i==0
+        if i==floor(iter/2)
             figure(3)
             plot(filtData(startTime:endTime))
-        end
+        end        
         seriesZ=[seriesZ filtData(startTime:endTime)];
         filtData=filter(d,BRSY_out-mean(BRSY_out)); 
         seriesRX=[seriesRX filtData(startTime:endTime)];
