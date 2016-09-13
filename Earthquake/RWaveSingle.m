@@ -113,13 +113,13 @@ function [v,phi,el,k,sigmaV,sigmaPhi,bootV,bootPhi,bootEl,bootK]=...
     %        tempRX=[tempRX max(abs(cut))];%-min(cut)];
     %     end        
         for j=1:floor(length(seriesX(:,i+1))*(freq1/sampf))-2
-           cut=seriesX(floor(j/(freq1/sampf)):floor((j+1)/(freq1/sampf)),i+1);
+           cut=seriesX(floor(j/(freq1/sampf)):floor((j+2)/(freq1/sampf)),i+1);
            tempX=[tempX sgnX*(max(cut)-min(cut))];
-           cut=seriesY(floor(j/(freq1/sampf)):floor((j+1)/(freq1/sampf)),i+1);
+           cut=seriesY(floor(j/(freq1/sampf)):floor((j+2)/(freq1/sampf)),i+1);
            tempY=[tempY sgnY*(max(cut)-min(cut))];
-           cut=seriesZ(floor(j/(freq1/sampf)):floor((j+1)/(freq1/sampf)),i+1);
+           cut=seriesZ(floor(j/(freq1/sampf)):floor((j+2)/(freq1/sampf)),i+1);
            tempZ=[tempZ sgnZ*(max(cut)-min(cut))];
-           cut=seriesRX(floor(j/(freq1/sampf)):floor((j+1)/(freq1/sampf)),i+1);
+           cut=seriesRX(floor(j/(freq1/sampf)):floor((j+2)/(freq1/sampf)),i+1);
            tempRX=[tempRX sgnRX*(max(cut)-min(cut))];
         end    
     %     for j=2:length((startTime:endTime))-1

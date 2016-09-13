@@ -1,7 +1,8 @@
 close all
 singVel=[0];
 singAng=[0];
-for j=0:2
+% for j=0:2
+j=1;
     sampf =8;
     startFreq=0.03;
     freqStep=.005;
@@ -31,17 +32,18 @@ for j=0:2
     RWaveSingle(ETMYX_out,ETMYY_out,ETMYZ_out,BRSY_out,...
         'S',errFreq,transXErr,transYErr,transZErr,tiltErr,sampf,ang,threshold,startFreq,freqStep,iter);
 
-    cInd1=find((abs(v)+2*std(bootV')'>=abs(vel)'-2*std(bootVel')'));
-    cInd2=find((abs(v)-2*std(bootV')'<=abs(vel)'+2*std(bootVel')'));
-    cInd3=find(std(bootVel')<=1000);
-    cInd4=find(std(bootV')<=1000);
-    cInd5=find(std(bootVel')>=1);
-    cInd6=find(std(bootV')>=1);
-    cInd12=intersect(cInd1,cInd2);
-    cInd123=intersect(cInd12,cInd3);
-    cInd1234=intersect(cInd123,cInd4);
-    cInd12345=intersect(cInd1234,cInd5);
-    cInd=intersect(cInd12345,cInd6);
+%     cInd1=find((abs(v)+4*std(bootV')'>=abs(vel)'-4*std(bootVel')'));
+%     cInd2=find((abs(v)-4*std(bootV')'<=abs(vel)'+4*std(bootVel')'));
+%     cInd3=find(std(bootVel')<=1000);
+%     cInd4=find(std(bootV')<=1000);
+%     cInd5=find(std(bootVel')>=1);
+%     cInd6=find(std(bootV')>=1);
+%     cInd12=intersect(cInd1,cInd2);
+%     cInd123=intersect(cInd12,cInd3);
+%     cInd1234=intersect(cInd123,cInd4);
+%     cInd12345=intersect(cInd1234,cInd5);
+%     cInd=intersect(cInd12345,cInd6);
+    cInd=find(abs(v)>=0);
     v=v(cInd);
     vel=vel(cInd);
     ang=ang(cInd);
@@ -63,8 +65,8 @@ for j=0:2
     hold on
     % errorbar(((0:length(v)-1))*freqStep+startFreq,abs(v),-sigmaV,sigmaV)
     % errorbar(((0:length(vel)-1))*freqStep+startFreq,vel,-sigmaVel,sigmaVel)
-    l=errorbar(cInd*freqStep+startFreq,abs(v),-std(bootV'),std(bootV'));
-    ll=errorbar(cInd*freqStep+startFreq,vel,-std(bootVel'),std(bootVel'),'--');
+    l=errorbar((cInd-1)*freqStep+startFreq,abs(v),-std(bootV'),std(bootV'));
+    ll=errorbar((cInd-1)*freqStep+startFreq,vel,-std(bootVel'),std(bootVel'),'--');
     ylabel('Velocity (m/s)')
     xlabel('Frequency (Hz)')
     legend('Single Station Vanuatu', 'Array Vanuatu','Single Station Ecuador','Array Ecuador','Single Station California','Array California')
@@ -102,7 +104,7 @@ for j=0:2
     % xlabel('Frequency (Hz)')
     % grid on
     % xlim([.02 .0675])
-end
+% end
 %%
 % figure(6)
 % n=5;
