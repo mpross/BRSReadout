@@ -61,7 +61,7 @@ function [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=RWave
 
     %% torque computation
     % [bb,aa] = butter(4,[2*0.02/sampf 2*0.100/sampf],'bandpass');
-    [bb,aa] = butter(4,[2*0.01/sampf, 2*3/sampf]);
+    [bb,aa] = butter(4,[2*0.001/sampf, 2*1/sampf]);
     % %T240 response inversion filter
     T240InvertFilt = zpk(-2*pi*[pairQ(8.2e-3,0.7)],-2*pi*[0 0],1);
     T240InvertFilt = 1*T240InvertFilt/abs(freqresp(T240InvertFilt,2*pi*100));
