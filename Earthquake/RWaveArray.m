@@ -1,8 +1,8 @@
 function [vel, ang, bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sampf,threshold,startFreq,freqStep,iter,startTime,endTime)
 %% Array
-    Astop1 = 10;
+    Astop1 = 50;
     Apass  = 1;
-    Astop2 = 10;
+    Astop2 = 50;
     vel=[];
     ang=[];
     angTim=[];
@@ -22,11 +22,15 @@ function [vel, ang, bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sa
           'StopbandAttenuation2',Astop2, ...
           'DesignMethod','butter','SampleRate',sampf);
 
-        filtData=filter(d,ETMXZ_out);
-        X=filtData(startTime:endTime);
-        filtData=filter(d,ETMYZ_out);
+        filtData=filter(d,ETMXZ_out-mean(ETMXZ_out));
+        X=filtData(startTime:endTime);        
+        filtData=filter(d,ETMYZ_out-mean(ETMYZ_out));
         Y=filtData(startTime:endTime);
-        filtData=filter(d,ITMYZ_out);
+        if i==0
+            figure(4)
+            plot(Y)
+        end
+        filtData=filter(d,ITMYZ_out-mean(ITMYZ_out));
         C=filtData(startTime:endTime);
     %     injAng=150*pi/180;
     %     X=filter(d,seed(ceil(100*cos(injAng))+150:length(ETMXZ_out)+ceil(100*cos(injAng))+150))';

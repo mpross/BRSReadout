@@ -28,8 +28,8 @@ function [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=RWave
     %     rawWINDX=mydata(:,12);
     %     rawWINDY=mydata(:,13);
     end   
-    Sttime =01*sampf;
-    Endtime=length(rawBRSY)-0*sampf;
+    Sttime =1;
+    Endtime=length(rawBRSY);
     localg = 9.8;
     % BRSscale=.85;
     BRSscale=1;

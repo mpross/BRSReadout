@@ -23,7 +23,7 @@ j=0;
     end 
     bootVel=[];
     bootAng=[];
-    startTime=250*sampf;
+    startTime=1;
     endTime=length(ETMXZ_out);
     [bb,aa] = butter(4,[2*0.01/sampf, 2*.1/sampf]);
 
