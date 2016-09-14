@@ -1,12 +1,16 @@
 close all
 singVel=[0];
 singAng=[0];
-% for j=0:2
-j=2;
+for j=0:2
+% j=2;
     sampf =8;
     startFreq=0.03;
-    freqStep=.005;
-    iter=floor((.2-startFreq)/freqStep);
+    if j==2
+        freqStep=.01;
+    else
+        freqStep=.005;
+    end
+    iter=floor((.12-startFreq)/freqStep);
     [errFreq,transXErr,transYErr,transZErr,tiltErr]=RWaveMeasErr;
     if j==0
         [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]= RWaveDataIn('GPS1143962787_6_9Earthquake.mat');
@@ -30,13 +34,21 @@ j=2;
     BRSY_out=BRSY_out(300*sampf:length(BRSY_out));
     bootVel=[];
     bootAng=[];
-    startTime=300*sampf;
+    if j==2
+        startTime=150*sampf;
+    else
+        startTime=300*sampf;
+    end
 %     startTime=1;
-%     endTime=length(ETMXZ_out);
-    endTime=800*sampf;
+%     
+    if j==2
+        endTime=750*sampf;
+    else
+        endTime=length(ETMXZ_out);
+    end
     % seed=randn(1,length(ETMYZ_out));
        
-    threshold=rms(abs(ETMYZ_out))/2;
+    threshold=rms(abs(ETMYZ_out));
     
     [vel, ang,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sampf,threshold,startFreq,freqStep,iter,startTime,endTime);
     
@@ -95,12 +107,13 @@ j=2;
     hold on
     % errorbar(((0:length(v)-1))*freqStep+startFreq,abs(v),-sigmaV,sigmaV)
     % errorbar(((0:length(vel)-1))*freqStep+startFreq,vel,-sigmaVel,sigmaVel)
-    l=errorbar((cInd-1)*freqStep+startFreq,abs(v),-std(bootV'),std(bootV'));
-    ll=errorbar((cInd-1)*freqStep+startFreq,vel,-std(bootVel'),std(bootVel'),'--');
+    l=errorbar(1./((cInd-1)*freqStep+startFreq),abs(v),-std(bootV'),std(bootV'));
+    ll=errorbar(1./((cInd-1)*freqStep+startFreq),vel,-std(bootVel'),std(bootVel'),'--');
     ylabel('Velocity (m/s)')
-    xlabel('Frequency (Hz)')
-    legend('Single Station', 'Array','Single Station Ecuador','Array Ecuador','Single Station California','Array California')
+    xlabel('Period (s)')
+    legend('Single Station Vanuatu', 'Array Vanuatu','Single Station Ecuador','Array Ecuador','Single Station California','Array California')
     grid on
+    box on
     % xlim([.01 .1])
     ylim([0 8e3])
     set(gca,'FontSize',12)
@@ -134,7 +147,7 @@ j=2;
     % xlabel('Frequency (Hz)')
     % grid on
     % xlim([.02 .0675])
-% end
+end
 %%
 % figure(6)
 % n=5;

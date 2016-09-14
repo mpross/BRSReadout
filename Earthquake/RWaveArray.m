@@ -38,7 +38,11 @@ function [vel, ang, bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sa
 
     delta_t_X=[];
     delta_t_Y=[];
-    len=100*sampf;
+    if endTime<=6500
+        len=200*sampf;
+    else
+        len=500*sampf;
+    end
     for j=1:floor(length(X)/len)-1
         if (max(C(j*len:(j+1)*len))-min(C(j*len:(j+1)*len)))>=threshold
 
