@@ -2,11 +2,11 @@ close all
 singVel=[0];
 singAng=[0];
 % for j=0:2
-j=0;
+j=2;
     sampf =8;
-    startFreq=0.015;
+    startFreq=0.03;
     freqStep=.005;
-    iter=floor((.15-startFreq)/freqStep);
+    iter=floor((.2-startFreq)/freqStep);
     [errFreq,transXErr,transYErr,transZErr,tiltErr]=RWaveMeasErr;
     if j==0
         [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]= RWaveDataIn('GPS1143962787_6_9Earthquake.mat');
@@ -30,11 +30,13 @@ j=0;
     BRSY_out=BRSY_out(300*sampf:length(BRSY_out));
     bootVel=[];
     bootAng=[];
-    startTime=1000*sampf;
-    endTime=length(ETMXZ_out);
+    startTime=300*sampf;
+%     startTime=1;
+%     endTime=length(ETMXZ_out);
+    endTime=800*sampf;
     % seed=randn(1,length(ETMYZ_out));
        
-    threshold=rms(ETMYZ_out)/3;
+    threshold=rms(abs(ETMYZ_out))/2;
     
     [vel, ang,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sampf,threshold,startFreq,freqStep,iter,startTime,endTime);
     
@@ -42,18 +44,19 @@ j=0;
     RWaveSingle(ETMYX_out,ETMYY_out,ETMYZ_out,BRSY_out,...
         'S',errFreq,transXErr,transYErr,transZErr,tiltErr,sampf,ang,threshold,startFreq,freqStep,iter,startTime,endTime);
 
-%     cInd1=find((abs(v)+4*std(bootV')'>=abs(vel)'-4*std(bootVel')'));
-%     cInd2=find((abs(v)-4*std(bootV')'<=abs(vel)'+4*std(bootVel')'));
-%     cInd3=find(std(bootVel')<=1000);
-%     cInd4=find(std(bootV')<=1000);
-%     cInd5=find(std(bootVel')>=1);
-%     cInd6=find(std(bootV')>=1);
+%     cInd1=find((abs(v)+10*std(bootV')'>=abs(vel)'-10*std(bootVel')'));
+%     cInd2=find((abs(v)-10*std(bootV')'<=abs(vel)'+10*std(bootVel')'));
+%     cInd3=find(std(bootVel')<=10000);
+%     cInd4=find(std(bootV')<=10000);
+    cInd5=find(std(bootVel')>=1);
+    cInd6=find(std(bootV')>=1);
 %     cInd12=intersect(cInd1,cInd2);
 %     cInd123=intersect(cInd12,cInd3);
 %     cInd1234=intersect(cInd123,cInd4);
 %     cInd12345=intersect(cInd1234,cInd5);
 %     cInd=intersect(cInd12345,cInd6);
-    cInd=find(abs(v)>=0);
+    cInd=intersect(cInd5,cInd6);
+%     cInd=find(abs(v)>=0);
     v=v(cInd);
     vel=vel(cInd);
     ang=ang(cInd);
@@ -70,7 +73,24 @@ j=0;
     % ylim([-1e-5 100e-5])
     % xlim([400 length(ETMYZ_out)/sampf]);
     % grid on
-
+    [C,F]=coh2(ETMYZ_out,BRSY_out,1/8,9);
+    figure(8)
+    plot(F,C)
+    xlim([.01 .1])
+    
+    C=C(find(F<.1));
+    F=F(find(F<.1));
+    C=C(find(F>.01));
+    F=F(find(F>.01));
+    
+    coInd=[];
+    for k=1:length(v)
+        [ind ind]=min(abs(k*freqStep+startFreq-F));
+        coInd=[coInd; ind];
+    end
+    F=F(coInd);
+    C=C(coInd);
+               
     figure(2)
     hold on
     % errorbar(((0:length(v)-1))*freqStep+startFreq,abs(v),-sigmaV,sigmaV)
@@ -79,10 +99,10 @@ j=0;
     ll=errorbar((cInd-1)*freqStep+startFreq,vel,-std(bootVel'),std(bootVel'),'--');
     ylabel('Velocity (m/s)')
     xlabel('Frequency (Hz)')
-    legend('Single Station Vanuatu', 'Array Vanuatu','Single Station Ecuador','Array Ecuador','Single Station California','Array California')
+    legend('Single Station', 'Array','Single Station Ecuador','Array Ecuador','Single Station California','Array California')
     grid on
     % xlim([.01 .1])
-    ylim([0 1e4])
+    ylim([0 8e3])
     set(gca,'FontSize',12)
     set(l,'LineWidth',1.2)
     set(ll,'LineWidth',1.2)

@@ -21,15 +21,10 @@ function [vel, ang, bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sa
           'StopbandAttenuation1',Astop1,'PassbandRipple', Apass, ...
           'StopbandAttenuation2',Astop2, ...
           'DesignMethod','butter','SampleRate',sampf);
-
         filtData=filter(d,ETMXZ_out-mean(ETMXZ_out));
         X=filtData(startTime:endTime);        
         filtData=filter(d,ETMYZ_out-mean(ETMYZ_out));
         Y=filtData(startTime:endTime);
-        if i==floor(iter/2)
-            figure(4)
-            plot(Y)
-        end        
         filtData=filter(d,ITMYZ_out-mean(ITMYZ_out));
         C=filtData(startTime:endTime);
     %     injAng=150*pi/180;
@@ -43,7 +38,7 @@ function [vel, ang, bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sa
 
     delta_t_X=[];
     delta_t_Y=[];
-    len=floor(200/freq2);
+    len=100*sampf;
     for j=1:floor(length(X)/len)-1
         if (max(C(j*len:(j+1)*len))-min(C(j*len:(j+1)*len)))>=threshold
 

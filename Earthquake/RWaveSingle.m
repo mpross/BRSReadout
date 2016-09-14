@@ -72,11 +72,7 @@ function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
         seriesX=[seriesX filtData(startTime:endTime)];
         filtData=filter(d,ETMYY_out-mean(ETMYY_out)); 
         seriesY=[seriesY filtData(startTime:endTime)];
-        filtData=filter(d,ETMYZ_out-mean(ETMYZ_out));
-        if i==floor(iter/2)
-            figure(3)
-            plot(filtData(startTime:endTime))
-        end        
+        filtData=filter(d,ETMYZ_out-mean(ETMYZ_out));   
         seriesZ=[seriesZ filtData(startTime:endTime)];
         filtData=filter(d,BRSY_out-mean(BRSY_out)); 
         seriesRX=[seriesRX filtData(startTime:endTime)];
@@ -85,14 +81,14 @@ function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
         tempY=[];
         tempZ=[];
         tempRX=[];      
-        for j=1:floor(length(seriesX(:,i+1))*(freq1/sampf))-2
-           cut=seriesX(floor(j/(freq1/sampf)):floor((j+2)/(freq1/sampf)),i+1);
+        for j=1:floor(length(seriesX(:,i+1))*(freq1/sampf))-4
+           cut=seriesX(floor(j/(freq1/sampf)):floor((j+1)/(freq1/sampf)),i+1);
            tempX=[tempX (max(cut)-min(cut))];
-           cut=seriesY(floor(j/(freq1/sampf)):floor((j+2)/(freq1/sampf)),i+1);
+           cut=seriesY(floor(j/(freq1/sampf)):floor((j+1)/(freq1/sampf)),i+1);
            tempY=[tempY (max(cut)-min(cut))];
-           cut=seriesZ(floor(j/(freq1/sampf)):floor((j+2)/(freq1/sampf)),i+1);
+           cut=seriesZ(floor(j/(freq1/sampf)):floor((j+1)/(freq1/sampf)),i+1);
            tempZ=[tempZ (max(cut)-min(cut))];
-           cut=seriesRX(floor(j/(freq1/sampf)):floor((j+2)/(freq1/sampf)),i+1);
+           cut=seriesRX(floor(j/(freq1/sampf)):floor((j+1)/(freq1/sampf)),i+1);
            tempRX=[tempRX (max(cut)-min(cut))];
         end 
         for p=1:1e4
