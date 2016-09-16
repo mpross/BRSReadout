@@ -1,8 +1,8 @@
 close all
 singVel=[0];
 singAng=[0];
-% for j=0:2
-j=6;
+% for j=0:6
+j=3;
     sampf =8;
     startFreq=0.03;
     if j==2
@@ -44,14 +44,23 @@ j=6;
     BRSY_out=BRSY_out(300*sampf:length(BRSY_out));
     bootVel=[];
     bootAng=[];
-    if j==2
+    if j==6
+        startTime=3500*sampf;
+%         startTime=1;
+    elseif j==5
+        startTime=2900*sampf;
+    elseif j==2
         startTime=150*sampf;
     else
         startTime=300*sampf;
     end
 %     startTime=1;
-%     
-    if j==2
+    if j==6
+        endTime=4500*sampf;
+%         endTime=length(ETMXZ_out);
+    elseif j==5
+        endTime=4100*sampf;
+    elseif j==2
         endTime=750*sampf;
     else
         endTime=length(ETMXZ_out);
@@ -119,8 +128,8 @@ j=6;
     hold on
     % errorbar(((0:length(v)-1))*freqStep+startFreq,abs(v),-sigmaV,sigmaV)
     % errorbar(((0:length(vel)-1))*freqStep+startFreq,vel,-sigmaVel,sigmaVel)
-    l=errorbar(((cInd-1)*freqStep+startFreq),abs(v),-std(bootV'),std(bootV'));
-    ll=errorbar(((cInd-1)*freqStep+startFreq),vel,-std(bootVel'),std(bootVel'),'--');
+    l=errorbar(((cInd-1)*freqStep+startFreq),abs(v),-2*std(bootV'),2*std(bootV'));
+    ll=errorbar(((cInd-1)*freqStep+startFreq),vel,-2*std(bootVel'),2*std(bootVel'),'--');
     ylabel('Velocity (m/s)')
     xlabel('Frequency (Hz)')
 %     legend('Single Station', 'Array','Single Station Ecuador','Array Ecuador','Single Station California','Array California')
@@ -159,7 +168,7 @@ j=6;
     % xlabel('Frequency (Hz)')
     % grid on
     % xlim([.02 .0675])
-% end
+%     end
 %%
 % figure(6)
 % n=5;

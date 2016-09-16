@@ -52,7 +52,7 @@ function [vel, ang, bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sa
     if endTime<=6500
         len=200*sampf;
     else
-        len=500*sampf;
+        len=100*sampf;
     end
     for j=1:floor(length(X)/len)-1
         if ((max(C(j*len:(j+1)*len))-min(C(j*len:(j+1)*len)))>=threshold && (max(C(j*len:(j+1)*len))-min(C(j*len:(j+1)*len)))>=localThreshold)
@@ -94,6 +94,10 @@ function [vel, ang, bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sa
     end     
     bootVel=[bootVel; tempBVel'];
     bootAng=[bootAng; tempBAng'];
+    if i==7
+        figure(4)
+        plot(4e3./sqrt((delta_t_X).^2+(delta_t_Y).^2));
+    end
     delta_t_X=mean(delta_t_X);
     delta_t_Y=mean(delta_t_Y);
     ang=[ang atan2(delta_t_Y,delta_t_X)*180/pi];    

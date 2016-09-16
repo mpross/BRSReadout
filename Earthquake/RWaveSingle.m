@@ -79,11 +79,11 @@ function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
         filtData=filter(d,BRSY_out-mean(BRSY_out)); 
         seriesRX=[seriesRX filtData(startTime:endTime)];        
         localThreshold2=max(abs(filtData))*.7;
-%         if i==7
-%             figure(13)            
-%             plot((startTime:endTime)/sampf,seriesZ(:,i),(startTime:endTime)/sampf,1e4*seriesRX(:,i)+1e-6)
-%             legend('Z','RX')
-%         end
+        if i==7
+            figure(13)            
+            plot((startTime:endTime)/sampf,seriesZ(:,i),(startTime:endTime)/sampf,1e4*seriesRX(:,i)+1e-6)
+            legend('Z','RX')
+        end
         tempX=[];
         tempY=[];
         tempZ=[];
@@ -145,17 +145,22 @@ function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
         avgK=0;
         avgEl=0;
         avgV=0;
+        pltV=[];
         for l=1:min([length(tempX) length(tempY) length(tempZ) length(tempRX)])
             if(abs(tempZ(l))>=threshold && abs(tempRX(l))>=localThreshold2 && abs(tempZ(l))>=localThreshold1)
     %         if l>=20
                 avgPhi=avgPhi+atan2(tempY(l),tempX(l))*180/pi;
                 avgK=avgK+tempRX(l)./tempZ(l)./sin(atan2(tempY(l),tempX(l)));
                 avgV=avgV+2*pi*freq1.*tempZ(l)./(tempRX(l)).*sin(ang(i+1)*pi/180);%(atan2(tempY(l),tempX(l)));%
+                pltV=[pltV; 2*pi*freq1.*tempZ(l)./(tempRX(l)).*sin(ang(i+1)*pi/180)];
                 avgEl=avgEl+acot(tempZ(l)/tempY(l).*sin(atan2(tempY(l),tempX(l))));                
                 N=N+1;
             end
         end   
-
+        if i==7
+            figure(5)
+            plot(pltV)
+        end
         avgPhi=avgPhi/N;
         avgK=avgK/N;
         avgV=avgV/N;
