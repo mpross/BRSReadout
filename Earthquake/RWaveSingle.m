@@ -1,6 +1,7 @@
 function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
     RWaveSingle(ETMYX_out,ETMYY_out,ETMYZ_out,BRSY_out,...
-    quad,errFreq,transXErr,transYErr,transZErr,tiltErr,sampf,ang,threshold,startFreq,freqStep,iter,startTime,endTime)
+    quad,errFreq,transXErr,transYErr,transZErr,tiltErr,sampf,ang,bootAng,...
+    threshold,startFreq,freqStep,iter,startTime,endTime)
 
     %% Single Station
     if quad=='E'
@@ -72,11 +73,17 @@ function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
         seriesX=[seriesX filtData(startTime:endTime)];
         filtData=filter(d,ETMYY_out-mean(ETMYY_out)); 
         seriesY=[seriesY filtData(startTime:endTime)];
-        filtData=filter(d,ETMYZ_out-mean(ETMYZ_out));   
+        filtData=filter(d,ETMYZ_out-mean(ETMYZ_out));
         seriesZ=[seriesZ filtData(startTime:endTime)];
+        localThreshold1=max(abs(filtData))*.7;
         filtData=filter(d,BRSY_out-mean(BRSY_out)); 
-        seriesRX=[seriesRX filtData(startTime:endTime)];
-        
+        seriesRX=[seriesRX filtData(startTime:endTime)];        
+        localThreshold2=max(abs(filtData))*.7;
+%         if i==7
+%             figure(13)            
+%             plot((startTime:endTime)/sampf,seriesZ(:,i),(startTime:endTime)/sampf,1e4*seriesRX(:,i)+1e-6)
+%             legend('Z','RX')
+%         end
         tempX=[];
         tempY=[];
         tempZ=[];
@@ -110,10 +117,11 @@ function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
             btempZ=bootArray(:,3)';
             btempRX=bootArray(:,4)';
             for l=1:min([length(btempX) length(btempY) length(btempZ) length(btempRX)])
-                if(abs(btempX(l))>=threshold && abs(btempY(l))>=threshold && abs(btempZ(l))>=threshold)
+                if(abs(btempX(l))>=threshold && abs(btempY(l))>=threshold...
+                        && abs(btempZ(l))>=threshold && abs(btempZ(l))>=localThreshold1 && abs(btempRX(l))>=localThreshold2)
                     avgPhi=avgPhi+atan2(btempY(l),btempX(l))*180/pi;
                     avgK=avgK+btempRX(l)./btempZ(l)./sin(atan2(btempY(l),btempX(l)));
-                    avgV=avgV+2*pi*freq1.*btempZ(l)./(btempRX(l)).*sin(ang(i+1)*pi/180);%(atan2(btempY(l),btempX(l)));%
+                    avgV=avgV+2*pi*freq1.*btempZ(l)./(btempRX(l)).*sin(bootAng(3,floor(1 + (length(bootAng)-1).*rand(1)))*pi/180);%ang(i+1)*pi/180%(atan2(btempY(l),btempX(l)));%
                     avgEl=avgEl+acot(btempZ(l)/btempY(l).*sin(atan2(btempY(l),btempX(l))));
                     N=N+1;
                 end
@@ -139,7 +147,7 @@ function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
         avgEl=0;
         avgV=0;
         for l=1:min([length(tempX) length(tempY) length(tempZ) length(tempRX)])
-            if(abs(tempZ(l))>=threshold)
+            if(abs(tempZ(l))>=threshold && abs(tempRX(l))>=localThreshold2 && abs(tempZ(l))>=localThreshold1)
     %         if l>=20
                 avgPhi=avgPhi+atan2(tempY(l),tempX(l))*180/pi;
                 avgK=avgK+tempRX(l)./tempZ(l)./sin(atan2(tempY(l),tempX(l)));

@@ -27,6 +27,17 @@ function [vel, ang, bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sa
         Y=filtData(startTime:endTime);
         filtData=filter(d,ITMYZ_out-mean(ITMYZ_out));
         C=filtData(startTime:endTime);
+        localThreshold=max(abs(C))*.7;
+        if i==2
+            figure(11)            
+            plot((startTime:endTime)/sampf,X,(startTime:endTime)/sampf,Y+1e-6,(startTime:endTime)/sampf,C+2e-6)
+            legend('X','Y','C')
+        end
+        if i==6
+            figure(12)            
+            plot((startTime:endTime)/sampf,X,(startTime:endTime)/sampf,Y+1e-6,(startTime:endTime)/sampf,C+2e-6)
+            legend('X','Y','C')
+        end
     %     injAng=150*pi/180;
     %     X=filter(d,seed(ceil(100*cos(injAng))+150:length(ETMXZ_out)+ceil(100*cos(injAng))+150))';
     %     Y=filter(d,seed(ceil(100*sin(injAng))+150:length(ETMXZ_out)+ceil(100*sin(injAng))+150))';
@@ -44,7 +55,7 @@ function [vel, ang, bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sa
         len=500*sampf;
     end
     for j=1:floor(length(X)/len)-1
-        if (max(C(j*len:(j+1)*len))-min(C(j*len:(j+1)*len)))>=threshold
+        if ((max(C(j*len:(j+1)*len))-min(C(j*len:(j+1)*len)))>=threshold && (max(C(j*len:(j+1)*len))-min(C(j*len:(j+1)*len)))>=localThreshold)
 
             [crossY,~] = xcorr(C(j*len:(j+1)*len),Y(j*len:(j+1)*len));
             [crossX,lags]=xcorr(C(j*len:(j+1)*len),X(j*len:(j+1)*len));
