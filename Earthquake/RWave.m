@@ -2,7 +2,7 @@ close all
 singVel=[0];
 singAng=[0];
 % for j=0:2
-j=5;
+j=6;
     sampf =8;
     startFreq=0.03;
     if j==2
@@ -31,7 +31,10 @@ j=5;
     if j==5
         [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=RWaveDataIn('GPS1156480217_Atlantic.mat',true);
     end
-    
+    if j==6
+        [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=RWaveDataIn('GPS1156782617_NewZealand.mat',true);
+    end
+   
     ETMXZ_out=ETMXZ_out(300*sampf:length(ETMXZ_out));
     ETMYZ_out=ETMYZ_out(300*sampf:length(ETMYZ_out));
     ITMYZ_out=ITMYZ_out(300*sampf:length(ITMYZ_out));
@@ -117,7 +120,7 @@ j=5;
     % errorbar(((0:length(v)-1))*freqStep+startFreq,abs(v),-sigmaV,sigmaV)
     % errorbar(((0:length(vel)-1))*freqStep+startFreq,vel,-sigmaVel,sigmaVel)
     l=errorbar(((cInd-1)*freqStep+startFreq),abs(v),-std(bootV'),std(bootV'));
-    ll=errorbar(((cInd-1)*freqStep+startFreq),vel,-std(bootVel),std(bootVel),'--');
+    ll=errorbar(((cInd-1)*freqStep+startFreq),vel,-std(bootVel'),std(bootVel'),'--');
     ylabel('Velocity (m/s)')
     xlabel('Frequency (Hz)')
 %     legend('Single Station', 'Array','Single Station Ecuador','Array Ecuador','Single Station California','Array California')
