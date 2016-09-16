@@ -117,7 +117,7 @@ j=5;
     % errorbar(((0:length(v)-1))*freqStep+startFreq,abs(v),-sigmaV,sigmaV)
     % errorbar(((0:length(vel)-1))*freqStep+startFreq,vel,-sigmaVel,sigmaVel)
     l=errorbar(((cInd-1)*freqStep+startFreq),abs(v),-std(bootV'),std(bootV'));
-    ll=errorbar(((cInd-1)*freqStep+startFreq),vel,-std(bootVel'),std(bootVel'),'--');
+    ll=errorbar(((cInd-1)*freqStep+startFreq),vel,-std(bootVel),std(bootVel),'--');
     ylabel('Velocity (m/s)')
     xlabel('Frequency (Hz)')
 %     legend('Single Station', 'Array','Single Station Ecuador','Array Ecuador','Single Station California','Array California')

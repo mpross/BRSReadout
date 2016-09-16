@@ -75,10 +75,10 @@ function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
         seriesY=[seriesY filtData(startTime:endTime)];
         filtData=filter(d,ETMYZ_out-mean(ETMYZ_out));
         seriesZ=[seriesZ filtData(startTime:endTime)];
-        localThreshold1=max(abs(filtData))*.7*0;
+        localThreshold1=max(abs(filtData))*.7;
         filtData=filter(d,BRSY_out-mean(BRSY_out)); 
         seriesRX=[seriesRX filtData(startTime:endTime)];        
-        localThreshold2=max(abs(filtData))*.7*0;
+        localThreshold2=max(abs(filtData))*.7;
 %         if i==7
 %             figure(13)            
 %             plot((startTime:endTime)/sampf,seriesZ(:,i),(startTime:endTime)/sampf,1e4*seriesRX(:,i)+1e-6)
@@ -117,8 +117,7 @@ function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
             btempZ=bootArray(:,3)';
             btempRX=bootArray(:,4)';
             for l=1:min([length(btempX) length(btempY) length(btempZ) length(btempRX)])
-                if(abs(btempX(l))>=threshold && abs(btempY(l))>=threshold...
-                        && abs(btempZ(l))>=threshold && abs(btempZ(l))>=localThreshold1 && abs(btempRX(l))>=localThreshold2)
+                if(abs(btempZ(l))>=threshold && abs(btempZ(l))>=localThreshold1 && abs(btempRX(l))>=localThreshold2)
                     avgPhi=avgPhi+atan2(btempY(l),btempX(l))*180/pi;
                     avgK=avgK+btempRX(l)./btempZ(l)./sin(atan2(btempY(l),btempX(l)));
                     avgV=avgV+2*pi*freq1.*btempZ(l)./(btempRX(l)).*sin(bootAng(3,floor(1 + (length(bootAng)-1).*rand(1)))*pi/180);%ang(i+1)*pi/180%(atan2(btempY(l),btempX(l)));%
