@@ -2,7 +2,7 @@ close all
 singVel=[0];
 singAng=[0];
 % for j=0:2
-j=4;
+j=5;
     sampf =8;
     startFreq=0.03;
     if j==2
