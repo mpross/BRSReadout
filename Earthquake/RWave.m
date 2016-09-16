@@ -2,7 +2,7 @@ close all
 singVel=[0];
 singAng=[0];
 % for j=0:2
-j=0;
+j=4;
     sampf =8;
     startFreq=0.03;
     if j==2
@@ -13,18 +13,25 @@ j=0;
     iter=floor((.12-startFreq)/freqStep);
     [errFreq,transXErr,transYErr,transZErr,tiltErr]=RWaveMeasErr;
     if j==0
-        [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]= RWaveDataIn('GPS1143962787_6_9Earthquake.mat');
+        [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]= RWaveDataIn('GPS1143962787_6_9Earthquake.mat',false);
     end
-    %     RWaveDataIn('GPS1149323500_Quite.mat');
+%         [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]= RWaveDataIn('GPS1149323500_Quite.mat',new);
     if j==1
-        [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]= RWaveDataIn('GPS1144888165_7_8Earthquake.mat');
+        [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]= RWaveDataIn('GPS1144888165_7_8Earthquake.mat',false);
     end
     if j==2
-        [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]= RWaveDataIn('GPS1149581095_5_2Earthquake.mat');
+        [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]= RWaveDataIn('GPS1149581095_5_2Earthquake.mat',false);
     end
     if j==3
-        [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=RWaveDataIn('GPS1149331885_6_2Earthquake.mat');
+        [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=RWaveDataIn('GPS1149331885_6_2Earthquake.mat',false);
     end 
+    if j==4
+        [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=RWaveDataIn('GPS1156069817_Burma.mat',true);
+    end 
+    if j==5
+        [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=RWaveDataIn('GPS1156480217_Atlantic.mat',true);
+    end
+    
     ETMXZ_out=ETMXZ_out(300*sampf:length(ETMXZ_out));
     ETMYZ_out=ETMYZ_out(300*sampf:length(ETMYZ_out));
     ITMYZ_out=ITMYZ_out(300*sampf:length(ITMYZ_out));

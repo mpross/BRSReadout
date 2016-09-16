@@ -1,7 +1,7 @@
 function [errFreq,transXErr,transYErr,transZErr,tiltErr]=RWaveMeasErr
 sampf=8;
 [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=...
-    RWaveDataIn('GPS1149323500_Quite.mat');
+    RWaveDataIn('GPS1149323500_Quite.mat',false);
 
 [ATransX, ~] = asd2(ETMYX_out,1/sampf, 3, 1, @hann);
 [ATransY, ~] = asd2(ETMYY_out,1/sampf, 3, 1, @hann);

@@ -1,4 +1,4 @@
-function [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=RWaveDataIn(fileName)   
+function [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=RWaveDataIn(fileName,new)   
 %     close all
     sampf = 8; % sampling frequency in Hz
 
@@ -11,7 +11,7 @@ function [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=RWave
     %     myfile = load('GPS1149331885_6_2Earthquake.mat');
     % if exist('GPS1144888165_7_8Earthquake.mat','file')
     %     myfile = load('GPS1144888165_7_8Earthquake.mat');
-    if exist(fileName,'file')
+    if (exist(fileName,'file')&& new==false)
         myfile = load(fileName);
         mydata = myfile.mydata;
         rawETMXX= mydata(:,1);
@@ -28,6 +28,23 @@ function [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=RWave
     %     rawWINDX=mydata(:,12);
     %     rawWINDY=mydata(:,13);
     end   
+    if (exist(fileName,'file')&& new==true)
+        myfile = load(fileName);
+        mydata = myfile.rawdata8Hz1;
+        rawBRSY= mydata(:,4);
+        rawETMXX= zeros([1 length(rawBRSY)]);
+        rawETMXY =  zeros([1 length(rawBRSY)]);
+        rawETMXZ = mydata(:,2);
+        rawETMYX = zeros([1 length(rawBRSY)]);
+        rawETMYY = zeros([1 length(rawBRSY)]);
+        rawETMYZ = mydata(:,1);
+        rawITMYX =  zeros([1 length(rawBRSY)]);
+        rawITMYY =  zeros([1 length(rawBRSY)]);
+        rawITMYZ = mydata(:,3);        
+        rawBRSX= zeros([1 length(rawBRSY)]);
+    %     rawWINDX=mydata(:,12);
+    %     rawWINDY=mydata(:,13);
+    end 
     Sttime =01;
     Endtime=length(rawBRSY);
     localg = 9.8;
@@ -61,7 +78,7 @@ function [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=RWave
 
     %% torque computation
     % [bb,aa] = butter(4,[2*0.02/sampf 2*0.100/sampf],'bandpass');
-    [bb,aa] = butter(4,[2*0.01/sampf, 2*1/sampf]);
+    [bb,aa] = butter(4,[2*0.01/sampf, 2*.1/sampf]);
     % %T240 response inversion filter
     T240InvertFilt = zpk(-2*pi*[pairQ(8.2e-3,0.7)],-2*pi*[0 0],1);
     T240InvertFilt = 1*T240InvertFilt/abs(freqresp(T240InvertFilt,2*pi*100));
