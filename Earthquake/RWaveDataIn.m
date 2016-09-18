@@ -62,8 +62,8 @@ function [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=RWave
     ITMYX=1e-9 *rawITMYX(Sttime:Endtime);
     ITMYY=1e-9 *rawITMYY(Sttime:Endtime);
     ITMYZ=1e-9 *rawITMYZ(Sttime:Endtime);
-    BRSY=1e-9* BRSscale*rawBRSY(Sttime:Endtime);
-    BRSX=2.13e-9* BRSscale*rawBRSX(Sttime:Endtime);
+    BRSY=1e-9*rawBRSY(Sttime:Endtime);
+    BRSX=2.13e-9*rawBRSX(Sttime:Endtime);
     Navg =9;
     seed=randn(1,length(ETMYZ));
     %% BRS parameters

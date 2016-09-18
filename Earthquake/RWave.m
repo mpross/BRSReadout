@@ -1,8 +1,13 @@
 close all
 singVel=[0];
 singAng=[0];
+avgVel=containers.Map('ValueType','any','KeyType','double');
+avgV=containers.Map('ValueType','any','KeyType','double');
+avgVelErr=containers.Map('ValueType','any','KeyType','double');
+avgVErr=containers.Map('ValueType','any','KeyType','double');
 % for j=0:6
-j=3;
+for j=[5 0 6]
+% j=7;
     sampf =8;
     startFreq=0.03;
     if j==2
@@ -34,7 +39,9 @@ j=3;
     if j==6
         [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=RWaveDataIn('GPS1156782617_NewZealand.mat',true);
     end
-   
+    if j==7
+        [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=RWaveDataIn('GPS1157149817_Russia.mat',true);
+    end
     ETMXZ_out=ETMXZ_out(300*sampf:length(ETMXZ_out));
     ETMYZ_out=ETMYZ_out(300*sampf:length(ETMYZ_out));
     ITMYZ_out=ITMYZ_out(300*sampf:length(ITMYZ_out));
@@ -51,6 +58,8 @@ j=3;
         startTime=2900*sampf;
     elseif j==2
         startTime=150*sampf;
+    elseif j==7
+        startTime=1;
     else
         startTime=300*sampf;
     end
@@ -60,6 +69,8 @@ j=3;
 %         endTime=length(ETMXZ_out);
     elseif j==5
         endTime=4100*sampf;
+   elseif j==7
+        endTime=length(ETMXZ_out);
     elseif j==2
         endTime=750*sampf;
     else
@@ -67,7 +78,7 @@ j=3;
     end
     % seed=randn(1,length(ETMYZ_out));
        
-    threshold=rms(ETMYZ_out);
+    threshold=rms(ETMYZ_out)/2;
     
     [vel, ang,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sampf,threshold,startFreq,freqStep,iter,startTime,endTime);
     
@@ -80,15 +91,15 @@ j=3;
 %     cInd2=find((abs(v)-2*std(bootV')'<=abs(vel)'+2*std(bootVel')'));
 %     cInd3=find(std(bootVel')<=10000);
 %     cInd4=find(std(bootV')<=10000);
-%     cInd5=find(std(bootVel')>=1);
-%     cInd6=find(std(bootV')>=1);
+    cInd5=find(std(bootVel')>=1);
+    cInd6=find(std(bootV')>=1);
 %     cInd12=intersect(cInd1,cInd2);
 %     cInd123=intersect(cInd12,cInd3);
 %     cInd1234=intersect(cInd123,cInd4);
 %     cInd12345=intersect(cInd1234,cInd5);
 %     cInd=intersect(cInd12345,cInd6);
-%     cInd=intersect(cInd5,cInd6);
-    cInd=find(abs(v)>=0);
+    cInd=intersect(cInd5,cInd6);
+%     cInd=find(abs(v)>=0);
     v=v(cInd);
     vel=vel(cInd);
     ang=ang(cInd);
@@ -121,27 +132,72 @@ j=3;
 %         [ind ind]=min(abs(k*freqStep+startFreq-F));
 %         coInd=[coInd; ind];
 %     end
-%     F=F(coInd);
-%     C=C(coInd);
-               
-    figure(2)
-    hold on
-    % errorbar(((0:length(v)-1))*freqStep+startFreq,abs(v),-sigmaV,sigmaV)
-    % errorbar(((0:length(vel)-1))*freqStep+startFreq,vel,-sigmaVel,sigmaVel)
-    l=errorbar(((cInd-1)*freqStep+startFreq),abs(v),-2*std(bootV'),2*std(bootV'));
-    ll=errorbar(((cInd-1)*freqStep+startFreq),vel,-2*std(bootVel'),2*std(bootVel'),'--');
-    ylabel('Velocity (m/s)')
-    xlabel('Frequency (Hz)')
-%     legend('Single Station', 'Array','Single Station Ecuador','Array Ecuador','Single Station California','Array California')
-    grid on
-    box on
-    % xlim([.01 .1])
-    ylim([0 8e3])
-    set(gca,'FontSize',12)
-    set(l,'LineWidth',1.2)
-    set(ll,'LineWidth',1.2)
-    hold off
+        
 
+%     F=F(coInd);
+%     C=C(coInd);      
+        figure(2)
+        hold on
+        % errorbar(((0:length(v)-1))*freqStep+startFreq,abs(v),-sigmaV,sigmaV)
+        % errorbar(((0:length(vel)-1))*freqStep+startFreq,vel,-sigmaVel,sigmaVel)
+        l=errorbar(((cInd-1)*freqStep+startFreq),abs(v),-2*std(bootV'),2*std(bootV'));
+        ll=errorbar(((cInd-1)*freqStep+startFreq),vel,-2*std(bootVel'),2*std(bootVel'),'--');
+        ylabel('Velocity (m/s)')
+        xlabel('Frequency (Hz)')
+    %     legend('Single Station', 'Array','Single Station Ecuador','Array Ecuador','Single Station California','Array California')
+        grid on
+        box on
+        % xlim([.01 .1])
+        ylim([0 8e3])
+%         set(gca,'FontSize',12)
+%         set(l,'LineWidth',1.2)
+%         set(ll,'LineWidth',1.2)
+        hold off
+        
+%         if length(avgVel)==0
+%             cIndRef=cInd;
+%             avgVel=[avgVel; vel];
+%             avgV=[avgV; v];
+%             avgVelErr=[avgVelErr; std(bootVel').^2];
+%             avgVErr=[avgVErr; std(bootV').^2];
+%         else
+%             set=intersect(cInd,cIndRef);
+%             for p=set-set(1)+1
+%                 if cInd(p)==cIndRef(p)
+%                     avgVel(p)=avgVel(p)+vel(p);
+%                     avgV(p)=avgV(p)+ v(p);
+%                     avgVelErr(p)=avgVelErr(p)+ std(bootVel(p,:)')^2;
+%                     avgVErr(p)=avgVErr(p)+ std(bootV(p,:)')^2;
+%                 end
+%             end
+%             for k=setxor(cInd,intersect(cInd,cIndRef))-cIndRef(1)+1
+%                 cIndRef=[cInd k+cIndRef(1)-1];
+%                 avgVel=[avgVel vel(k)];
+%                 try
+%                     avgV=[avgV' v(k)];
+%                 catch
+%                     avgV=[avgV v(k)];
+%                 end
+%                 avgVelErr=[avgVelErr std(bootVel(k,:)').^2];
+%                 avgVErr=[avgVErr std(bootV(k,:)').^2];
+%             end
+
+        com=intersect(cInd,cell2mat(avgV.keys));
+        for i=1:length(com)
+            avgV(com(i))=[avgV(com(i)) v(i)];
+            avgVel(com(i))=[avgVel(com(i)) vel(i)];
+            avgVErr(com(i))=[avgVErr(com(i)) std(bootV(i,:)')^2];
+            avgVelErr(com(i))=[avgVelErr(com(i)) std(bootVel(i,:)')^2];
+        end
+        new=setxor(cInd,intersect(cInd,cell2mat(avgV.keys)));
+        for i=1:length(new)
+            avgV(new(i))=v(i);
+            avgVel(new(i))=vel(i);
+            avgVErr(new(i))=std(bootV(i,:)')^2;
+            avgVelErr(new(i))=std(bootVel(i,:)')^2;
+        end
+        
+    end
     % figure(3)
     % hold on
     % % errorbar(((0:length(phi)-1))*freqStep+startFreq,phi,-sigmaPhi,sigmaPhi)
@@ -168,7 +224,22 @@ j=3;
     % xlabel('Frequency (Hz)')
     % grid on
     % xlim([.02 .0675])
-%     end
+cInd=cell2mat(avgV.keys);
+for k=1:length(avgV.keys)
+    N=length(avgV(cInd(k)));
+    avgV(cInd(k))=sum(abs(avgV(cInd(k))))/N;
+    avgVel(cInd(k))=sum(abs(avgVel(cInd(k))))/N;
+    avgVErr(cInd(k))=sqrt(sum(avgVErr(cInd(k))))/N;
+    avgVelErr(cInd(k))=sqrt(sum(avgVelErr(cInd(k))))/N;
+end
+
+
+figure(6)
+hold on
+l=errorbar(((cInd-1)*freqStep+startFreq),cell2mat(avgV.values),-2*cell2mat(avgVErr.values),2*cell2mat(avgVErr.values));
+ll=errorbar(((cInd-1)*freqStep+startFreq),cell2mat(avgVel.values),-2*cell2mat(avgVelErr.values),2*cell2mat(avgVelErr.values),'--');
+ylabel('Velocity (m/s)')
+xlabel('Frequency (Hz)')
 %%
 % figure(6)
 % n=5;
