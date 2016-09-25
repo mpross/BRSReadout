@@ -84,11 +84,11 @@ function [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=RWave
     T240InvertFilt = 1*T240InvertFilt/abs(freqresp(T240InvertFilt,2*pi*100));
     % 
     % %BRS response inversion filter
-
+    
     BRSXInvertFilt = zpk(-2*pi*[pairQ(8.9e-3,4000)],-2*pi*[0 0],1);
     BRSXInvertFilt = 1*BRSXInvertFilt/abs(freqresp(BRSXInvertFilt,2*pi*100));
 
-    BRSYInvertFilt = zpk(-2*pi*[pairQ(7.7e-3,3000)],-2*pi*[0 0],1);
+    BRSYInvertFilt = zpk(-2*pi*[pairQ(7.74e-3,3000)],-2*pi*[0 0],1);
     BRSYInvertFilt = 1*BRSYInvertFilt/abs(freqresp(BRSYInvertFilt,2*pi*100));
     % 
     % %Filters to differentiate and integrate
