@@ -50,15 +50,10 @@ function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
         seriesY=[seriesY filtData(startTime:endTime)];
         filtData=filter(d,ETMYZ_out-mean(ETMYZ_out));
         seriesZ=[seriesZ filtData(startTime:endTime)];
-        localThreshold1=max(abs(filtData))*.6*0;
+        localThreshold1=max(abs(filtData))*.7*0;
         filtData=filter(d,BRSY_out-mean(BRSY_out)); 
         seriesRX=[seriesRX filtData(startTime:endTime)];        
-        localThreshold2=max(abs(filtData))*.6*0;
-        if i==7
-            figure(13)            
-            plot((startTime:endTime)/sampf,seriesZ(:,i),(startTime:endTime)/sampf,1e4*seriesRX(:,i)+1e-6)
-            legend('Z','RX')
-        end
+        localThreshold2=max(abs(filtData))*.7*0;
         tempX=[];
         tempY=[];
         tempZ=[];

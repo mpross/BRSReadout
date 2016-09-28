@@ -10,17 +10,17 @@ fileName={'GPS1143962787_6_9Earthquake.mat','GPS1144888165_7_8Earthquake.mat','G
     'GPS1157149817_Russia.mat'};
 newArray=[false, false, false, false, true, true, true, true];
 sampf =8;
-startArray=[300, 800, 150, 750, 3000, 2600, 3000, 2550].*sampf;
-endArray=[1600, 1700, 400, 1000, 4200, 3400, 4500, 2900].*sampf;
+startArray=[300, 800, 1, 750, 3000, 2450, 3000, 1].*sampf;
+endArray=[1700, 1700, 1000, 1000, 4200, 3200, 3750, 3200].*sampf;
 % for j=0:7
-for j=[6]
+for j=[0 5 6]
 % for j=7
     startFreq=0.015;
     freqStep=.005;
     iter=floor((.1-startFreq)/freqStep);
     [errFreq,transXErr,transYErr,transZErr,tiltErr]=RWaveMeasErr;
     [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=RWaveDataIn(fileName{j+1},newArray(j+1));
-   
+    
     ETMXZ_out=ETMXZ_out(300*sampf:length(ETMXZ_out));
     ETMYZ_out=ETMYZ_out(300*sampf:length(ETMYZ_out));
     ITMYZ_out=ITMYZ_out(300*sampf:length(ITMYZ_out));
@@ -35,7 +35,7 @@ for j=[6]
     startTime=startArray(j+1);
     endTime=endArray(j+1);
 %     % seed=randn(1,length(ETMYZ_out));
-    threshold=rms(ETMYZ_out(startTime:endTime))/2;
+    threshold=rms(ETMYZ_out(startTime:endTime))/3;
     
     [vel, ang,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sampf,threshold,startFreq,freqStep,iter,startTime,endTime);
     
@@ -165,7 +165,13 @@ end
 
 figure(6)
 hold on
-l=errorbar(((cInd-1)*freqStep+startFreq),cell2mat(avgV.values),-cell2mat(avgVErr.values),cell2mat(avgVErr.values));
-ll=errorbar(((cInd-1)*freqStep+startFreq),cell2mat(avgVel.values),-cell2mat(avgVelErr.values),cell2mat(avgVelErr.values),'--');
-ylabel('Velocity (m/s)')
+l=errorbar(((cInd-1)*freqStep+startFreq)+10^-4,cell2mat(avgV.values),-cell2mat(avgVErr.values),cell2mat(avgVErr.values),'.');
+ll=errorbar(((cInd-1)*freqStep+startFreq),cell2mat(avgVel.values),-cell2mat(avgVelErr.values),cell2mat(avgVelErr.values),'.');
+ylabel('Average Phase Velocity (m/s)')
 xlabel('Frequency (Hz)')
+legend('Array','Single Station')
+set(l,'LineWidth',1.2)
+set(ll,'LineWidth',1.2)
+set(gca,'FontSize',12)
+grid on
+box on
