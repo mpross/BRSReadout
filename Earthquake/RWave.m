@@ -13,7 +13,8 @@ sampf =8;
 startArray=[300, 800, 1, 750, 3000, 2450, 3000, 1].*sampf;
 endArray=[1700, 1700, 1000, 1000, 4200, 3200, 3750, 3200].*sampf;
 % for j=0:7
-for j=[0 5 6]
+% for j=[0 5 6]
+for j=[5]
 % for j=7
     startFreq=0.015;
     freqStep=.005;
@@ -35,7 +36,7 @@ for j=[0 5 6]
     startTime=startArray(j+1);
     endTime=endArray(j+1);
 %     % seed=randn(1,length(ETMYZ_out));
-    threshold=rms(ETMYZ_out(startTime:endTime))/3;
+    threshold=rms(ETMYZ_out(startTime:endTime))/3*0;
     
     [vel, ang,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sampf,threshold,startFreq,freqStep,iter,startTime,endTime);
     
@@ -93,7 +94,7 @@ for j=[0 5 6]
 
 %     F=F(coInd);
 %     C=C(coInd);      
-        figure(2)
+        figure(5)
         hold on
         % errorbar(((0:length(v)-1))*freqStep+startFreq,abs(v),-sigmaV,sigmaV)
         % errorbar(((0:length(vel)-1))*freqStep+startFreq,vel,-sigmaVel,sigmaVel)
@@ -105,7 +106,7 @@ for j=[0 5 6]
         grid on
         box on
         % xlim([.01 .1])
-        ylim([0 8e3])
+%         ylim([0 8e3])
 %         set(gca,'FontSize',12)
 %         set(l,'LineWidth',1.2)
 %         set(ll,'LineWidth',1.2)

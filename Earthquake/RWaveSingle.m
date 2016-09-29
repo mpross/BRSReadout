@@ -25,21 +25,21 @@ function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
     Astop1 = 5;
     Apass  = .5;
     Astop2 = 5;
-    for i=0:iter
+    for o=0:iter
         tempBV=[];
         tempBPhi=[];
         tempBEl=[];
         tempBK=[];
         
-        freq1=(startFreq+i*freqStep);
+        freq1=(startFreq+o*freqStep);
         [indx indx]=min(abs(errFreq-freq1));
         sigmaX=transXErr(indx);
         sigmaY=transYErr(indx);
         sigmaZ=transZErr(indx);
         sigmaRX=tiltErr(indx);
         d = designfilt('bandpassiir', ...
-          'StopbandFrequency1',(i-2)*freqStep+startFreq,'PassbandFrequency1', (i-1)*freqStep+startFreq, ...
-          'PassbandFrequency2',(i+1)*freqStep+startFreq,'StopbandFrequency2', (i+2)*freqStep+startFreq, ...
+          'StopbandFrequency1',(o-2)*freqStep+startFreq,'PassbandFrequency1', (o-1)*freqStep+startFreq, ...
+          'PassbandFrequency2',(o+1)*freqStep+startFreq,'StopbandFrequency2', (o+2)*freqStep+startFreq, ...
           'StopbandAttenuation1',Astop1,'PassbandRipple', Apass, ...
           'StopbandAttenuation2',Astop2, ...
           'DesignMethod','butter','SampleRate',sampf);
@@ -58,16 +58,31 @@ function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
         tempY=[];
         tempZ=[];
         tempRX=[];      
-        for j=1:floor(length(seriesX(:,i+1))*(freq1/sampf))-4
-           cut=seriesX(floor(j/(freq1/sampf)):floor((j+1)/(freq1/sampf)),i+1);
+%         for j=1:floor(length(seriesX(:,i+1))*(freq1/sampf))-4
+%            cut=seriesX(floor(j/(freq1/sampf)):floor((j+1)/(freq1/sampf)),i+1);
+%            tempX=[tempX (max(cut)-min(cut))];
+%            cut=seriesY(floor(j/(freq1/sampf)):floor((j+1)/(freq1/sampf)),i+1);
+%            tempY=[tempY (max(cut)-min(cut))];
+%            cut=seriesZ(floor(j/(freq1/sampf)):floor((j+1)/(freq1/sampf)),i+1);
+%            tempZ=[tempZ (max(cut)-min(cut))];
+%            cut=seriesRX(floor(j/(freq1/sampf)):floor((j+1)/(freq1/sampf)),i+1);
+%            tempRX=[tempRX (max(cut)-min(cut))];
+%         end 
+        for j=1:floor(length(seriesX(:,o+1))*(freq1/sampf))-4
+           tim=(floor(j/(freq1/sampf)):floor((j+1)/(freq1/sampf)))'./8;
+           cut=1e9*seriesX(floor(j/(freq1/sampf)):floor((j+1)/(freq1/sampf)),o+1);           
            tempX=[tempX (max(cut)-min(cut))];
-           cut=seriesY(floor(j/(freq1/sampf)):floor((j+1)/(freq1/sampf)),i+1);
+           cut=1e9*seriesY(floor(j/(freq1/sampf)):floor((j+1)/(freq1/sampf)),o+1);
            tempY=[tempY (max(cut)-min(cut))];
-           cut=seriesZ(floor(j/(freq1/sampf)):floor((j+1)/(freq1/sampf)),i+1);
-           tempZ=[tempZ (max(cut)-min(cut))];
-           cut=seriesRX(floor(j/(freq1/sampf)):floor((j+1)/(freq1/sampf)),i+1);
-           tempRX=[tempRX (max(cut)-min(cut))];
-        end 
+           cut=1e9*seriesZ(floor(j/(freq1/sampf)):floor((j+1)/(freq1/sampf)),o+1);
+           myfit = fit(tim,cut, 'a*sin(2*pi*freq1*x)+b*cos(2*pi*freq1*x)','StartPoint', [1, 1, freq1]);
+           a=coeffvalues(myfit);
+           tempZ=[tempZ a(2)+i*a(1)];
+           cut=1e9*seriesRX(floor(j/(freq1/sampf)):floor((j+1)/(freq1/sampf)),o+1);
+           myfit = fit(tim,cut, 'a*sin(2*pi*freq1*x)+b*cos(2*pi*freq1*x)','StartPoint', [1, 1, freq1]);
+           a=coeffvalues(myfit);
+           tempRX=[tempRX a(2)+i*a(1)];
+        end
         for p=1:1e4
             N=0;
             sumX=0;
@@ -90,7 +105,7 @@ function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
                 if(abs(btempZ(l))>=threshold && abs(btempZ(l))>=localThreshold1 && abs(btempRX(l))>=localThreshold2)
                     avgPhi=avgPhi+atan2(btempY(l),btempX(l))*180/pi;
                     avgK=avgK+btempRX(l)./btempZ(l)./sin(atan2(btempY(l),btempX(l)));
-                    avgV=avgV+2*pi*freq1.*btempZ(l)./(btempRX(l)).*sin(bootAng(3,floor(1 + (length(bootAng)-1).*rand(1)))*pi/180);%ang(i+1)*pi/180%(atan2(btempY(l),btempX(l)));%
+                    avgV=avgV+2*pi*freq1.*abs(btempZ(l))./abs(btempRX(l)).*cos(angle(btempZ(l))-angle(btempRX(l))).*sin(bootAng(3,floor(1 + (length(bootAng)-1).*rand(1)))*pi/180);%ang(i+1)*pi/180%(atan2(btempY(l),btempX(l)));%
                     avgEl=avgEl+acot(btempZ(l)/btempY(l).*sin(atan2(btempY(l),btempX(l))));
                     N=N+1;
                 end
@@ -121,8 +136,8 @@ function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
     %         if l>=20
                 avgPhi=avgPhi+atan2(tempY(l),tempX(l))*180/pi;
                 avgK=avgK+tempRX(l)./tempZ(l)./sin(atan2(tempY(l),tempX(l)));
-                avgV=avgV+2*pi*freq1.*tempZ(l)./(tempRX(l)).*sin(ang(i+1)*pi/180);%(atan2(tempY(l),tempX(l)));%
-                pltV=[pltV; 2*pi*freq1.*tempZ(l)./(tempRX(l)).*sin(ang(i+1)*pi/180)];
+                avgV=avgV+2*pi*freq1.*abs(tempZ(l))./abs(tempRX(l)).*cos(angle(tempZ(l))-angle(tempRX(l))).*sin(ang(o+1)*pi/180);%(atan2(tempY(l),tempX(l)));%
+                pltV=[pltV; 2*pi*freq1.*tempZ(l)./(tempRX(l)).*sin(ang(o+1)*pi/180)];
                 avgEl=avgEl+acot(tempZ(l)/tempY(l).*sin(atan2(tempY(l),tempX(l))));                
                 N=N+1;
             end
