@@ -75,11 +75,13 @@ function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
            cut=1e9*seriesY(floor(j/(freq1/sampf)):floor((j+1)/(freq1/sampf)),o+1);
            tempY=[tempY (max(cut)-min(cut))];
            cut=1e9*seriesZ(floor(j/(freq1/sampf)):floor((j+1)/(freq1/sampf)),o+1);
-           myfit = fit(tim,cut, 'a*sin(2*pi*freq1*x)+b*cos(2*pi*freq1*x)','StartPoint', [1, 1, freq1]);
+           g = fittype( @(a,b,cen_fr,x) a*sin(2*pi*cen_fr*x)+b*cos(2*pi*cen_fr*x), 'problem', 'cen_fr' );
+           myfit = fit(tim,cut, g,'problem',freq1,'StartPoint', [1, 1]);
            a=coeffvalues(myfit);
            tempZ=[tempZ a(2)+i*a(1)];
            cut=1e9*seriesRX(floor(j/(freq1/sampf)):floor((j+1)/(freq1/sampf)),o+1);
-           myfit = fit(tim,cut, 'a*sin(2*pi*freq1*x)+b*cos(2*pi*freq1*x)','StartPoint', [1, 1, freq1]);
+           g = fittype( @(a,b,cen_fr,x) a*sin(2*pi*cen_fr*x)+b*cos(2*pi*cen_fr*x), 'problem', 'cen_fr' );
+           myfit = fit(tim,cut, g,'problem',freq1,'StartPoint', [1, 1]);
            a=coeffvalues(myfit);
            tempRX=[tempRX a(2)+i*a(1)];
         end
