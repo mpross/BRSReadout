@@ -11,7 +11,9 @@ function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
     seriesX=[];
     seriesY=[];
     seriesZ=[];
-    seriesRX=[];
+    seriesRX=[];    
+    r2zavg=[];
+    r2rxavg=[];
     ampX=[];
     ampY=[];
     ampZ=[];
@@ -54,36 +56,47 @@ function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
         filtData=filter(d,BRSY_out-mean(BRSY_out)); 
         seriesRX=[seriesRX filtData(startTime:endTime)];        
         localThreshold2=max(abs(filtData))*.7*0;
+        FitData=seriesZ;
         tempX=[];
         tempY=[];
         tempZ=[];
-        tempRX=[];      
+        tempRX=[];
+        r2z=[];
+        r2rx=[];
 %         for j=1:floor(length(seriesX(:,i+1))*(freq1/sampf))-4
-%            cut=seriesX(floor(j/(freq1/sampf)):floor((j+1)/(freq1/sampf)),i+1);
+%            cut=seriesX(j*fitLength:(j+1)*fitLength,i+1);
 %            tempX=[tempX (max(cut)-min(cut))];
-%            cut=seriesY(floor(j/(freq1/sampf)):floor((j+1)/(freq1/sampf)),i+1);
+%            cut=seriesY(j*fitLength:(j+1)*fitLength,i+1);
 %            tempY=[tempY (max(cut)-min(cut))];
-%            cut=seriesZ(floor(j/(freq1/sampf)):floor((j+1)/(freq1/sampf)),i+1);
+%            cut=seriesZ(j*fitLength:(j+1)*fitLength,i+1);
 %            tempZ=[tempZ (max(cut)-min(cut))];
-%            cut=seriesRX(floor(j/(freq1/sampf)):floor((j+1)/(freq1/sampf)),i+1);
+%            cut=seriesRX(j*fitLength:(j+1)*fitLength,i+1);
 %            tempRX=[tempRX (max(cut)-min(cut))];
 %         end 
-        for j=1:floor(length(seriesX(:,o+1))*(freq1/sampf))-4
-           tim=(floor(j/(freq1/sampf)):floor((j+1)/(freq1/sampf)))'./8;
-           cut=1e9*seriesX(floor(j/(freq1/sampf)):floor((j+1)/(freq1/sampf)),o+1);           
+        fitLength=floor(1/(freq1/sampf));
+        for j=1:floor(length(seriesX(:,o+1))/fitLength)-2
+           tim=(j*fitLength:(j+1)*fitLength)'./8;
+           cut=1e9*seriesX(j*fitLength:(j+1)*fitLength,o+1);           
            tempX=[tempX (max(cut)-min(cut))];
-           cut=1e9*seriesY(floor(j/(freq1/sampf)):floor((j+1)/(freq1/sampf)),o+1);
+           cut=1e9*seriesY(j*fitLength:(j+1)*fitLength,o+1);
            tempY=[tempY (max(cut)-min(cut))];
-           cut=1e9*seriesZ(floor(j/(freq1/sampf)):floor((j+1)/(freq1/sampf)),o+1);
+           cut=1e9*seriesZ(j*fitLength:(j+1)*fitLength,o+1);
            g = fittype( @(a,b,cen_fr,x) a*sin(2*pi*cen_fr*x)+b*cos(2*pi*cen_fr*x), 'problem', 'cen_fr' );
-           myfit = fit(tim,cut, g,'problem',freq1,'StartPoint', [1, 1]);
+           [myfit,st] = fit(tim,cut, g,'problem',freq1,'StartPoint', [1, 1]);
+           r2z=[r2z;st.rsquare];
            a=coeffvalues(myfit);
+           FitData(j*fitLength:(j+1)*fitLength) = a(1)*sin(2*pi*freq1.*tim)+a(2)*cos(2*pi*freq1.*tim);
            tempZ=[tempZ a(2)+i*a(1)];
-           cut=1e9*seriesRX(floor(j/(freq1/sampf)):floor((j+1)/(freq1/sampf)),o+1);
+           cut=1e12*seriesRX(j*fitLength+floor(sampf/(4*freq1)):(j+1)*fitLength+floor(sampf/(4*freq1)),o+1);
            g = fittype( @(a,b,cen_fr,x) a*sin(2*pi*cen_fr*x)+b*cos(2*pi*cen_fr*x), 'problem', 'cen_fr' );
-           myfit = fit(tim,cut, g,'problem',freq1,'StartPoint', [1, 1]);
+           [myfit,st] = fit(tim,cut, g,'problem',freq1,'StartPoint', [1, 1]);
+           r2rx=[r2rx;st.rsquare];
            a=coeffvalues(myfit);
-           tempRX=[tempRX a(2)+i*a(1)];
+           tempRX=[tempRX (a(2)+i*a(1))/1e3];
+%            if j==10
+%                figure(8)
+%                plot((1:length(seriesZ)),seriesZ*1e9,(1:length(FitData)),FitData,'--')
+%             end
         end
         for p=1:1e4
             N=0;
@@ -157,5 +170,11 @@ function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
         k=[k; avgK];
         v=[v; avgV];
         el=[el; avgEl];
+        r2zavg=[mean(r2z);r2zavg];
+        r2rxavg=[mean(r2rx);r2rxavg];
     end
+%     hold on
+%     figure(8)
+%     plot(r2zavg)
+%     plot(r2rxavg)
 end

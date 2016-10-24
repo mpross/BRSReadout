@@ -10,11 +10,14 @@ fileName={'GPS1143962787_6_9Earthquake.mat','GPS1144888165_7_8Earthquake.mat','G
     'GPS1157149817_Russia.mat'};
 newArray=[false, false, false, false, true, true, true, true];
 sampf =8;
-startArray=[300, 800, 1, 750, 3000, 2450, 3000, 1].*sampf;
-endArray=[1700, 1700, 1000, 1000, 4200, 3200, 3750, 3200].*sampf;
+% startArray=[300, 800, 1, 750, 3000, 2450, 3000, 1].*sampf;
+% endArray=[1700, 1700, 1000, 1000, 4200, 3200, 3750, 3200].*sampf;
+startArray=[500, 800, 1, 750, 3000, 2500, 2500, 1].*sampf;
+endArray=[1250, 1700, 1000, 1000, 4200, 3250, 3250, 3200].*sampf;
 % for j=0:7
-% for j=[0 5 6]
-for j=[5]
+% for j=[0 1 4 5 6]
+for j=[0 5 6]
+% for j=[0]
 % for j=7
     startFreq=0.015;
     freqStep=.005;
@@ -31,12 +34,12 @@ for j=[5]
     BRSY_out=BRSY_out(300*sampf:length(BRSY_out));
     bootVel=[];
     bootAng=[];
-%     startTime=1;
+%      startTime=1;
 %     endTime=length(ETMYZ_out);
-    startTime=startArray(j+1);
-    endTime=endArray(j+1);
+   startTime=startArray(j+1);
+   endTime=endArray(j+1);
 %     % seed=randn(1,length(ETMYZ_out));
-    threshold=rms(ETMYZ_out(startTime:endTime))/3*0;
+    threshold=rms(ETMYZ_out(startTime:endTime))/2;
     
     [vel, ang,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sampf,threshold,startFreq,freqStep,iter,startTime,endTime);
     
@@ -113,18 +116,18 @@ for j=[5]
         hold off
         
         com=intersect(cInd,cell2mat(avgV.keys));
-        for i=1:length(com)
-            avgV(com(i))=[avgV(com(i)) v(i)];
-            avgVel(com(i))=[avgVel(com(i)) vel(i)];
-            avgVErr(com(i))=[avgVErr(com(i)) std(bootV(i,:)')^2];
-            avgVelErr(com(i))=[avgVelErr(com(i)) std(bootVel(i,:)')^2];
+        for k=1:length(com)
+            avgV(com(k))=[avgV(com(k)) v(k)];
+            avgVel(com(k))=[avgVel(com(k)) vel(k)];
+            avgVErr(com(k))=[avgVErr(com(k)) std(bootV(k,:)')^2];
+            avgVelErr(com(k))=[avgVelErr(com(k)) std(bootVel(k,:)')^2];
         end
         new=setxor(cInd,intersect(cInd,cell2mat(avgV.keys)));
-        for i=1:length(new)
-            avgV(new(i))=v(i);
-            avgVel(new(i))=vel(i);
-            avgVErr(new(i))=std(bootV(i,:)')^2;
-            avgVelErr(new(i))=std(bootVel(i,:)')^2;
+        for k=1:length(new)
+            avgV(new(k))=v(k);
+            avgVel(new(k))=vel(k);
+            avgVErr(new(k))=std(bootV(k,:)')^2;
+            avgVelErr(new(k))=std(bootVel(k,:)')^2;
         end
         
     end
