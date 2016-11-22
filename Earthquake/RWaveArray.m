@@ -50,7 +50,7 @@ function [vel, ang, bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sa
     delta_t_X=[];
     delta_t_Y=[];
     if endTime<=6500
-        len=200*sampf;
+        len=250*sampf;
     else
         len=250*sampf;
     end

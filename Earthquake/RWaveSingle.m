@@ -52,10 +52,10 @@ function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
         seriesY=[seriesY filtData(startTime:endTime)];
         filtData=filter(d,ETMYZ_out-mean(ETMYZ_out));
         seriesZ=[seriesZ filtData(startTime:endTime)];
-        localThreshold1=max(abs(filtData))*.7*0;
+        localThreshold1=max(abs(filtData))*.0;
         filtData=filter(d,BRSY_out-mean(BRSY_out)); 
         seriesRX=[seriesRX filtData(startTime:endTime)];        
-        localThreshold2=max(abs(filtData))*.7*0;
+        localThreshold2=max(abs(filtData))*.0;
         FitData=seriesZ;
         tempX=[];
         tempY=[];
@@ -73,31 +73,45 @@ function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
 %            cut=seriesRX(j*fitLength:(j+1)*fitLength,i+1);
 %            tempRX=[tempRX (max(cut)-min(cut))];
 %         end 
-        fitLength=floor(1/(freq1/sampf));
-        for j=1:floor(length(seriesX(:,o+1))/fitLength)-2
+        fitLength=floor(1/(freq1/sampf)/2);
+        for j=1:floor(length(seriesZ(:,o+1))/fitLength)-2
            tim=(j*fitLength:(j+1)*fitLength)'./8;
-           cut=1e9*seriesX(j*fitLength:(j+1)*fitLength,o+1);           
-           tempX=[tempX (max(cut)-min(cut))];
-           cut=1e9*seriesY(j*fitLength:(j+1)*fitLength,o+1);
-           tempY=[tempY (max(cut)-min(cut))];
+%            cut=1e9*seriesX(j*fitLength:(j+1)*fitLength,o+1);           
+%            tempX=[tempX (max(cut)-min(cut))];
+%            cut=1e9*seriesY(j*fitLength:(j+1)*fitLength,o+1);
+%            tempY=[tempY (max(cut)-min(cut))];
            cut=1e9*seriesZ(j*fitLength:(j+1)*fitLength,o+1);
            g = fittype( @(a,b,cen_fr,x) a*sin(2*pi*cen_fr*x)+b*cos(2*pi*cen_fr*x), 'problem', 'cen_fr' );
            [myfit,st] = fit(tim,cut, g,'problem',freq1,'StartPoint', [1, 1]);
            r2z=[r2z;st.rsquare];
-           a=coeffvalues(myfit);
-           FitData(j*fitLength:(j+1)*fitLength) = a(1)*sin(2*pi*freq1.*tim)+a(2)*cos(2*pi*freq1.*tim);
-           tempZ=[tempZ a(2)+i*a(1)];
+           a1=coeffvalues(myfit);
+           FitData(j*fitLength:(j+1)*fitLength) = a1(1)*sin(2*pi*freq1.*tim)+a1(2)*cos(2*pi*freq1.*tim);          
            cut=1e12*seriesRX(j*fitLength+floor(sampf/(4*freq1)):(j+1)*fitLength+floor(sampf/(4*freq1)),o+1);
            g = fittype( @(a,b,cen_fr,x) a*sin(2*pi*cen_fr*x)+b*cos(2*pi*cen_fr*x), 'problem', 'cen_fr' );
            [myfit,st] = fit(tim,cut, g,'problem',freq1,'StartPoint', [1, 1]);
            r2rx=[r2rx;st.rsquare];
-           a=coeffvalues(myfit);
-           tempRX=[tempRX (a(2)+i*a(1))/1e3];
-%            if j==10
-%                figure(8)
-%                plot((1:length(seriesZ)),seriesZ*1e9,(1:length(FitData)),FitData,'--')
-%             end
+           a2=coeffvalues(myfit);
+           if (abs(r2rx)>0) 
+               if (abs(r2z)>0)
+                   tempZ=[tempZ a1(2)+i*a1(1)];
+                   tempRX=[tempRX (a2(2)+i*a2(1))/1e3];
+                   tim=(j*fitLength:(j+1)*fitLength)'./8;
+                   cut=1e9*seriesX(j*fitLength:(j+1)*fitLength,o+1);           
+                   tempX=[tempX (max(cut)-min(cut))];
+                   cut=1e9*seriesY(j*fitLength:(j+1)*fitLength,o+1);
+                   tempY=[tempY (max(cut)-min(cut))];
+                   cut=1e9*seriesZ(j*fitLength:(j+1)*fitLength,o+1);
+               end
+           end
         end
+%         figure(8)
+%         lll=plot((1:length(seriesZ)),seriesZ*1e6,(1:length(FitData)),FitData/1e3,'--')
+%         ylabel('Vertical Displacement (um)')
+%         xlabel('Time (s)')
+%         legend('Data','Fit')
+%         set(lll,'LineWidth',1.2)
+%         set(gca,'FontSize',12)
+%         grid on
         for p=1:1e4
             N=0;
             sumX=0;
@@ -173,8 +187,17 @@ function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
         r2zavg=[mean(r2z);r2zavg];
         r2rxavg=[mean(r2rx);r2rxavg];
     end
-%     hold on
-%     figure(8)
-%     plot(r2zavg)
-%     plot(r2rxavg)
+    if o==0
+        hold on
+        figure(8)
+        plot(r2zavg)
+        plot(r2rxavg)
+        ylabel('R^2 Value')
+        xlabel('Time Cut')
+        legend('Vertical','Rotational')
+        set(l,'LineWidth',1.2)
+        set(ll,'LineWidth',1.2)
+        set(gca,'FontSize',12)
+        grid on
+    end
 end

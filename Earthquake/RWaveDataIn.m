@@ -137,7 +137,7 @@ function [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=RWave
 % %     [AT240Xaccel_cal, ~] = asd2(T240cal_accX,1/sampf, Navg, 1, @hann);
 %     [AT240Yaccel_cal, ~] = asd2(T240cal_accY,1/sampf, Navg, 1, @hann);
 %     [ABRSY, Af] = asd2(BRSY_out,1/sampf, Navg, 1, @hann);
-%     tim=(1:length(ETMYZ_out))/8;
+    tim=(1:length(ETMYZ_out))/8;
 %     figure(1)
 %     ll=loglog(Af,AETMYZ,Af,ABRSY,Af,AT240Yaccel_cal.*Mtotal*localg/Ibar*abs(doffsetY)./(2*pi*Af').^2);
 %     set(ll,'LineWidth',2);
@@ -150,18 +150,18 @@ function [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=RWave
 %     title('STS');
 %     legend('STS_Z','BRS','BRS Possible Acceleration Coupling')
 %     grid on
-% 
-%     figure(2)
-%     lll=plot(tim-3000,1e6*ETMYZ_out+100,tim-3000,BRSY_out*1e10);
-%     hold off
-%     set(lll,'LineWidth',.5);
-%     set(gca,'FontSize',18)
-%     set(gca,'YTick',25.*(-10:20))
+
+    figure(2)
+    lll=plot(tim,1e6*ETMYZ_out+100,tim,BRSY_out*1e10);
+    hold off
+    set(lll,'LineWidth',.5);
+    set(gca,'FontSize',18)
+    set(gca,'YTick',25.*(-10:20))
 %     xlim([0 max(tim)-3000])
-% %     ylim([-3e-5 1e-4])
-%     legend('STS_Z ETMY','BRS ETMY')
-%     ylabel('Displacement (um or 0.1 nrad)')
-%     xlabel('Time (s)')
-%     grid on
+%     ylim([-3e-5 1e-4])
+    legend('STS_Z ETMY','BRS ETMY')
+    ylabel('Displacement (um or 0.1 nrad)')
+    xlabel('Time (s)')
+    grid on
 
 end

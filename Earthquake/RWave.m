@@ -10,16 +10,16 @@ fileName={'GPS1143962787_6_9Earthquake.mat','GPS1144888165_7_8Earthquake.mat','G
     'GPS1157149817_Russia.mat'};
 newArray=[false, false, false, false, true, true, true, true];
 sampf =8;
-% startArray=[300, 800, 1, 750, 3000, 2450, 3000, 1].*sampf;
-% endArray=[1700, 1700, 1000, 1000, 4200, 3200, 3750, 3200].*sampf;
-startArray=[500, 800, 1, 750, 3000, 2500, 2500, 1].*sampf;
-endArray=[1250, 1700, 1000, 1000, 4200, 3250, 3250, 3200].*sampf;
+startArray=[1000, 800, 1, 750, 3000, 3000, 3250, 1].*sampf;
+endArray=[1750, 1700, 1000, 1000, 4200, 3750, 4750, 3200].*sampf;
+% startArray=[500, 800, 1, 750, 3000, 2500, 2500, 1].*sampf;
+% endArray=[1250, 1700, 1000, 1000, 4200, 3250, 3250, 3200].*sampf;
 % for j=0:7
 % for j=[0 1 4 5 6]
 for j=[0 5 6]
 % for j=[0]
-% for j=7
-    startFreq=0.015;
+% for j=6
+    startFreq=0.05;
     freqStep=.005;
     iter=floor((.1-startFreq)/freqStep);
     [errFreq,transXErr,transYErr,transZErr,tiltErr]=RWaveMeasErr;
@@ -34,12 +34,12 @@ for j=[0 5 6]
     BRSY_out=BRSY_out(300*sampf:length(BRSY_out));
     bootVel=[];
     bootAng=[];
-%      startTime=1;
+%     startTime=1;
 %     endTime=length(ETMYZ_out);
    startTime=startArray(j+1);
    endTime=endArray(j+1);
 %     % seed=randn(1,length(ETMYZ_out));
-    threshold=rms(ETMYZ_out(startTime:endTime))/2;
+    threshold=rms(ETMYZ_out(startTime:endTime))*0;
     
     [vel, ang,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sampf,threshold,startFreq,freqStep,iter,startTime,endTime);
     
@@ -72,12 +72,7 @@ for j=[0 5 6]
     singVel=[singVel; mean(v)];
     singAng=[singAng; mean(ang)];
 
-    % figure(1)
-    % plot(Rot_time(startTime:length(BRSY_out)),seriesX,Rot_time(startTime:length(BRSY_out))...
-    %     ,seriesY,Rot_time(startTime:length(BRSY_out)),seriesZ,Rot_time(startTime:length(BRSY_out)),seriesRX)
-    % ylim([-1e-5 100e-5])
-    % xlim([400 length(ETMYZ_out)/sampf]);
-    % grid on
+   
 %     [C,F]=coh2(ETMYZ_out,BRSY_out,1/8,9);
 %     figure(8)
 %     plot(F,C)
@@ -173,7 +168,7 @@ l=errorbar(((cInd-1)*freqStep+startFreq)+10^-4,cell2mat(avgV.values),-cell2mat(a
 ll=errorbar(((cInd-1)*freqStep+startFreq),cell2mat(avgVel.values),-cell2mat(avgVelErr.values),cell2mat(avgVelErr.values),'.');
 ylabel('Average Phase Velocity (m/s)')
 xlabel('Frequency (Hz)')
-legend('Array','Single Station')
+legend('Single Station','Array')
 set(l,'LineWidth',1.2)
 set(ll,'LineWidth',1.2)
 set(gca,'FontSize',12)
