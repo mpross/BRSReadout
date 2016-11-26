@@ -93,14 +93,16 @@ function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
            a2=coeffvalues(myfit);
            if (abs(r2rx)>0) 
                if (abs(r2z)>0)
-                   tempZ=[tempZ a1(2)+i*a1(1)];
-                   tempRX=[tempRX (a2(2)+i*a2(1))/1e3];
-                   tim=(j*fitLength:(j+1)*fitLength)'./8;
-                   cut=1e9*seriesX(j*fitLength:(j+1)*fitLength,o+1);           
-                   tempX=[tempX (max(cut)-min(cut))];
-                   cut=1e9*seriesY(j*fitLength:(j+1)*fitLength,o+1);
-                   tempY=[tempY (max(cut)-min(cut))];
-                   cut=1e9*seriesZ(j*fitLength:(j+1)*fitLength,o+1);
+                   if(abs(cos(angle(a1(2)+i*a1(1))-angle((a2(2)+i*a2(1)))))>.9)
+                       tempZ=[tempZ a1(2)+i*a1(1)];
+                       tempRX=[tempRX (a2(2)+i*a2(1))/1e3];
+                       tim=(j*fitLength:(j+1)*fitLength)'./8;
+                       cut=1e9*seriesX(j*fitLength:(j+1)*fitLength,o+1);           
+                       tempX=[tempX (max(cut)-min(cut))];
+                       cut=1e9*seriesY(j*fitLength:(j+1)*fitLength,o+1);
+                       tempY=[tempY (max(cut)-min(cut))];
+                       cut=1e9*seriesZ(j*fitLength:(j+1)*fitLength,o+1);
+                   end
                end
            end
         end
@@ -134,7 +136,7 @@ function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
                 if(abs(btempZ(l))>=threshold && abs(btempZ(l))>=localThreshold1 && abs(btempRX(l))>=localThreshold2)
                     avgPhi=avgPhi+atan2(btempY(l),btempX(l))*180/pi;
                     avgK=avgK+btempRX(l)./btempZ(l)./sin(atan2(btempY(l),btempX(l)));
-                    avgV=avgV+2*pi*freq1.*abs(btempZ(l))./abs(btempRX(l)).*cos(angle(btempZ(l))-angle(btempRX(l))).*sin(bootAng(3,floor(1 + (length(bootAng)-1).*rand(1)))*pi/180);%ang(i+1)*pi/180%(atan2(btempY(l),btempX(l)));%
+                    avgV=avgV+2*pi*freq1.*abs(btempZ(l))./abs(btempRX(l)).*sin(bootAng(3,floor(1 + (length(bootAng)-1).*rand(1)))*pi/180);%ang(i+1)*pi/180%(atan2(btempY(l),btempX(l)));%*cos(angle(btempZ(l))-angle(btempRX(l)))
                     avgEl=avgEl+acot(btempZ(l)/btempY(l).*sin(atan2(btempY(l),btempX(l))));
                     N=N+1;
                 end
@@ -165,7 +167,7 @@ function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
     %         if l>=20
                 avgPhi=avgPhi+atan2(tempY(l),tempX(l))*180/pi;
                 avgK=avgK+tempRX(l)./tempZ(l)./sin(atan2(tempY(l),tempX(l)));
-                avgV=avgV+2*pi*freq1.*abs(tempZ(l))./abs(tempRX(l)).*cos(angle(tempZ(l))-angle(tempRX(l))).*sin(ang(o+1)*pi/180);%(atan2(tempY(l),tempX(l)));%
+                avgV=avgV+2*pi*freq1.*abs(tempZ(l))./abs(tempRX(l)).*sin(ang(o+1)*pi/180);%(atan2(tempY(l),tempX(l)));%.*cos(angle(tempZ(l))-angle(tempRX(l)))
                 pltV=[pltV; 2*pi*freq1.*tempZ(l)./(tempRX(l)).*sin(ang(o+1)*pi/180)];
                 avgEl=avgEl+acot(tempZ(l)/tempY(l).*sin(atan2(tempY(l),tempX(l))));                
                 N=N+1;

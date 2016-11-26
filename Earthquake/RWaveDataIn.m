@@ -151,12 +151,12 @@ function [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=RWave
 %     legend('STS_Z','BRS','BRS Possible Acceleration Coupling')
 %     grid on
 
-    figure(2)
-    lll=plot(tim,1e6*ETMYZ_out+100,tim,BRSY_out*1e10);
-    hold off
-    set(lll,'LineWidth',.5);
-    set(gca,'FontSize',18)
-    set(gca,'YTick',25.*(-10:20))
+%     figure(2)
+%     lll=plot(tim,1e6*ETMYZ_out+100,tim,BRSY_out*1e10);
+%     hold off
+%     set(lll,'LineWidth',.5);
+%     set(gca,'FontSize',18)
+%     set(gca,'YTick',25.*(-10:20))
 %     xlim([0 max(tim)-3000])
 %     ylim([-3e-5 1e-4])
     legend('STS_Z ETMY','BRS ETMY')

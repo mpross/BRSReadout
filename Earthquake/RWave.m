@@ -10,8 +10,8 @@ fileName={'GPS1143962787_6_9Earthquake.mat','GPS1144888165_7_8Earthquake.mat','G
     'GPS1157149817_Russia.mat'};
 newArray=[false, false, false, false, true, true, true, true];
 sampf =8;
-startArray=[1000, 800, 1, 750, 3000, 3000, 3250, 1].*sampf;
-endArray=[1750, 1700, 1000, 1000, 4200, 3750, 4750, 3200].*sampf;
+startArray=[1000, 800, 1, 750, 3000, 3000, 3000, 1].*sampf;
+endArray=[2000, 1700, 1000, 1000, 4200, 4000, 4500, 3200].*sampf;
 % startArray=[500, 800, 1, 750, 3000, 2500, 2500, 1].*sampf;
 % endArray=[1250, 1700, 1000, 1000, 4200, 3250, 3250, 3200].*sampf;
 % for j=0:7
@@ -19,7 +19,7 @@ endArray=[1750, 1700, 1000, 1000, 4200, 3750, 4750, 3200].*sampf;
 for j=[0 5 6]
 % for j=[0]
 % for j=6
-    startFreq=0.05;
+    startFreq=0.025;
     freqStep=.005;
     iter=floor((.1-startFreq)/freqStep);
     [errFreq,transXErr,transYErr,transZErr,tiltErr]=RWaveMeasErr;
@@ -34,10 +34,10 @@ for j=[0 5 6]
     BRSY_out=BRSY_out(300*sampf:length(BRSY_out));
     bootVel=[];
     bootAng=[];
-%     startTime=1;
-%     endTime=length(ETMYZ_out);
-   startTime=startArray(j+1);
-   endTime=endArray(j+1);
+    startTime=1;
+    endTime=length(ETMYZ_out);
+%    startTime=startArray(j+1);
+%    endTime=endArray(j+1);
 %     % seed=randn(1,length(ETMYZ_out));
     threshold=rms(ETMYZ_out(startTime:endTime))*0;
     
@@ -164,13 +164,14 @@ end
 
 figure(6)
 hold on
-l=errorbar(((cInd-1)*freqStep+startFreq)+10^-4,cell2mat(avgV.values),-cell2mat(avgVErr.values),cell2mat(avgVErr.values),'.');
-ll=errorbar(((cInd-1)*freqStep+startFreq),cell2mat(avgVel.values),-cell2mat(avgVelErr.values),cell2mat(avgVelErr.values),'.');
-ylabel('Average Phase Velocity (m/s)')
+l=errorbar(((cInd-1)*freqStep+startFreq)+10^-4,cell2mat(avgV.values)/1000,-cell2mat(avgVErr.values)/1000,cell2mat(avgVErr.values)/1000,'.');
+ll=errorbar(((cInd-1)*freqStep+startFreq),cell2mat(avgVel.values)/1000,-cell2mat(avgVelErr.values)/1000,cell2mat(avgVelErr.values)/1000,'.');
+ylabel('Average Phase Velocity (km/s)')
 xlabel('Frequency (Hz)')
 legend('Single Station','Array')
 set(l,'LineWidth',1.2)
 set(ll,'LineWidth',1.2)
 set(gca,'FontSize',12)
+set(gca,'YTick',.1*(0:100))
 grid on
 box on
