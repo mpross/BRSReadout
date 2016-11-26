@@ -34,10 +34,8 @@ for j=[0 5 6]
     BRSY_out=BRSY_out(300*sampf:length(BRSY_out));
     bootVel=[];
     bootAng=[];
-    startTime=1;
-    endTime=length(ETMYZ_out);
-%    startTime=startArray(j+1);
-%    endTime=endArray(j+1);
+    startTime=startArray(j+1);
+    endTime=endArray(j+1);
 %     % seed=randn(1,length(ETMYZ_out));
     threshold=rms(ETMYZ_out(startTime:endTime))*0;
     

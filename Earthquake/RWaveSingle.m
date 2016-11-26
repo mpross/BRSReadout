@@ -93,7 +93,7 @@ function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
            a2=coeffvalues(myfit);
            if (abs(r2rx)>0) 
                if (abs(r2z)>0)
-                   if(abs(cos(angle(a1(2)+i*a1(1))-angle((a2(2)+i*a2(1)))))>.9)
+                   if(abs(cos(angle(a1(2)+i*a1(1))-angle((a2(2)+i*a2(1)))))>cos(10*pi/180))
                        tempZ=[tempZ a1(2)+i*a1(1)];
                        tempRX=[tempRX (a2(2)+i*a2(1))/1e3];
                        tim=(j*fitLength:(j+1)*fitLength)'./8;

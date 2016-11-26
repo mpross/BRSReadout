@@ -159,9 +159,9 @@ function [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=RWave
 %     set(gca,'YTick',25.*(-10:20))
 %     xlim([0 max(tim)-3000])
 %     ylim([-3e-5 1e-4])
-    legend('STS_Z ETMY','BRS ETMY')
-    ylabel('Displacement (um or 0.1 nrad)')
-    xlabel('Time (s)')
-    grid on
+%     legend('STS_Z ETMY','BRS ETMY')
+%     ylabel('Displacement (um or 0.1 nrad)')
+%     xlabel('Time (s)')
+%     grid on
 
 end
