@@ -79,6 +79,7 @@ function [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=RWave
     %% torque computation
     % [bb,aa] = butter(4,[2*0.02/sampf 2*0.100/sampf],'bandpass');
     [bb,aa] = butter(4,[2*0.01/sampf, 2*.3/sampf]);
+    
     % %T240 response inversion filter
     T240InvertFilt = zpk(-2*pi*[pairQ(8.2e-3,0.7)],-2*pi*[0 0],1);
     T240InvertFilt = 1*T240InvertFilt/abs(freqresp(T240InvertFilt,2*pi*100));
@@ -151,17 +152,17 @@ function [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=RWave
 %     legend('STS_Z','BRS','BRS Possible Acceleration Coupling')
 %     grid on
 
-%     figure(2)
-%     lll=plot(tim,1e6*ETMYZ_out+100,tim,BRSY_out*1e10);
-%     hold off
-%     set(lll,'LineWidth',.5);
-%     set(gca,'FontSize',18)
-%     set(gca,'YTick',25.*(-10:20))
+    figure(2)
+    lll=plot(tim-1000,1e6*ETMYZ_out+1000,tim-1000,BRSY_out*1e10);
+    hold off
+    set(lll,'LineWidth',.5);
+    set(gca,'FontSize',18)
+    set(gca,'YTick',250.*(-10:20))
 %     xlim([0 max(tim)-3000])
 %     ylim([-3e-5 1e-4])
-%     legend('STS_Z ETMY','BRS ETMY')
-%     ylabel('Displacement (um or 0.1 nrad)')
-%     xlabel('Time (s)')
-%     grid on
+    legend('STS_Z ETMY','BRS ETMY')
+    ylabel('Displacement (um or 0.1 nrad)')
+    xlabel('Time (s)')
+    grid on
 
 end

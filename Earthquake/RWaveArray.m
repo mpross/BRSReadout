@@ -27,7 +27,7 @@ function [vel, ang, bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sa
         Y=filtData(startTime:endTime);
         filtData=filter(d,ITMYZ_out-mean(ITMYZ_out));
         C=filtData(startTime:endTime);
-        localThreshold=max(abs(C))*.7*0;
+        localThreshold=max(abs(C))*.7;
 %         if i==2
 %             figure(11)            
 %             plot((startTime:endTime)/sampf,X,(startTime:endTime)/sampf,Y+1e-6,(startTime:endTime)/sampf,C+2e-6)

@@ -7,18 +7,18 @@ avgVelErr=containers.Map('ValueType','any','KeyType','double');
 avgVErr=containers.Map('ValueType','any','KeyType','double');
 fileName={'GPS1143962787_6_9Earthquake.mat','GPS1144888165_7_8Earthquake.mat','GPS1149581095_5_2Earthquake.mat',...
     'GPS1149331885_6_2Earthquake.mat','GPS1156069817_Burma.mat','GPS1156480217_Atlantic.mat','GPS1156782617_NewZealand.mat',...
-    'GPS1157149817_Russia.mat'};
-newArray=[false, false, false, false, true, true, true, true];
+    'GPS1157149817_Russia.mat','GPS1163070017_7k_EQ5.mat','GPS1163797217_7k_EQ6.mat','GPS1166005817_10k_EQ7_PapNG.mat'};
+newArray=[false, false, false, false, true, true, true, true, true, true, true, true];
 sampf =8;
-startArray=[1000, 800, 1, 750, 3000, 3000, 3000, 1].*sampf;
-endArray=[2000, 1700, 1000, 1000, 4200, 4000, 4500, 3200].*sampf;
+startArray=[1000, 800, 1, 750, 3000, 3000, 3000, 1, 2500, 1, 2000].*sampf;
+endArray=[2000, 1700, 1000, 1000, 4200, 4000, 4500, 3200, 5500, 5000].*sampf;
 % startArray=[500, 800, 1, 750, 3000, 2500, 2500, 1].*sampf;
 % endArray=[1250, 1700, 1000, 1000, 4200, 3250, 3250, 3200].*sampf;
 % for j=0:7
 % for j=[0 1 4 5 6]
-for j=[0 5 6]
+% for j=[0 5 6 8]
 % for j=[0]
-% for j=6
+for j=10
     startFreq=0.025;
     freqStep=.005;
     iter=floor((.1-startFreq)/freqStep);
@@ -34,10 +34,11 @@ for j=[0 5 6]
     BRSY_out=BRSY_out(300*sampf:length(BRSY_out));
     bootVel=[];
     bootAng=[];
-    startTime=startArray(j+1);
-    endTime=endArray(j+1);
+    startTime=startArray(j);
+    endTime=endArray(j);
+%     endTime=length(ETMXZ_out);
 %     % seed=randn(1,length(ETMYZ_out));
-    threshold=rms(ETMYZ_out(startTime:endTime))*0;
+    threshold=rms(ETMYZ_out(startTime:endTime))/2*0;
     
     [vel, ang,bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sampf,threshold,startFreq,freqStep,iter,startTime,endTime);
     
@@ -124,19 +125,19 @@ for j=[0 5 6]
         end
         
     end
-    % figure(3)
-    % hold on
-    % % errorbar(((0:length(phi)-1))*freqStep+startFreq,phi,-sigmaPhi,sigmaPhi)
-    % % errorbar(((0:length(ang)-1))*freqStep+startFreq,ang,-sigmaAng,sigmaAng)
-    % errorbar(((0:length(phi)-1))*freqStep+startFreq,phi,-std(bootPhi'),std(bootPhi'))
-    % errorbar(((0:length(ang)-1))*freqStep+startFreq,ang,-std(bootAng'),std(bootAng'))
-    % ylabel('Angle of Incidence (degrees)')
-    % xlabel('Frequency (Hz)')
-    % legend('Single Station','Array','Single Station Bootstrapping','Array Bootstrapping')
-    % grid on
-    % % xlim([.01 .1])
-    % ylim([-200 200])
-    % hold off
+%     figure(3)
+%     hold on
+%     % errorbar(((0:length(phi)-1))*freqStep+startFreq,phi,-sigmaPhi,sigmaPhi)
+%     % errorbar(((0:length(ang)-1))*freqStep+startFreq,ang,-sigmaAng,sigmaAng)
+%     errorbar(((0:length(phi)-1))*freqStep+startFreq,phi,-std(bootPhi'),std(bootPhi'))
+%     errorbar(((0:length(ang)-1))*freqStep+startFreq,ang,-std(bootAng'),std(bootAng'))
+%     ylabel('Angle of Incidence (degrees)')
+%     xlabel('Frequency (Hz)')
+%     legend('Single Station','Array','Single Station Bootstrapping','Array Bootstrapping')
+%     grid on
+%     % xlim([.01 .1])
+%     ylim([-200 200])
+%     hold off
     % figure(4)
     % plot(((0:100)+1/2)*0.005+0.02,mean(k'))
     % ylabel('Rayleigh Wave Wavenumber')
