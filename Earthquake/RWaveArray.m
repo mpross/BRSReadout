@@ -1,4 +1,4 @@
-function [vel, ang, bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sampf,threshold,startFreq,freqStep,iter,startTime,endTime)
+function [vel, ang, bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,BRSY_out,sampf,threshold,startFreq,freqStep,iter,startTime,endTime)
 %% Array
     Astop1 = 5;
     Apass  = .5;
@@ -27,7 +27,31 @@ function [vel, ang, bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sa
         Y=filtData(startTime:endTime);
         filtData=filter(d,ITMYZ_out-mean(ITMYZ_out));
         C=filtData(startTime:endTime);
-        localThreshold=max(abs(C))*.7;
+        localThreshold=.1;
+        
+        filtData=filter(d,BRSY_out-mean(BRSY_out)); 
+        seriesRX=filtData(startTime:endTime);        
+        
+        r2rx=[];
+        tempRX=[];
+        
+        fitLength=floor(1/(freq2/sampf)/2);
+        for j=1:floor(length(seriesRX)/fitLength)-2
+           tim=(j*fitLength:(j+1)*fitLength)'./8;
+%            cut=1e9*seriesX(j*fitLength:(j+1)*fitLength,o+1);           
+%            tempX=[tempX (max(cut)-min(cut))];
+%            cut=1e9*seriesY(j*fitLength:(j+1)*fitLength,o+1);
+%            tempY=[tempY (max(cut)-min(cut))];           
+           cut=1e12*seriesRX(j*fitLength:(j+1)*fitLength);
+           g = fittype( @(a,b,cen_fr,x) a*sin(2*pi*cen_fr*x)+b*cos(2*pi*cen_fr*x), 'problem', 'cen_fr' );
+           [myfit,st] = fit(tim,cut, g,'problem',freq2,'StartPoint', [1, 1]);
+           r2rx=[r2rx;st.rsquare];
+           a2=coeffvalues(myfit);
+           if (abs(r2rx)>0) 
+                    tempRX=[tempRX (a2(2)+i*a2(1))/1e3];
+                    tim=(j*fitLength:(j+1)*fitLength)'./8;%                        
+           end
+        end
 %         if i==2
 %             figure(11)            
 %             plot((startTime:endTime)/sampf,X,(startTime:endTime)/sampf,Y+1e-6,(startTime:endTime)/sampf,C+2e-6)
@@ -55,7 +79,8 @@ function [vel, ang, bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sa
         len=250*sampf;
     end
     for j=1:floor(length(X)/len)-1
-        if ((max(C(j*len:(j+1)*len))-min(C(j*len:(j+1)*len)))>=threshold && (max(C(j*len:(j+1)*len))-min(C(j*len:(j+1)*len)))>=localThreshold)
+%         if ((max(C(j*len:(j+1)*len))-min(C(j*len:(j+1)*len)))>=threshold && (max(C(j*len:(j+1)*len))-min(C(j*len:(j+1)*len)))>=localThreshold)
+        if(max(abs(tempRX(floor(j*len/fitLength):floor((j+1)*len/fitLength))))>=localThreshold)
 
             [crossY,~] = xcorr(C(j*len:(j+1)*len),Y(j*len:(j+1)*len));
             [crossX,lags]=xcorr(C(j*len:(j+1)*len),X(j*len:(j+1)*len));
@@ -65,13 +90,13 @@ function [vel, ang, bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sa
             
             peak=crossX(floor(find(crossX==max(crossX))-1/freq2):floor(find(crossX==max(crossX))+1/freq2));
             peakLags=lags(floor(find(crossX==max(crossX))-1/freq2):floor(find(crossX==max(crossX))+1/freq2))';
-            [fit,s]=polyfit(peakLags,peak,2);  
-            delta_t_X=[delta_t_X -fit(2)/(2*fit(1))/sampf];
+            [myfit,s]=polyfit(peakLags,peak,2);  
+            delta_t_X=[delta_t_X -myfit(2)/(2*myfit(1))/sampf];
             
             peak=crossY(floor(find(crossY==max(crossY))-1/freq2):floor(find(crossY==max(crossY))+1/freq2));
             peakLags=lags(floor(find(crossY==max(crossY))-1/freq2):floor(find(crossY==max(crossY))+1/freq2))';
-            [fit,s]=polyfit(peakLags,peak,2);
-            delta_t_Y=[delta_t_Y -fit(2)/(2*fit(1))/sampf];
+            [myfit,s]=polyfit(peakLags,peak,2);
+            delta_t_Y=[delta_t_Y -myfit(2)/(2*myfit(1))/sampf];
 
         end
     end   
@@ -100,6 +125,7 @@ function [vel, ang, bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,sa
 %     end
     delta_t_X=mean(delta_t_X);
     delta_t_Y=mean(delta_t_Y);
+    {atan2(delta_t_Y,delta_t_X)*180/pi,4e3./sqrt((delta_t_X).^2+(delta_t_Y).^2)}
     ang=[ang atan2(delta_t_Y,delta_t_X)*180/pi];    
     vel=[vel 4e3./sqrt((delta_t_X).^2+(delta_t_Y).^2)];
     end
