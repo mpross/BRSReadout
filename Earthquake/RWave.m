@@ -8,7 +8,7 @@ avgVErr=containers.Map('ValueType','any','KeyType','double');
 fileName={'GPS1143962787_6_9Earthquake.mat','GPS1144888165_7_8Earthquake.mat','GPS1149581095_5_2Earthquake.mat',...
     'GPS1149331885_6_2Earthquake.mat','GPS1156069817_Burma.mat','GPS1156480217_Atlantic.mat','GPS1156782617_NewZealand.mat',...
     'GPS1157149817_Russia.mat','GPS1163070017_7k_EQ5.mat','GPS1163797217_7k_EQ6.mat','GPS1166005817_10k_EQ7_PapNG.mat','GPS1155000017_7k_EQ8_NewC.mat'};
-newArray=[false, false, false, false, true, true, true, true, true, true, true, true, true];
+newArray=[false, false, false, false, true, true, true, true, true, true, true, true,true];
 sampf =8;
 % startArray=[1000, 800, 1, 750, 3000, 2000, 3000, 1, 2500, 1, 4500].*sampf;
 % endArray=[2000, 1700, 1000, 1000, 4200, 4500, 4500, 3200, 5500, 1, 5500].*sampf;
@@ -16,7 +16,7 @@ sampf =8;
 % endArray=[1250, 1700, 1000, 1000, 4200, 3250, 3250, 3200].*sampf;
 % for j=0:7
 % for j=[0 1 4 5 6]
-for j=[0 5 8 10]
+for j=[0 5 8 10 11]
 % for j=[0]
 % for j=10
     startFreq=0.025;
@@ -31,6 +31,7 @@ for j=[0 5 8 10]
     
     ETMYX_out=ETMYX_out(300*sampf:length(ETMYX_out));
     ETMYY_out=ETMYY_out(300*sampf:length(ETMYY_out));
+    ETMYZ_outV=ETMYZ_outV(300*sampf:length(ETMYZ_outV));
     BRSY_out=BRSY_out(300*sampf:length(BRSY_out));
     bootVel=[];
     bootAng=[];
@@ -52,22 +53,23 @@ for j=[0 5 8 10]
 %     cInd2=find((abs(v)-2*std(bootV')'<=abs(vel)'+2*std(bootVel')'));
 %     cInd3=find(std(bootVel')<=10000);
 %     cInd4=find(std(bootV')<=10000);
-    cInd5=find(std(bootVel')>=1);
-    cInd6=find(std(bootV')>=1);
+    cInd5=find(std(bootVel')>0);
+    cInd6=find(std(bootV')>0);
 %     cInd12=intersect(cInd1,cInd2);
 %     cInd123=intersect(cInd12,cInd3);
 %     cInd1234=intersect(cInd123,cInd4);
 %     cInd12345=intersect(cInd1234,cInd5);
 %     cInd=intersect(cInd12345,cInd6);
     cInd=intersect(cInd5,cInd6);
-%     cInd=find(abs(v)>=0);
+%     cInd=(1:length(v)-1);
+% %     cInd=find(abs(v)>=0);
     v=v(cInd);
     vel=vel(cInd);
-    ang=ang(cInd);
+%     ang=ang(cInd);
 %     phi=phi(cInd);
     bootV=bootV(cInd,:);
     bootVel=bootVel(cInd,:);
-    bootAng=bootAng(cInd,:);
+%     bootAng=bootAng(cInd,:);
      
     singVel=[singVel; mean(v)];
     singAng=[singAng; mean(ang)]
@@ -100,7 +102,9 @@ for j=[0 5 8 10]
         ll=errorbar(((cInd-1)*freqStep+startFreq),vel,-std(bootVel'),std(bootVel'),'--');
         ylabel('Velocity (m/s)')
         xlabel('Frequency (Hz)')
-        legend('Single Station', 'Array')
+        legend('Single Station-6.7 Vanuatu', 'Array-6.7 Vanuatu','Single Station-7.1 Pacific', 'Array-7.1 Pacific',...
+            'Single Station-7.8 New Zealand', 'Array-7.8 New Zealand','Single Station-7.9 Papa New Guinea', 'Array-7.9 Papa New Guinea',...
+            'Single Station-7.2 New Caledonia', 'Array-7.2 New Caledonia')
         grid on
         box on
         % xlim([.01 .1])
@@ -176,3 +180,4 @@ set(gca,'XTick',0.005*(0:100))
 set(gca,'YTick',.5*(0:100))
 grid on
 box on
+

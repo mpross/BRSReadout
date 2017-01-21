@@ -56,8 +56,8 @@ function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
         filtData=filter(d,BRSY_out-mean(BRSY_out)); 
         seriesRX=[seriesRX filtData(startTime:endTime)];        
 %         localThreshold2=max(abs(filtData))*.7*1e9;
-        localThreshold2=.1;
-        FitData=seriesZ;
+        localThreshold2=1;
+        FitData=zeros(length(seriesZ),1);
         tempX=[];
         tempY=[];
         tempZ=[];
@@ -86,7 +86,9 @@ function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
            [myfit,st] = fit(tim,cut, g,'problem',freq1,'StartPoint', [1, 1]);
            r2z=[r2z;st.rsquare];
            a1=coeffvalues(myfit);
-           FitData(j*fitLength:(j+1)*fitLength) = a1(1)*sin(2*pi*freq1.*tim)+a1(2)*cos(2*pi*freq1.*tim);          
+           if o==7
+                FitData(j*fitLength:(j+1)*fitLength) = a1(1)*sin(2*pi*freq1.*tim)+a1(2)*cos(2*pi*freq1.*tim);
+           end
 %            cut=1e12*seriesRX(j*fitLength+floor(sampf/(4*freq1)):(j+1)*fitLength+floor(sampf/(4*freq1)),o+1);
            cut=1e12*seriesRX(j*fitLength:(j+1)*fitLength,o+1);
            g = fittype( @(a,b,cen_fr,x) a*sin(2*pi*cen_fr*x)+b*cos(2*pi*cen_fr*x), 'problem', 'cen_fr' );
@@ -108,14 +110,17 @@ function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
                end
            end
         end
-%         figure(8)
-%         lll=plot((1:length(seriesZ)),seriesZ*1e6,(1:length(FitData)),FitData/1e3,'--')
-%         ylabel('Vertical Displacement (um)')
-%         xlabel('Time (s)')
-%         legend('Data','Fit')
-%         set(lll,'LineWidth',1.2)
-%         set(gca,'FontSize',12)
-%         grid on
+        if o==7
+            figure(8)
+            lll=plot((1:length(FitData)),seriesZ(o)*1e9,(1:length(FitData)),FitData,'--');
+            ylabel('Vertical Displacement (um)')
+            xlabel('Time (s)')
+            legend('Data','Fit')
+            set(lll,'LineWidth',1.2)
+            set(gca,'FontSize',12)
+            grid on
+            length(seriesZ(o))
+        end
         for p=1:1e4
             N=0;
 %             sumX=0;
@@ -139,7 +144,7 @@ function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
 %                     avgPhi=avgPhi+atan2(btempY(l),btempX(l))*180/pi;
 %                     avgK=avgK+btempRX(l)./btempZ(l)./sin(atan2(btempY(l),btempX(l)));
 %                     avgV=avgV+2*pi*freq1.*abs(btempZ(l))./abs(btempRX(l)).*sin(bootAng(3,floor(1 + (length(bootAng)-1).*rand(1)))*pi/180);
-                    avgV=avgV+abs(btempZ(l))./abs(btempRX(l)).*sin(bootAng(3,floor(1 + (length(bootAng)-1).*rand(1)))*pi/180);
+                       avgV=avgV+abs(btempZ(l))./abs(btempRX(l)).*sin(bootAng(o+1,floor(1 + (length(bootAng)-1).*rand(1))))*pi/180;                    
                     %ang(i+1)*pi/180%(atan2(btempY(l),btempX(l)));%*cos(angle(btempZ(l))-angle(btempRX(l)))
 %                     avgEl=avgEl+acot(btempZ(l)/btempY(l).*sin(atan2(btempY(l),btempX(l))));
                     N=N+1;
@@ -172,7 +177,7 @@ function [v,phi,el,k,bootV,bootPhi,bootEl,bootK]=...
 %                 avgPhi=avgPhi+atan2(tempY(l),tempX(l))*180/pi;
 %                 avgK=avgK+tempRX(l)./tempZ(l)./sin(atan2(tempY(l),tempX(l)));
 %                 avgV=avgV+2*pi*freq1.*abs(tempZ(l))./abs(tempRX(l)).*sin(ang(o+1)*pi/180);%(atan2(tempY(l),tempX(l)));%.*cos(angle(tempZ(l))-angle(tempRX(l)))
-                avgV=avgV+abs(tempZ(l))./abs(tempRX(l)).*sin(ang(o+1)*pi/180);
+                    avgV=avgV+abs(tempZ(l))./abs(tempRX(l)).*sin(ang(o+1)*pi/180);
 %                 pltV=[pltV; 2*pi*freq1.*tempZ(l)./(tempRX(l)).*sin(ang(o+1)*pi/180)];
 %                 avgEl=avgEl+acot(tempZ(l)/tempY(l).*sin(atan2(tempY(l),tempX(l))));                
                 N=N+1;

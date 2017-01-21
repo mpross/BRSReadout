@@ -78,7 +78,7 @@ function [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=RWave
 
     %% torque computation
     % [bb,aa] = butter(4,[2*0.02/sampf 2*0.100/sampf],'bandpass');
-    [bb,aa] = butter(4,[2*0.01/sampf, 2*.1/sampf]);
+    [bb,aa] = butter(4,[2*0.001/sampf, 2*1/sampf]);
     
     % %T240 response inversion filter
     T240InvertFilt = zpk(-2*pi*[pairQ(8.2e-3,0.7)],-2*pi*[0 0],1);
@@ -102,7 +102,8 @@ function [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=RWave
     % %Apply filters
     T240cal_vel = lsim(T240InvertFilt,ETMXZ,Rot_time);
     T240cal_disp = lsim(IntFilt,T240cal_vel,Rot_time);
-    ETMXZ_out=filter(bb,aa,T240cal_disp);
+%     ETMXZ_out=filter(bb,aa,T240cal_disp);
+%     ETMXZ_out=filter(bb,aa,T240cal_vel);
 
     % 
     T240cal_accY = lsim(DiffFilt,ETMYY,Rot_time);
@@ -125,11 +126,13 @@ function [ETMXZ_out, ITMYZ_out, ETMYX_out, ETMYY_out, ETMYZ_out, BRSY_out]=RWave
 
     T240cal_vel = lsim(T240InvertFilt,ETMXZ,Rot_time);
     T240cal_disp = lsim(IntFilt,T240cal_vel,Rot_time);
-    ETMXZ_out=filter(bb,aa,T240cal_disp);
+%     ETMXZ_out=filter(bb,aa,T240cal_disp);
+    ETMXZ_out=filter(bb,aa,T240cal_vel);
 
     T240cal_vel = lsim(T240InvertFilt,ITMYZ,Rot_time);
     T240cal_disp = lsim(IntFilt,T240cal_vel,Rot_time);
-    ITMYZ_out=filter(bb,aa,T240cal_disp);
+%     ITMYZ_out=filter(bb,aa,T240cal_disp);
+    ITMYZ_out=filter(bb,aa,T240cal_vel);
 
     BRSYcal_out = lsim(BRSYInvertFilt,BRSY, Rot_time);
     BRSY_out=filter(bb,aa,BRSYcal_out);

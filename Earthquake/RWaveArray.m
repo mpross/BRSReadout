@@ -27,7 +27,7 @@ function [vel, ang, bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,BR
         Y=filtData(startTime:endTime);
         filtData=filter(d,ITMYZ_out-mean(ITMYZ_out));
         C=filtData(startTime:endTime);
-        localThreshold=.1;
+        localThreshold=1;
         
         filtData=filter(d,BRSY_out-mean(BRSY_out)); 
         seriesRX=filtData(startTime:endTime);        
@@ -49,7 +49,7 @@ function [vel, ang, bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,BR
            a2=coeffvalues(myfit);
            if (abs(r2rx)>0) 
                     tempRX=[tempRX (a2(2)+i*a2(1))/1e3];
-                    tim=(j*fitLength:(j+1)*fitLength)'./8;%                        
+                    %tim=(j*fitLength:(j+1)*fitLength)'./8;%                        
            end
         end
 %         if i==2
@@ -57,11 +57,14 @@ function [vel, ang, bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,BR
 %             plot((startTime:endTime)/sampf,X,(startTime:endTime)/sampf,Y+1e-6,(startTime:endTime)/sampf,C+2e-6)
 %             legend('X','Y','C')
 %         end
-%         if i==6
-%             figure(12)            
-%             plot((startTime:endTime)/sampf,X,(startTime:endTime)/sampf,Y+1e-6,(startTime:endTime)/sampf,C+2e-6)
-%             legend('X','Y','C')
-%         end
+        if i==7
+            figure(12)            
+            l=plot((startTime:endTime)/sampf,X,(startTime:endTime)/sampf,Y+1e-6,(startTime:endTime)/sampf,C+2e-6)
+            legend('X','Y','C')
+            set(l,'LineWidth',1.2)
+            set(gca,'FontSize',12)
+            grid on
+        end
     %     injAng=150*pi/180;
     %     X=filter(d,seed(ceil(100*cos(injAng))+150:length(ETMXZ_out)+ceil(100*cos(injAng))+150))';
     %     Y=filter(d,seed(ceil(100*sin(injAng))+150:length(ETMXZ_out)+ceil(100*sin(injAng))+150))';
@@ -73,11 +76,7 @@ function [vel, ang, bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,BR
 
     delta_t_X=[];
     delta_t_Y=[];
-    if endTime<=6500
-        len=250*sampf;
-    else
-        len=250*sampf;
-    end
+    len=250*sampf;
     for j=1:floor(length(X)/len)-1
 %         if ((max(C(j*len:(j+1)*len))-min(C(j*len:(j+1)*len)))>=threshold && (max(C(j*len:(j+1)*len))-min(C(j*len:(j+1)*len)))>=localThreshold)
         if(max(abs(tempRX(floor(j*len/fitLength):floor((j+1)*len/fitLength))))>=localThreshold)
@@ -93,13 +92,22 @@ function [vel, ang, bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,BR
             [myfit,s]=polyfit(peakLags,peak,2);  
             delta_t_X=[delta_t_X -myfit(2)/(2*myfit(1))/sampf];
             
+            if i==7
+                figure(18)
+                ll=plot(peakLags,peak,peakLags,myfit(1)*peakLags.^2+myfit(2)*peakLags+myfit(3));
+                legend('Cross Cor','Fit')
+                set(ll,'LineWidth',1.2)
+                set(gca,'FontSize',12)
+                grid on
+            end
+            
             peak=crossY(floor(find(crossY==max(crossY))-1/freq2):floor(find(crossY==max(crossY))+1/freq2));
             peakLags=lags(floor(find(crossY==max(crossY))-1/freq2):floor(find(crossY==max(crossY))+1/freq2))';
             [myfit,s]=polyfit(peakLags,peak,2);
-            delta_t_Y=[delta_t_Y -myfit(2)/(2*myfit(1))/sampf];
+            delta_t_Y=[delta_t_Y -myfit(2)/(2*myfit(1))/sampf];            
 
         end
-    end   
+    end
     tempBAng=[];
     tempBVel=[];
     for k=0:1e4
@@ -108,25 +116,26 @@ function [vel, ang, bootVel,bootAng]=RWaveArray(ETMXZ_out,ETMYZ_out,ITMYZ_out,BR
         if length(bootArray)>0
             bootTX=bootArray(:,1)';
             bootTY=bootArray(:,2)';   
-            bootTX=mean(bootTX);
-            bootTY=mean(bootTY);
         else
             bootTX=nan;
             bootTY=nan;
         end
-        tempBAng=[tempBAng; atan2(bootTY,bootTX)*180/pi];      
-        tempBVel=[tempBVel; 4e3./sqrt((bootTX).^2+(bootTY).^2)];
+        tempBAng=[tempBAng; mean(atan2(bootTY,bootTX)*180/pi)];      
+        tempBVel=[tempBVel; mean(4e3./sqrt((bootTX).^2+(bootTY).^2))];
     end     
     bootVel=[bootVel; tempBVel'];
     bootAng=[bootAng; tempBAng'];
-%     if i==7
-%         figure(4)
-%         plot(4e3./sqrt((delta_t_X).^2+(delta_t_Y).^2));
-%     end
-    delta_t_X=mean(delta_t_X);
-    delta_t_Y=mean(delta_t_Y);
-    {atan2(delta_t_Y,delta_t_X)*180/pi,4e3./sqrt((delta_t_X).^2+(delta_t_Y).^2)}
-    ang=[ang atan2(delta_t_Y,delta_t_X)*180/pi];    
-    vel=[vel 4e3./sqrt((delta_t_X).^2+(delta_t_Y).^2)];
-    end
+    figure(4)
+    lll=plot(4e3./sqrt((delta_t_X).^2+(delta_t_Y).^2));
+    set(lll,'LineWidth',1.2)
+    set(gca,'FontSize',12)
+    grid on
+%      delta_t_X=delta_t_X;
+%      delta_t_Y=delta_t_Y;
+    tempAng=atan2(delta_t_Y,delta_t_X)*180/pi;
+    tempVel=4e3./mean(sqrt((delta_t_X).^2+(delta_t_Y).^2));
+    {mean(tempAng),mean(tempVel)}
+    ang=[ang mean(tempAng)];
+    vel=[vel mean(tempVel)];   
+
 end
