@@ -1,4 +1,4 @@
-close all
+
 
 avgVel=containers.Map('ValueType','any','KeyType','double');
 avgV=containers.Map('ValueType','any','KeyType','double');
@@ -9,7 +9,7 @@ fileName={'GPS1143962787_6_9Earthquake.mat','GPS1144888165_7_8Earthquake.mat','G
     'GPS1157149817_Russia.mat','GPS1163070017_7k_EQ5.mat','GPS1163797217_7k_EQ6.mat','GPS1166005817_10k_EQ7_PapNG.mat','GPS1155000017_7k_EQ8_NewC.mat'};
 newArray=[false, false, false, false, true, true, true, true, true, true, true, true,true];
 sampf =8;
-threshold=2;
+threshold=.5;
 
 for j=[0 5 8 10 11]
     Astop1 = 5;
@@ -23,9 +23,9 @@ for j=[0 5 8 10 11]
     lagsY=[];      
     delta_t_X=[];
     delta_t_Y=[];
-    bootVelA=[];
+    errVelA=[];
     bootAng=[];    
-    bootVelS=[];
+    errVelS=[];
     seriesX=[];
     seriesY=[];
     seriesZ=[];
@@ -126,19 +126,18 @@ for j=[0 5 8 10 11]
     ETMYZ_out=ETMYZ_out(300*sampf:length(ETMYZ_out));
     ITMYZ_out=ITMYZ_out(300*sampf:length(ITMYZ_out));
     BRSY_out=BRSY_out(300*sampf:length(BRSY_out));
-    bootVelA=[];
+    errVelA=[];
     bootAng=[];
-    startTime=1;
+    startTime=1000;
     endTime=length(ETMXZ_out);
-    threshold=rms(ETMYZ_out(startTime:endTime))*0;
     
   
-    for i=0:iter
+    for a=0:iter
         %% Data Crunching  
-        freq=(startFreq+i*freqStep);
+        freq=(startFreq+a*freqStep);
         d = designfilt('bandpassiir', ...
-          'StopbandFrequency1',(i-2)*freqStep+startFreq,'PassbandFrequency1', (i-1)*freqStep+startFreq, ...
-          'PassbandFrequency2',(i+1)*freqStep+startFreq,'StopbandFrequency2', (i+2)*freqStep+startFreq, ...
+          'StopbandFrequency1',(a-2)*freqStep+startFreq,'PassbandFrequency1', (a-1)*freqStep+startFreq, ...
+          'PassbandFrequency2',(a+1)*freqStep+startFreq,'StopbandFrequency2', (a+2)*freqStep+startFreq, ...
           'StopbandAttenuation1',Astop1,'PassbandRipple', Apass, ...
           'StopbandAttenuation2',Astop2, ...
           'DesignMethod','butter','SampleRate',sampf);
@@ -169,7 +168,7 @@ for j=[0 5 8 10 11]
            [myfit,st] = fit(tim,cut, g,'problem',freq,'StartPoint', [1, 1]);
            r2z=[r2z;st.rsquare];
            a1=coeffvalues(myfit);
-           if i==7
+           if a==7
                 FitData(j*fitLength:(j+1)*fitLength) = a1(1)*sin(2*pi*freq.*tim)+a1(2)*cos(2*pi*freq.*tim);
            end
            cut=1e12*seriesRX(j*fitLength:(j+1)*fitLength);
@@ -177,18 +176,23 @@ for j=[0 5 8 10 11]
            [myfit,st] = fit(tim,cut, g,'problem',freq,'StartPoint', [1, 1]);
            r2rx=[r2rx;st.rsquare];
            a2=coeffvalues(myfit);
-           j
            if (abs(r2rx)>0) 
                if (abs(r2z)>0)
-                   if(abs(cos(angle(a1(2)+i*a1(1))-angle((a2(2)+i*a2(1)))))>cos(10*pi/180))
-                       tempZ=[tempZ a1(2)+i*a1(1)];
-                       tempRX=[tempRX (a2(2)+i*a2(1))/1e3];
+                   if(cos(angle(a1(2)+i*a1(1))-angle((a2(2)+i*a2(1))))>cos(10*pi/180))
+                       tempZ=[tempZ a1(2)+a1(1)*i];
+                       tempRX=[tempRX (a2(2)+a2(1)*i)/1e3];
+                   else
+                       tempZ=[tempZ NaN];
+                       tempRX=[tempRX NaN];
                    end
                end
            end
         end
+        
+        figure(1)
+        plot((1:length(tempZ)),abs(tempZ)/1000,(1:length(tempRX)),abs(tempRX))
 
-        if i==7
+        if a==7
             figure(8)
             line1=plot((1:length(FitData)),seriesZ*1e9,(1:length(FitData)),FitData,'--');
             ylabel('Vertical Displacement (um)')
@@ -209,9 +213,8 @@ for j=[0 5 8 10 11]
 
         delta_t_X=[];
         delta_t_Y=[];
-        len=250*sampf;
-        for j=1:floor(length(X)/len)-1
-            j
+        len=50*sampf;
+        for j=1:floor(length(X)/len)-2
             if(max(abs(tempRX(floor(j*len/fitLength):floor((j+1)*len/fitLength))))>=threshold)
 
                 [crossY,~] = xcorr(C(j*len:(j+1)*len),Y(j*len:(j+1)*len));
@@ -225,7 +228,7 @@ for j=[0 5 8 10 11]
                 [myfit,s]=polyfit(peakLags,peak,2);  
                 delta_t_X=[delta_t_X -myfit(2)/(2*myfit(1))/sampf];
 
-                if i==7
+                if a==7
                     figure(18)
                     line3=plot(peakLags,peak,peakLags,myfit(1)*peakLags.^2+myfit(2)*peakLags+myfit(3));
                     legend('Cross Cor','Fit')
@@ -246,8 +249,7 @@ for j=[0 5 8 10 11]
         tempBAng=[];
         tempBVelA=[];
         tempBVelS=[];
-        for k=0:1e2
-            k
+        for k=0:1e4
             array=[delta_t_X; delta_t_Y];
             bootArray=bootstrapData(array');
             if length(bootArray)>0
@@ -269,16 +271,16 @@ for j=[0 5 8 10 11]
             btempZ=bootArray(:,1)';
             btempRX=bootArray(:,2)';
             for p=1:min([length(btempZ) length(btempRX)])
-                if(abs(btempZ(p))>=threshold)
+                if(abs(btempRX(p))>=threshold)
                    avgVS=avgVS+abs(btempZ(p))./abs(btempRX(p)).*sin(tempBAng)*pi/180;                    
                    N=N+1;
-                end
+                end                
             end   
             avgVS=avgVS/N;
             tempBVelS=[tempBVelS; avgVS];
         end
-        bootVelS=[bootVelS; tempBVelS'];
-        bootVelA=[bootVelA; tempBVelA'];
+        errVelS=[errVelS; std(tempBVelS')];
+        errVelA=[errVelA; std(tempBVelA')];
         bootAng=[bootAng; tempBAng'];
         
         %% Calculations
@@ -296,9 +298,9 @@ for j=[0 5 8 10 11]
         pltV=[];
         for p=1:min([length(tempZ) length(tempRX)])
             if(abs(tempRX(p))>=threshold)
-                if(not(isnan(abs(tempZ(p))./abs(tempRX(p)).*sin(ang(i+1)*pi/180))))
-                    avgVS=avgVS+abs(tempZ(p))./abs(tempRX(p)).*sin(ang(i+1)*pi/180);
-                    pltV=[pltV abs(tempZ(p))./abs(tempRX(p)).*sin(ang(i+1)*pi/180)];
+                if(not(isnan(abs(tempZ(p))./abs(tempRX(p)).*sin(ang(a+1)*pi/180))))
+                    avgVS=avgVS+abs(tempZ(p))./abs(tempRX(p)).*sin(ang(a+1)*pi/180);
+                    pltV=[pltV abs(tempZ(p))./abs(tempRX(p)).*sin(ang(a+1)*pi/180)];
                     N=N+1;
                 end
             end
@@ -310,9 +312,10 @@ for j=[0 5 8 10 11]
         r2rxavg=[mean(r2rx);r2rxavg];
                
         figure(4)
-        line4=plot((1:length(delta_t_X))*250*sampf,4e3./sqrt((delta_t_X).^2+(delta_t_Y).^2),(1:length(pltV))*fitLength,pltV);
+        line4=plot((1:length(delta_t_X))*50*sampf/2,4e3./sqrt((delta_t_X).^2+(delta_t_Y).^2),(1:length(pltV))*fitLength,pltV);
         set(line4,'LineWidth',1.2)
         set(gca,'FontSize',12)
+        ylim([0 1e4])
         grid on        
         
     end   
@@ -320,21 +323,21 @@ for j=[0 5 8 10 11]
  %% Single Event Plotting
 
 
-    cInd5=find(std(bootVelA')>0);
-    cInd6=find(std(bootVelS')>0);
-    cInd=intersect(cInd5,cInd6);
+    cInd1=find(errVelA'>0);
+    cInd2=find(errVelS'>0);
+    cInd=intersect(cInd1,cInd2);
     velS=velS(cInd);
     velA=velA(cInd);
-    bootVelS=bootVelS(cInd,:);
-    bootVelA=bootVelA(cInd,:);
+    errVelS=errVelS(cInd);
+    errVelA=errVelA(cInd);
      
     singVel=[singVel; mean(velS)];
     singAng=[singAng; mean(ang)]
 
-    figure(5)
+    fig1=figure(5)
     hold on
-    errorbar(((cInd-1)*freqStep+startFreq),abs(velS),-std(bootVelS'),std(bootVelS'));
-    errorbar(((cInd-1)*freqStep+startFreq),velA,-std(bootVelA'),std(bootVelA'),'--');
+    errorbar(((cInd-1)*freqStep+startFreq),abs(velS),-errVelS',errVelS');
+    errorbar(((cInd-1)*freqStep+startFreq),velA,-errVelA',errVelA','--');
     ylabel('Velocity (m/s)')
     xlabel('Frequency (Hz)')
     legend('Single Station-6.7 Vanuatu', 'Array-6.7 Vanuatu','Single Station-7.1 Pacific', 'Array-7.1 Pacific',...
@@ -348,15 +351,15 @@ for j=[0 5 8 10 11]
     for k=1:length(com)
         avgV(com(k))=[avgV(com(k)) velS(k)];
         avgVel(com(k))=[avgVel(com(k)) velA(k)];
-        avgVErr(com(k))=[avgVErr(com(k)) std(bootVelS(k,:)')^2];
-        avgVelErr(com(k))=[avgVelErr(com(k)) std(bootVelA(k,:)')^2];
+        avgVErr(com(k))=[avgVErr(com(k)) errVelS(k)'];
+        avgVelErr(com(k))=[avgVelErr(com(k)) errVelA(k)'];
     end
     new=setxor(cInd,intersect(cInd,cell2mat(avgV.keys)));
     for k=1:length(new)
         avgV(new(k))=velS(k);
         avgVel(new(k))=velA(k);
-        avgVErr(new(k))=std(bootVelS(k,:)')^2;
-        avgVelErr(new(k))=std(bootVelA(k,:)')^2;
+        avgVErr(new(k))=std(errVelS(k,:)')^2;
+        avgVelErr(new(k))=std(errVelA(k,:)')^2;
     end
         
 end
@@ -371,7 +374,7 @@ for k=1:length(avgV.keys)
 end
 
 
-figure(6)
+fig2=figure(6)
 hold on
 l=errorbar(((cInd-1)*freqStep+startFreq)+10^-4,cell2mat(avgV.values)/1000,-cell2mat(avgVErr.values)/1000,cell2mat(avgVErr.values)/1000);
 ll=errorbar(((cInd-1)*freqStep+startFreq),cell2mat(avgVel.values)/1000,-cell2mat(avgVelErr.values)/1000,cell2mat(avgVelErr.values)/1000,'--');
@@ -385,4 +388,17 @@ set(gca,'XTick',0.005*(0:100))
 set(gca,'YTick',.5*(0:100))
 grid on
 box on
+
+print(fig1,'-dpng','figure1.png')
+print(fig2,'-dpng','figure2.png')
+
+ setpref('Internet','E_mail','mross444@gmail.com');
+setpref('Internet','SMTP_Server','smtp.gmail.com');
+setpref('Internet','SMTP_Username','mross444');
+setpref('Internet','SMTP_Password','31nst31n');
+props = java.lang.System.getProperties;
+props.setProperty('mail.smtp.auth','true');
+props.setProperty('mail.smtp.socketFactory.class', 'javax.net.ssl.SSLSocketFactory');
+props.setProperty('mail.smtp.socketFactory.port','465');
+sendmail('mpross2@uw.edu','Rayleigh Wave Analysis Complete!','fig1','fig2');
 
