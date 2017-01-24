@@ -11,7 +11,7 @@ newArray=[false, false, false, false, true, true, true, true, true, true, true, 
 sampf =8;
 threshold=.5;
 
-for j=[0 5 8 10 11]
+for m=[0 5 8 10 11]
     Astop1 = 5;
     Apass  = .5;
     Astop2 =5;
@@ -45,16 +45,16 @@ for j=[0 5 8 10 11]
     sampf = 8; 
     
     %% Data Reading
-    if (exist(fileName{j+1},'file')&& newArray(j+1)==false)
-        myfile = load(fileName{j+1});
+    if (exist(fileName{m+1},'file')&& newArray(m+1)==false)
+        myfile = load(fileName{m+1});
         mydata = myfile.mydata;
         rawETMXZ = mydata(:,3);
         rawETMYZ = mydata(:,6);
         rawITMYZ = mydata(:,9);
         rawBRSY= mydata(:,10);
     end   
-    if (exist(fileName{j+1},'file')&& newArray(j+1)==true)
-        myfile = load(fileName{j+1});
+    if (exist(fileName{m+1},'file')&& newArray(m+1)==true)
+        myfile = load(fileName{m+1});
         mydata = myfile.rawdata8Hz1;
         rawBRSY= mydata(:,4);        
         rawETMXZ = mydata(:,2);
@@ -149,7 +149,6 @@ for j=[0 5 8 10 11]
         C=filtData(startTime:endTime);
         filtData=filter(d,ETMYZ_out-mean(ETMYZ_out));
         seriesZ=Y;
-        localThreshold1=max(abs(filtData))*.7*1e9*0;
         filtData=filter(d,BRSY_out-mean(BRSY_out)); 
         seriesRX=filtData(startTime:endTime);    
 
@@ -178,7 +177,7 @@ for j=[0 5 8 10 11]
            a2=coeffvalues(myfit);
            if (abs(r2rx)>0) 
                if (abs(r2z)>0)
-                   if(cos(angle(a1(2)+i*a1(1))-angle((a2(2)+i*a2(1))))>cos(10*pi/180))
+                   if(abs(cos(angle(a1(2)+i*a1(1))-angle((a2(2)+i*a2(1)))))>cos(15*pi/180))
                        tempZ=[tempZ a1(2)+a1(1)*i];
                        tempRX=[tempRX (a2(2)+a2(1)*i)/1e3];
                    else
@@ -249,7 +248,7 @@ for j=[0 5 8 10 11]
         tempBAng=[];
         tempBVelA=[];
         tempBVelS=[];
-        for k=0:1e4
+        for k=0:1e1
             array=[delta_t_X; delta_t_Y];
             bootArray=bootstrapData(array');
             if length(bootArray)>0
@@ -266,21 +265,25 @@ for j=[0 5 8 10 11]
             sumZ=0;
             sumRX=0;
             avgVS=0;
-            array=[tempZ; tempRX]; 
+            array=[tempZ(find(not(isnan(tempZ)))); tempRX(find(not(isnan(tempRX))))]; 
             bootArray=bootstrapData(array');
             btempZ=bootArray(:,1)';
             btempRX=bootArray(:,2)';
             for p=1:min([length(btempZ) length(btempRX)])
                 if(abs(btempRX(p))>=threshold)
-                   avgVS=avgVS+abs(btempZ(p))./abs(btempRX(p)).*sin(tempBAng)*pi/180;                    
-                   N=N+1;
+                   if not(isnan(abs(btempZ(p)./btempRX(p).*sin(mean(atan2(bootTY,bootTX)*180/pi)))))
+                       avgVS=avgVS+abs(btempZ(p)./btempRX(p).*sin(mean(atan2(bootTY,bootTX)*180/pi)));                    
+                       N=N+1;
+                   end
                 end                
             end   
             avgVS=avgVS/N;
-            tempBVelS=[tempBVelS; avgVS];
+            if (not(isnan(avgVS)))
+                tempBVelS=[tempBVelS; avgVS];
+            end
         end
-        errVelS=[errVelS; std(tempBVelS')];
-        errVelA=[errVelA; std(tempBVelA')];
+        errVelS=[errVelS; std(tempBVelS')]
+        errVelA=[errVelA; std(tempBVelA')]
         bootAng=[bootAng; tempBAng'];
         
         %% Calculations
@@ -298,14 +301,13 @@ for j=[0 5 8 10 11]
         pltV=[];
         for p=1:min([length(tempZ) length(tempRX)])
             if(abs(tempRX(p))>=threshold)
-                if(not(isnan(abs(tempZ(p))./abs(tempRX(p)).*sin(ang(a+1)*pi/180))))
-                    avgVS=avgVS+abs(tempZ(p))./abs(tempRX(p)).*sin(ang(a+1)*pi/180);
+                if(not(isnan(abs(abs(tempZ(p)./tempRX(p).*sin(ang(a+1)*pi/180))))))
+                    avgVS=avgVS+abs(tempZ(p)./tempRX(p).*sin(ang(a+1)*pi/180));
                     pltV=[pltV abs(tempZ(p))./abs(tempRX(p)).*sin(ang(a+1)*pi/180)];
                     N=N+1;
                 end
             end
         end   
-
         avgVS=avgVS/N
         velS=[velS; avgVS];
         r2zavg=[mean(r2z);r2zavg];
@@ -336,7 +338,7 @@ for j=[0 5 8 10 11]
 
     fig1=figure(5)
     hold on
-    errorbar(((cInd-1)*freqStep+startFreq),abs(velS),-errVelS',errVelS');
+    errorbar(((cInd-1)*freqStep+startFreq),abs(velS'),-errVelS',errVelS');
     errorbar(((cInd-1)*freqStep+startFreq),velA,-errVelA',errVelA','--');
     ylabel('Velocity (m/s)')
     xlabel('Frequency (Hz)')
@@ -358,8 +360,8 @@ for j=[0 5 8 10 11]
     for k=1:length(new)
         avgV(new(k))=velS(k);
         avgVel(new(k))=velA(k);
-        avgVErr(new(k))=std(errVelS(k,:)')^2;
-        avgVelErr(new(k))=std(errVelA(k,:)')^2;
+        avgVErr(new(k))=errVelS(k);
+        avgVelErr(new(k))=errVelA(k);
     end
         
 end
@@ -388,17 +390,18 @@ set(gca,'XTick',0.005*(0:100))
 set(gca,'YTick',.5*(0:100))
 grid on
 box on
+email=1;
+if email==1
+    print(fig1,'-dpng','figure1.png')
+    print(fig2,'-dpng','figure2.png')
 
-print(fig1,'-dpng','figure1.png')
-print(fig2,'-dpng','figure2.png')
-
- setpref('Internet','E_mail','mross444@gmail.com');
-setpref('Internet','SMTP_Server','smtp.gmail.com');
-setpref('Internet','SMTP_Username','mross444');
-setpref('Internet','SMTP_Password','31nst31n');
-props = java.lang.System.getProperties;
-props.setProperty('mail.smtp.auth','true');
-props.setProperty('mail.smtp.socketFactory.class', 'javax.net.ssl.SSLSocketFactory');
-props.setProperty('mail.smtp.socketFactory.port','465');
-sendmail('mpross2@uw.edu','Rayleigh Wave Analysis Complete!','fig1','fig2');
-
+    setpref('Internet','E_mail',strcat(user,'@gmail.com'));
+    setpref('Internet','SMTP_Server','smtp.gmail.com');
+    setpref('Internet','SMTP_Username',user);
+    setpref('Internet','SMTP_Password',password);
+    props = java.lang.System.getProperties;
+    props.setProperty('mail.smtp.auth','true');
+    props.setProperty('mail.smtp.socketFactory.class', 'javax.net.ssl.SSLSocketFactory');
+    props.setProperty('mail.smtp.socketFactory.port','465');
+    sendmail('mpross2@uw.edu','Rayleigh Wave Analysis Complete!',{'figure1.png','figure2.png'});
+end
