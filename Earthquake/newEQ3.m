@@ -4,9 +4,9 @@ fileload = true;
 
 sampf = 8;
 
-if (exist('GPS1166005817_10k_EQ7_PapNG.mat','file')&& fileload==true)
+if (exist('GPS1155000017_7k_EQ8_NewC.mat','file')&& fileload==true)
 
-        myfile = load('GPS1166005817_10k_EQ7_PapNG.mat');
+        myfile = load('GPS1155000017_7k_EQ8_NewC.mat');
 
         mydata = myfile.rawdata8Hz1;
 
@@ -24,9 +24,9 @@ end
 
 
 
-sttime = 2000*sampf + 1;
+sttime = 1200*sampf + 1;
 
-edtime = sttime + 5000*sampf;
+edtime = sttime + 4500*sampf;
 
 %edtime = length(rawBRSY);
 
@@ -44,7 +44,7 @@ eqtime = [1:length(BRSY)]*1/8-1/8;
 
 %% Filters
 
-[bb,aa] = butter(4,[2*0.01/sampf, 2*.3/sampf]);
+[bb,aa] = butter(4,[2*0.03/sampf, 2*.3/sampf]);
 
     % %T240 response inversion filter
 
@@ -132,7 +132,7 @@ Navg2=9;
 
 figure(1)
 
-    subplot('Position',[0.1, 0.7, 0.8, 0.25])
+    subplot('Position',[0.1, 0.59, 0.8, 0.35])
 
     l = plot(eqtime(sampf*250:end)-250, EYZ_vel_filt(sampf*250:end));
 
@@ -144,13 +144,13 @@ figure(1)
 
     %xlabel('time (s)');
 
-    xlim([0 4800])
+    xlim([0 4000])
 
-    ylim([-16e-5 16e-5])
+    ylim([-5e-5 5e-5])
 
     set(gca,'xtick',500*[0:10])
 
-    set(gca,'ytick',5e-5*[-3:3])
+    set(gca,'ytick',2e-5*[-3:3])
 
     set(gca,'xticklabel',[])
 
@@ -160,7 +160,7 @@ figure(1)
 
 
 
-    subplot('Position',[0.1, 0.4, 0.8, 0.25])
+   subplot('Position',[0.1, 0.15, 0.8, 0.35])
 
     ll = plot(eqtime(sampf*250:end)-250, BRSY_out(sampf*250:end));
 
@@ -170,17 +170,15 @@ figure(1)
 
     set(gca,'FontSize',15)
 
-    xlim([0 4800])
+    xlim([0 4000])
 
-    ylim([-4e-8 4e-8])
+    ylim([-2e-8 2e-8])
 
     %xlabel('time (s)');
 
     set(gca,'xtick',500*[0:10])
 
-    set(gca,'ytick',2e-8*[-2:2])
-
-    set(gca,'xticklabel',[])
+    set(gca,'ytick',1e-8*[-2:2])
 
     ylabel('angle (rad)');
 
@@ -188,29 +186,29 @@ figure(1)
 
     
 
-    subplot('Position',[0.1, 0.1, 0.8, 0.25])
-
-    lll = plot(eqtime(sampf*250:end)-250, EYY_disp_filt(sampf*250:end));
-
-    legend('Y displacement','Location','SouthEast');
-
-    set(lll,'LineWidth',1);
-
-    set(gca,'FontSize',15)
-
-    xlim([0 4800])
-
-    set(gca,'xtick',500*[0:10])
-
-    xlabel('time (s)');
-
-    ylabel('displacement (m)');
-
-    ylim([-7e-4 7e-4])
-
-    set(gca,'ytick',2e-4*[-3:3])
-
-    grid on
+%     subplot('Position',[0.1, 0.1, 0.8, 0.25])
+% 
+%     lll = plot(eqtime(sampf*250:end)-250, EYY_disp_filt(sampf*250:end));
+% 
+%     legend('Y displacement','Location','SouthEast');
+% 
+%     set(lll,'LineWidth',1);
+% 
+%     set(gca,'FontSize',15)
+% 
+%     xlim([0 4800])
+% 
+%     set(gca,'xtick',500*[0:10])
+% 
+%     xlabel('time (s)');
+% 
+%     ylabel('displacement (m)');
+% 
+%     ylim([-7e-4 7e-4])
+% 
+%     set(gca,'ytick',2e-4*[-3:3])
+% 
+%     grid on
 
 
 
@@ -244,9 +242,9 @@ figure(3)
 
     lll = semilogx(freqs2,FCohYY,freqs2,FCohYZ);
 
-    set(lll,'LineWidth',2);
+    set(lll,'LineWidth',1);
 
-    set(gca,'FontSize',20)
+    set(gca,'FontSize',15)
 
     xlim([5e-3 10])
 
