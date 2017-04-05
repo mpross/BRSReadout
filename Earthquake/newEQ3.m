@@ -4,11 +4,11 @@ fileload = true;
 
 sampf = 8;
 
-if (exist('GPS1155000017_7k_EQ8_NewC.mat','file')&& fileload==true)
+if (exist('GPS1149323500_Quite','file')&& fileload==true)
 
-        myfile = load('GPS1155000017_7k_EQ8_NewC.mat');
+        myfile = load('GPS1149323500_Quite.mat');
 
-        mydata = myfile.rawdata8Hz1;
+         mydata = myfile.rawdata8Hz1;
 
         rawBRSY= mydata(:,4);
 
@@ -24,9 +24,9 @@ end
 
 
 
-sttime = 1200*sampf + 1;
+sttime = 000*sampf + 1;
 
-edtime = sttime + 4500*sampf;
+edtime = sttime + 2000*sampf;
 
 %edtime = length(rawBRSY);
 
@@ -120,9 +120,9 @@ Navg2=9;
 
 
 
-[FCohYY,freqs2]=coh2(BRSY,ETMYY,1/sampf,Navg2,1,@hann);
+% [FCohYY,freqs2]=coh2(BRSY,ETMYY,1/sampf,Navg2,1,@hann);
 
-[FCohYZ,~]=coh2(BRSY,ETMYZ,1/sampf,Navg2,1,@hann);
+% [FCohYZ,~]=coh2(BRSY,ETMYZ,1/sampf,Navg2,1,@hann);
 
 
 
@@ -144,7 +144,7 @@ figure(1)
 
     %xlabel('time (s)');
 
-    xlim([0 4000])
+%     xlim([0 4000])
 
     ylim([-5e-5 5e-5])
 
@@ -170,7 +170,7 @@ figure(1)
 
     set(gca,'FontSize',15)
 
-    xlim([0 4000])
+%     xlim([0 4000])
 
     ylim([-2e-8 2e-8])
 
@@ -238,25 +238,25 @@ figure(2)
 
     
 
-figure(3)
-
-    lll = semilogx(freqs2,FCohYY,freqs2,FCohYZ);
-
-    set(lll,'LineWidth',1);
-
-    set(gca,'FontSize',15)
-
-    xlim([5e-3 10])
-
-    xlabel('frequency (Hz)')
-
-    ylabel('Coherence')
-
-    legend('Between BRS and EY Y','BRS Y and EY Z')
-
-    grid on
-
-
+% figure(3)
+% 
+%     lll = semilogx(freqs2,FCohYY,freqs2,FCohYZ);
+% 
+%     set(lll,'LineWidth',1);
+% 
+%     set(gca,'FontSize',15)
+% 
+%     xlim([5e-3 10])
+% 
+%     xlabel('frequency (Hz)')
+% 
+%     ylabel('Coherence')
+% 
+%     legend('Between BRS and EY Y','BRS Y and EY Z')
+% 
+%     grid on
+% 
+% 
 
 if printFigs
 
