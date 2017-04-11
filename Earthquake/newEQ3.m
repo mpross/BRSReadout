@@ -4,11 +4,12 @@ fileload = true;
 
 sampf = 8;
 
-if (exist('GPS1149323500_Quite','file')&& fileload==true)
+% if (exist('GPS1166005817_10k_EQ7_PapNG','file')&& fileload==true)
 
-        myfile = load('GPS1149323500_Quite.mat');
+        myfile = load('GPS1166005817_10k_EQ7_PapNG.mat');
 
-         mydata = myfile.rawdata8Hz1;
+        mydata = myfile.rawdata8Hz1;
+%         mydata=myfile.mydata;
 
         rawBRSY= mydata(:,4);
 
@@ -19,8 +20,17 @@ if (exist('GPS1149323500_Quite','file')&& fileload==true)
         rawITMYZ = mydata(:,3);
 
         rawETMYY = mydata(:,5);
+%         rawBRSY= mydata(:,10);
+% 
+%         rawETMXZ = mydata(:,3);
+% 
+%         rawETMYZ = mydata(:,6);
+% 
+%         rawITMYZ = mydata(:,9);
+% 
+%         rawETMYY = mydata(:,5);
 
-end
+% end
 
 
 
@@ -54,7 +64,7 @@ STSInvertFilt = 1*STSInvertFilt/abs(freqresp(STSInvertFilt,2*pi*100));
 
 
 
-BRSYInvertFilt = zpk(-2*pi*[pairQ(7.74e-3,3000)],-2*pi*[0 0],1);
+BRSYInvertFilt = zpk(-2*pi*[pairQ(7.73e-3,3000)],-2*pi*[0 0],1);
 
 BRSYInvertFilt = 1*BRSYInvertFilt/abs(freqresp(BRSYInvertFilt,2*pi*100));
 
@@ -214,23 +224,23 @@ figure(1)
 
 figure(2)
 
-    ll = loglog(freqs,AEYZ,freqs,AEYY,'--',freqs, ABRSY,':', freqs, ABRSYcal,'-.');
+    ll = loglog(freqs,AEYZ,freqs,AEYY,'--',freqs, ABRSYcal);
 
     set(ll,'LineWidth',2);
 
     xlim([5e-3 5])
 
-    ylim([1e-10 1e-3])
+    ylim([1e-10 1e-5])
 
-    set(gca,'YTick',10.^(-10:-3))
+    set(gca,'YTick',10.^(-10:-5))
 
     %set(gca,'XTick',10.^(-2:2))
 
     set(gca,'FontSize',15)
 
-    legend('STS Z velocity','STS Y velocity','BRS Y raw','BRS Y calibrated','Location','Northeast')
+    legend('Z velocity','Y velocity','BRS output','BRS Y calibrated','Location','Northeast')
 
-    xlabel('frequency (Hz)')
+    xlabel('Frequency (Hz)')
 
     ylabel('ASD (rad/\surd(Hz) or m/s/\surd(Hz))')
 

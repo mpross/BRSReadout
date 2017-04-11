@@ -1,5 +1,5 @@
 close all
-
+%Containers for final averaging
 avgVel=containers.Map('ValueType','any','KeyType','double');
 avgV=containers.Map('ValueType','any','KeyType','double');
 avgVelErr=containers.Map('ValueType','any','KeyType','double');
@@ -8,32 +8,29 @@ avgVelP=containers.Map('ValueType','any','KeyType','double');
 avgVP=containers.Map('ValueType','any','KeyType','double');
 avgVelErrP=containers.Map('ValueType','any','KeyType','double');
 avgVErrP=containers.Map('ValueType','any','KeyType','double');
-fileName={'GPS1143962787_6_9Earthquake.mat','GPS1144888165_7_8Earthquake.mat','GPS1149581095_5_2Earthquake.mat',...
-    'GPS1149331885_6_2Earthquake.mat','GPS1156069817_Burma.mat','GPS1156480217_Atlantic.mat','GPS1156782617_NewZealand.mat',...
-    'GPS1157149817_Russia.mat','GPS1163070017_7k_EQ5.mat','GPS1163797217_7k_EQ6.mat','GPS1166005817_10k_EQ7_PapNG.mat','GPS1155000017_7k_EQ8_NewC.mat'};
-newArray=[false, false, false, false, true, true, true, true, true, true, true, true,true];
+%6.7 Vanuatu 4/6/16, 7.1 Atlantic 8/29/16, 7.8 New Zealand 11/13/16
+%7.9 Papa New Guinea 12/17/16, New Caledonia 8/12/16
+fileName={'GPS1143962787_6_9Earthquake.mat','GPS1156480217_Atlantic.mat','GPS1163070017_7k_EQ5.mat','GPS1166005817_10k_EQ7_PapNG.mat','GPS1155000017_7k_EQ8_NewC.mat'};
+%We changed data file formats so this accommodates both formats
+newArray=[false, true, true, true, true];
 sampf =8;
 noiseThreshold=0.5; % approx 5*BRS noise
-phaseThreshold=20; %20
-plIndex=0;
-ampIter=0;
+phaseThreshold=20; % threshold for phase between seismometer signal and BRS signal
+plIndex=0; %plotting index
 avgAng=[];
+avgErrAng=[];
 
-for m=[0 5 8 10 11]
-    ampIter=ampIter+1;
+for m=[0 1 2 3 4]
     Astop1 = 20;
     Apass  = .5;
     Astop2 =20;
     velA=[];
-    ang=[];
-    angTim=[];
-    velTim=[];
-    lagsX=[];
-    lagsY=[];      
+    velS=[];
+    ang=[];;      
     delta_t_X=[];
     delta_t_Y=[];
     errVelA=[];
-    bootAng=[];    
+    errAng=[];  
     errVelS=[];
     seriesX=[];
     seriesY=[];
@@ -41,12 +38,6 @@ for m=[0 5 8 10 11]
     seriesRX=[];    
     r2zavg=[];
     r2rxavg=[];
-    ampX=[];
-    ampY=[];
-    ampZ=[];
-    ampRX=[];
-    ampTim=[];
-    velS=[];
     plIndex=plIndex+1;
    
     startFreq=0.025;
@@ -119,28 +110,27 @@ for m=[0 5 8 10 11]
     % %Apply filters
     %
     T240cal_vel = lsim(STSInvertFilt,ETMYZ,Rot_time);
-    T240cal_disp = lsim(IntFilt,T240cal_vel,Rot_time);
+%     T240cal_disp = lsim(IntFilt,T240cal_vel,Rot_time);
     ETMYZ_out=filter(bb,aa,filter(bb,aa,T240cal_vel));
     
     T240cal_vel = lsim(STSInvertFilt,ETMXZ,Rot_time);
-    T240cal_disp = lsim(IntFilt,T240cal_vel,Rot_time);
+%     T240cal_disp = lsim(IntFilt,T240cal_vel,Rot_time);
     ETMXZ_out=filter(bb,aa,filter(bb,aa,T240cal_vel));
 
     T240cal_vel = lsim(STSInvertFilt,ITMYZ,Rot_time);
-    T240cal_disp = lsim(IntFilt,T240cal_vel,Rot_time);
+%     T240cal_disp = lsim(IntFilt,T240cal_vel,Rot_time);
     ITMYZ_out=filter(bb,aa,filter(bb,aa,T240cal_vel));
 
     BRSYcal_out = lsim(BRSYInvertFilt,BRSY, Rot_time);
     BRSY_out=filter(bb,aa,filter(bb,aa,BRSYcal_out));
 
     tim=(1:length(ETMYZ_out))/sampf;
-
+ 
     ETMXZ_out=ETMXZ_out(300*sampf:length(ETMXZ_out));
     ETMYZ_out=ETMYZ_out(300*sampf:length(ETMYZ_out));
     ITMYZ_out=ITMYZ_out(300*sampf:length(ITMYZ_out));
     BRSY_out=BRSY_out(300*sampf:length(BRSY_out));
-    errVelA=[];
-    bootAng=[];
+    %Gives the filters time to ring down
     startTime=1000*sampf;
     endTime=length(ETMXZ_out);
     ampThreshold=max(BRSY_out*1e9)/5;
@@ -161,7 +151,6 @@ for m=[0 5 8 10 11]
         Y=filtData(startTime:endTime);
         filtData=filter(d,ITMYZ_out-mean(ITMYZ_out));
         C=filtData(startTime:endTime);
-        filtData=filter(d,ETMYZ_out-mean(ETMYZ_out));
         seriesZ=Y;
         filtData=filter(d,BRSY_out-mean(BRSY_out)); 
         seriesRX=filtData(startTime:endTime);
@@ -176,52 +165,64 @@ for m=[0 5 8 10 11]
         r2rx=[];        
         fitLength=floor(1/(freq/sampf)/4);
         for j=1:floor(length(seriesRX)/fitLength)-2
-           tim=(j*fitLength:(j+1)*fitLength)'./sampf;
-           cut=1e9*seriesZ(j*fitLength:(j+1)*fitLength);
-           g = fittype( @(a,b,cen_fr,x) a*sin(2*pi*cen_fr*x)+b*cos(2*pi*cen_fr*x), 'problem', 'cen_fr' );
-           [myfit,st] = fit(tim,cut, g,'problem',freq,'StartPoint', [1, 1]);
-           r2z=[r2z;st.rsquare];
-           a1=abs(coeffvalues(myfit));
-           cut=1e12*seriesRX(j*fitLength:(j+1)*fitLength);
-           g = fittype( @(a,b,cen_fr,x) a*sin(2*pi*cen_fr*x)+b*cos(2*pi*cen_fr*x), 'problem', 'cen_fr' );
-           [myfit,st] = fit(tim,cut, g,'problem',freq,'StartPoint', [1, 1]);
-           r2rx=[r2rx;st.rsquare];
-           a2=abs(coeffvalues(myfit));           
-           FitData(j*fitLength:(j+1)*fitLength) = a2(1)*sin(2*pi*freq.*tim)+a2(2)*cos(2*pi*freq.*tim);
-           % Extracting amplitude as a complex number
-           if (abs(r2rx)>0) 
-               if (abs(r2z)>0)
-                   if(abs(angle(a1(2)+i*a1(1))-angle((a2(2)+i*a2(1))))<(phaseThreshold*pi/180) && ...
-                           abs((a2(2)+a2(1)*i)/1e3)>=noiseThreshold && abs((a2(2)+a2(1)*i)/1e3)>=ampThreshold) % Phase and Amplitude Threshold
-                       tempZ=[tempZ abs(a1(2))+abs(a1(1))*i];
-                       tempRX=[tempRX (abs(a2(2))+abs(a2(1))*i)/1e3];
-                   else
-                       tempZ=[tempZ NaN];
-                       tempRX=[tempRX NaN];
+           if (max(abs(1e9*seriesRX(j*fitLength:(j+2)*fitLength)))>noiseThreshold)
+               tim=(j*fitLength:(j+1)*fitLength)'./sampf;
+               %Fitting the STS_Z. The signal is scaled to allow better fitting
+               cut=1e9*seriesZ(j*fitLength:(j+1)*fitLength);
+               g = fittype( @(a,b,cen_fr,x) a*sin(2*pi*cen_fr*x)+b*cos(2*pi*cen_fr*x), 'problem', 'cen_fr' );
+               [myfit,st] = fit(tim,cut, g,'problem',freq,'StartPoint', [1, 1]);
+               r2z=[r2z;st.rsquare];
+               a1=abs(coeffvalues(myfit));
+               %Fitting the BRS
+               cut=1e12*seriesRX(j*fitLength:(j+1)*fitLength);
+               g = fittype( @(a,b,cen_fr,x) a*sin(2*pi*cen_fr*x)+b*cos(2*pi*cen_fr*x), 'problem', 'cen_fr' );
+               [myfit,st] = fit(tim,cut, g,'problem',freq,'StartPoint', [1, 1]);
+               r2rx=[r2rx;st.rsquare];
+               a2=abs(coeffvalues(myfit));           
+               FitData(j*fitLength:(j+1)*fitLength) = a2(1)*sin(2*pi*freq.*tim)+a2(2)*cos(2*pi*freq.*tim);
+               % Extracting amplitude as a complex number
+               if (abs(r2rx)>0) % Fit quality check
+                   if (abs(r2z)>0)
+                       if(abs(angle(a1(2)+i*a1(1))-angle((a2(2)+i*a2(1))))<(phaseThreshold*pi/180) && ...
+                               abs((a2(2)+a2(1)*i)/1e3)>=noiseThreshold && abs((a2(2)+a2(1)*i)/1e3)>=ampThreshold) % Phase and Amplitude Threshold
+                           tempZ=[tempZ abs(a1(2))+abs(a1(1))*i];
+                           tempRX=[tempRX (abs(a2(2))+abs(a2(1))*i)/1e3];
+                       else
+                           tempZ=[tempZ NaN];
+                           tempRX=[tempRX NaN];
+                       end
                    end
                end
+           else
+               tempZ=[tempZ NaN];
+               tempRX=[tempRX NaN];
            end
         end
-        figure(6)
-        histogram(((angle(tempRX)-angle(tempZ))*180/pi),20)
-        legend('phase')
+        
         % Diagnostic plots
         figure(1)
-        plot((1:length(tempZ)),abs(tempZ)/1000,(1:length(tempRX)),abs(tempRX))
+        plot((1:length(tempZ))*fitLength/sampf,abs(tempZ)/1000,(1:length(tempRX))*fitLength/sampf,abs(tempRX))
+        title('Fit Amplitudes')
+        ylabel('Amplitude (nrad or um)')
+        xlabel('Time (s)')
+        legend('STS_Z','BRS')
+        set(gca,'FontSize',12)
+        grid on
         
         figure(2)
         line1=plot((1:length(FitData))/sampf,seriesRX*1e9,(1:length(FitData))/sampf,FitData/1e3,'--',(1:length(FitData))/sampf,...
             noiseThreshold*(1:length(FitData))./(1:length(FitData)),(1:length(FitData))/sampf,ampThreshold*(1:length(FitData))./(1:length(FitData)));
         ylabel('Angle (nrad)')
         xlabel('Time (s)')
+        title('BRS Filtered Data and Fit')
         legend('Data','Fit','Noise Threshold','Amp Threshold')
-        set(line1,'LineWidth',1.2)
         set(gca,'FontSize',12)
         grid on
 
         figure(3)            
         line2=plot((startTime:endTime)/sampf,X,(startTime:endTime)/sampf,Y+1e-6,(startTime:endTime)/sampf,C+2e-6);
-        legend('X','Y','C')
+        title('Filtered Seismometer Signals')
+        legend('EndX','EndY','Corner')
         set(line2,'LineWidth',1.2)
         set(gca,'FontSize',12)
         grid on
@@ -231,37 +232,32 @@ for m=[0 5 8 10 11]
         delta_t_X=[];
         delta_t_Y=[];
         len=floor(4/freq*sampf);
+        aTime=[];
         for j=1:floor(length(X)/len)-2
             if(max(abs(tempRX(floor(j*len/fitLength):floor((j+1)*len/fitLength))))>=noiseThreshold &&...
                     max(abs(tempRX(floor(j*len/fitLength):floor((j+1)*len/fitLength))))>=ampThreshold) % Amplitude noiseThreshold
                 cornerCut=C(j*len:(j+1)*len);
                 xCut=X(j*len:(j+1)*len);
                 yCut=Y(j*len:(j+1)*len);
+                %Cross corr calculation with windowed data to remove a discontinuity at zero
                 [crossY,~] = xcorr(tukeywin(length(cornerCut),0.1).*cornerCut,tukeywin(length(yCut),0.1).*yCut);
                 [crossX,lags]=xcorr(tukeywin(length(cornerCut),0.1).*cornerCut,tukeywin(length(xCut),0.1).*xCut);
 
                 crossX=abs(crossX);
                 crossY=abs(crossY);
-
+                %Finds the points within +/- 3/2 wavelength around the peak value
                 peak=crossX(floor(find(crossX==max(crossX))-sampf/freq/8/1.5):floor(find(crossX==max(crossX))+sampf/freq/8/1.5));
                 peakLags=lags(floor(find(crossX==max(crossX))-sampf/freq/8/1.5):floor(find(crossX==max(crossX))+sampf/freq/8/1.5))';
-                
+                %Fits peak with gaussian
                 f=fit(peakLags,10^12*peak,fittype('gauss1'));
                 delta_t_X=[delta_t_X f.b1/sampf];
-
-                figure(4)
-                line3=plot(lags/sampf,crossX,peakLags/sampf,f.a1*exp(-((peakLags-f.b1)/f.c1).^2)/10^12);
-                ylabel('Cross Cor')
-                xlabel('Lag (s)')
-                legend('Data','Fit')
-                set(line3,'LineWidth',1.2)
-                set(gca,'FontSize',12)
-                grid on
 
                 peak=crossY(floor(find(crossY==max(crossY))-sampf/freq/8/1.5):floor(find(crossY==max(crossY))+sampf/freq/8/1.5));
                 peakLags=lags(floor(find(crossY==max(crossY))-sampf/freq/8/1.5):floor(find(crossY==max(crossY))+sampf/freq/8/1.5))';
                 f=fit(peakLags,10^12*peak,fittype('gauss1'));
                 delta_t_Y=[delta_t_Y f.b1/sampf];
+                
+                aTime=[aTime j*len/sampf];
             end
         end
                 
@@ -269,11 +265,15 @@ for m=[0 5 8 10 11]
         % Velocity and angle of incidence calculations using array
         % angle of incidence=arctan((time delay along Y)/(time delay along X))
         % velocity=4 km/ sqrt((time delay along X)^2 + (time delay along Y)^2)
-        tempAng=atan2((delta_t_Y(find(not(isnan(delta_t_Y))))),(delta_t_X(find(not(isnan(delta_t_X))))))*180/pi;
-        tempVel=4e3./sqrt((delta_t_X(find(not(isnan(delta_t_X))))).^2+(delta_t_Y(find(not(isnan(delta_t_Y))))).^2);
-        ang=[ang mean(tempAng(find(not(isinf(tempVel)))))];
-        velA=[velA 4e3./sqrt(mean(delta_t_X(find(not(isnan(delta_t_X))))).^2+mean(delta_t_Y(find(not(isnan(delta_t_Y))))).^2)];
-        errVelA=[errVelA; std(abs(tempVel(find(not(isinf(tempVel))))))];
+        tX=mean(delta_t_X(find(not(isnan(delta_t_X)))));
+        tY=mean(delta_t_Y(find(not(isnan(delta_t_Y)))));
+        errTX=std(delta_t_X(find(not(isnan(delta_t_X)))));
+        errTY=std(delta_t_Y(find(not(isnan(delta_t_Y)))));
+        
+        ang=[ang atan2(tY,tX)*180/pi];
+        errAng=[errAng sqrt((errTX^2*tY^2/tX^2+errTY^2)/(tX^2*(1+tY^2/tX^2)))*180/pi];
+        velA=[velA 4e3./sqrt(tX^2+tY^2)];
+        errVelA=[errVelA; sqrt((4e3)^2*(errTX^2+errTY^2)/(tX^2+tY^2)^3)];
  
         % Average phase velocity calculations.
         % velocity=-(amplitude of vertical velocity)/(amplitude of rotation)* sin(angle of incidence)
@@ -283,37 +283,40 @@ for m=[0 5 8 10 11]
         avgEl=0;
         pltV=[];
         seriesVS=[];
+        sTime=[];
         for p=1:min([length(tempZ) length(tempRX)])
             if(abs(tempRX(p))>=noiseThreshold && abs(tempRX(p))>=ampThreshold) % Amplitude noiseThreshold
                 if(not(isnan(abs(abs(tempZ(p)./tempRX(p).*sin(ang(a+1)*pi/180)))))) % NaN check
                     seriesVS=[seriesVS abs(tempZ(p)./tempRX(p).*sin(ang(a+1)*pi/180))];
+                    sTime=[sTime p*fitLength/sampf];
                 end
             end
         end
-        seriesVS;
         errVelS=[errVelS; std(seriesVS)];
         velS=[velS; mean(seriesVS)];
         r2zavg=[mean(r2z);r2zavg];
         r2rxavg=[mean(r2rx);r2rxavg];
         % Diagnostic velocity plot       
         figure(5)
-        line4=plot((1:length(seriesVS))*fitLength,seriesVS,(1:length(delta_t_X))*50*sampf/2,4e3./sqrt((delta_t_X).^2+(delta_t_Y).^2));
+        line4=plot(sTime,seriesVS,aTime,4e3./sqrt((delta_t_X).^2+(delta_t_Y).^2));
         set(line4,'LineWidth',1.2)
         set(gca,'FontSize',12)
+        title('Velocity Over Time (One freq bin, time vectors are not the same)')
         legend('Single Station','Array')
         ylim([0 1e4])
         grid on    
         
     end   
     avgAng=[avgAng; mean(ang(find(not(isnan(ang)))))]
+    avgErrAng=[avgErrAng; sum(errAng(find(not(isnan(errAng)))).^2)/length(errAng)^2]
  %% Single Event Plotting
 
-
+    %Another NaN check
     cInd1=find(not(isnan(velA)));
     cInd2=find(not(isnan(velS)));
     cInd=intersect(cInd1,cInd2);
-    
-    fig1=figure(6+plIndex)
+    %Velocity dispersion plot for each event
+    fig1=figure(6+plIndex);
     hold on
     line4=errorbar(((0:length(velS)-1)*freqStep+startFreq),velS'/1000,-errVelS'/1000,errVelS'/1000);
     line5=errorbar(((0:length(velA)-1)*freqStep+startFreq),velA/1000,-errVelA'/1000,errVelA'/1000,'--');
@@ -343,8 +346,8 @@ for m=[0 5 8 10 11]
     box on
     hold off
     
-    print(fig1,'-dpng',strcat('figure',num2str(plIndex+1),'.png'))
-
+    %Creating a vector of different length vectors corresponding to the
+    %velocities of all the earthquakes that share a bin
     comV=intersect(cInd1,cell2mat(avgV.keys));
     comVel=intersect(cInd2,cell2mat(avgVel.keys));
     for k=1:length(comV)
@@ -363,19 +366,20 @@ for m=[0 5 8 10 11]
     newVel=setxor(cInd2,intersect(cInd2,cell2mat(avgVel.keys)));
     for k=1:length(newV)
         if(not(isnan(velS(newV(k))))&&not(isinf(velS(newV(k))))&&not(isnan(errVelS(newV(k)))))
-            avgV(newV(k))=velS(newV(k))
+            avgV(newV(k))=velS(newV(k));
             avgVErr(newV(k))=errVelS(newV(k));
         end
     end
     for k=1:length(newVel)
         if(not(isnan(velA(newVel(k))))&&not(isinf(velA(newVel(k))))&&not(isnan(errVelA(newVel(k)))))
-            avgVel(newVel(k))=velA(newVel(k))
+            avgVel(newVel(k))=velA(newVel(k));
             avgVelErr(newVel(k))=errVelA(newVel(k));
         end
     end
         
 end
 %%
+% Averaging down to one velocity per frequency bin
 cInd1=cell2mat(avgV.keys);
 for k=1:length(avgV.keys)
     N=length(avgV(cInd1(k)));
@@ -389,7 +393,8 @@ for k=1:length(avgVel.keys)
     avgVelErrP(cInd2(k))=sqrt(sum(avgVelErr(cInd2(k)).^2))/N;
 end
 
-fig2=figure(20)
+% Final dispersion plot for both methods
+fig2=figure(20);
 hold on
 l=errorbar(((cInd1-1)*freqStep+startFreq)+10^-4,cell2mat(avgVP.values)/1000,-cell2mat(avgVErrP.values)/1000,cell2mat(avgVErrP.values)/1000);
 ll=errorbar(((cInd2-1)*freqStep+startFreq),cell2mat(avgVelP.values)/1000,-cell2mat(avgVelErrP.values)/1000,cell2mat(avgVelErrP.values)/1000,'--');
