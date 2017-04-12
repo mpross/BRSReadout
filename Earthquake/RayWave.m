@@ -157,15 +157,14 @@ for m=[0 1 2 3 4]
         
         % Fitting of the BRS and EndY seiesmometer signals to a*sin(w*t)+b*cos(w*t)
         FitData=zeros(length(seriesZ),1);
-        tempX=[];
-        tempY=[];
+
         tempZ=[];
         tempRX=[];
         r2z=[];
         r2rx=[];        
         fitLength=floor(1/(freq/sampf)/4);
         for j=1:floor(length(seriesRX)/fitLength)-2
-           if (max(abs(1e9*seriesRX(j*fitLength:(j+2)*fitLength)))>noiseThreshold)
+           if (max(abs(1e9*seriesRX(j*fitLength:(j+2)*fitLength)))>ampThreshold)
                tim=(j*fitLength:(j+1)*fitLength)'./sampf;
                %Fitting the STS_Z. The signal is scaled to allow better fitting
                cut=1e9*seriesZ(j*fitLength:(j+1)*fitLength);
@@ -178,7 +177,7 @@ for m=[0 1 2 3 4]
                g = fittype( @(a,b,cen_fr,x) a*sin(2*pi*cen_fr*x)+b*cos(2*pi*cen_fr*x), 'problem', 'cen_fr' );
                [myfit,st] = fit(tim,cut, g,'problem',freq,'StartPoint', [1, 1]);
                r2rx=[r2rx;st.rsquare];
-               a2=abs(coeffvalues(myfit));           
+               a2=abs(coeffvalues(myfit));
                FitData(j*fitLength:(j+1)*fitLength) = a2(1)*sin(2*pi*freq.*tim)+a2(2)*cos(2*pi*freq.*tim);
                % Extracting amplitude as a complex number
                if (abs(r2rx)>0) % Fit quality check
@@ -301,7 +300,7 @@ for m=[0 1 2 3 4]
         line4=plot(sTime,seriesVS,aTime,4e3./sqrt((delta_t_X).^2+(delta_t_Y).^2));
         set(line4,'LineWidth',1.2)
         set(gca,'FontSize',12)
-        title('Velocity Over Time (One freq bin, time vectors are not the same)')
+        title('Velocity Over Time (One freq bin)')
         legend('Single Station','Array')
         ylim([0 1e4])
         grid on    
