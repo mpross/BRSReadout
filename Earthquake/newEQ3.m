@@ -6,7 +6,7 @@ sampf = 8;
 
 % if (exist('GPS1166005817_10k_EQ7_PapNG','file')&& fileload==true)
 
-        myfile = load('GPS1166005817_10k_EQ7_PapNG.mat');
+        myfile = load('PNG2EQData.mat');
 
         mydata = myfile.rawdata8Hz1;
 %         mydata=myfile.mydata;
@@ -19,7 +19,8 @@ sampf = 8;
 
         rawITMYZ = mydata(:,3);
 
-        rawETMYY = mydata(:,5);
+%         rawETMYY = mydata(:,5);
+
 %         rawBRSY= mydata(:,10);
 % 
 %         rawETMXZ = mydata(:,3);
@@ -29,16 +30,26 @@ sampf = 8;
 %         rawITMYZ = mydata(:,9);
 % 
 %         rawETMYY = mydata(:,5);
+        
+%         rawBRSY= mydata(:,4);
+% 
+%         rawETMXZ = mydata(:,3);
+% 
+%         rawETMYZ = mydata(:,2);
+% 
+%         rawITMYZ = mydata(:,1);
+% 
+        rawETMYY = zeros(length(rawITMYZ),1);
 
 % end
 
 
 
-sttime = 000*sampf + 1;
+sttime = 400*sampf + 1;
 
-edtime = sttime + 2000*sampf;
+% edtime = sttime + 3000*sampf;
 
-%edtime = length(rawBRSY);
+edtime = length(rawBRSY);
 
 
 
@@ -138,7 +149,8 @@ Navg2=9;
 
 %% Plots
 
-
+figure(4)
+plot(BRSY_out)
 
 figure(1)
 
@@ -154,13 +166,13 @@ figure(1)
 
     %xlabel('time (s)');
 
-%     xlim([0 4000])
+    xlim([0 4300])
 
-    ylim([-5e-5 5e-5])
+    ylim([-2e-4 2e-4])
 
     set(gca,'xtick',500*[0:10])
 
-    set(gca,'ytick',2e-5*[-3:3])
+    set(gca,'ytick',5e-5*[-4:4])
 
     set(gca,'xticklabel',[])
 
@@ -180,15 +192,15 @@ figure(1)
 
     set(gca,'FontSize',15)
 
-%     xlim([0 4000])
+    xlim([0 4300])
 
-    ylim([-2e-8 2e-8])
+    ylim([-4e-8 4e-8])
 
     %xlabel('time (s)');
 
     set(gca,'xtick',500*[0:10])
 
-    set(gca,'ytick',1e-8*[-2:2])
+    set(gca,'ytick',1e-8*[-4:4])
 
     ylabel('angle (rad)');
 
