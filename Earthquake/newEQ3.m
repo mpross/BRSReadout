@@ -20,7 +20,7 @@ sampf = 8;
         rawITMYZ = mydata(:,3);
 
 %         rawETMYY = mydata(:,5);
-
+% 
 %         rawBRSY= mydata(:,10);
 % 
 %         rawETMXZ = mydata(:,3);
@@ -45,9 +45,9 @@ sampf = 8;
 
 
 
-sttime = 400*sampf + 1;
+sttime =400*sampf + 1;
 
-% edtime = sttime + 3000*sampf;
+% edtime = sttime + 2000*sampf;
 
 edtime = length(rawBRSY);
 
@@ -166,7 +166,7 @@ figure(1)
 
     %xlabel('time (s)');
 
-    xlim([0 4300])
+    xlim([0 4000])
 
     ylim([-2e-4 2e-4])
 
@@ -192,7 +192,7 @@ figure(1)
 
     set(gca,'FontSize',15)
 
-    xlim([0 4300])
+    xlim([0 4000])
 
     ylim([-4e-8 4e-8])
 
@@ -202,7 +202,7 @@ figure(1)
 
     set(gca,'ytick',1e-8*[-4:4])
 
-    ylabel('angle (rad)');
+    ylabel('Angle (rad)');
 
     grid on
 

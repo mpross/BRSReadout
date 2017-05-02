@@ -1,4 +1,4 @@
-close all
+% close all
 % Containers for final averaging
 avgVel=containers.Map('ValueType','any','KeyType','double');
 avgV=containers.Map('ValueType','any','KeyType','double');
@@ -13,9 +13,11 @@ avgVErrS=containers.Map('ValueType','any','KeyType','double');
 %6.7 Vanuatu 4/6/16, 7.1 Atlantic 8/29/16, 7.8 New Zealand 11/13/16
 %7.9 Papa New Guinea 12/17/16, 7.2 New Caledonia 8/12/16, 
 %7.9 Papa New Guinea 1/22/17, 6.5 Botswana 4/3/17
-fileName={'GPS1143962787_6_9Earthquake.mat','GPS1156480217_Atlantic.mat','GPS1163070017_7k_EQ5.mat','GPS1166005817_10k_EQ7_PapNG.mat','GPS1155000017_7k_EQ8_NewC.mat','PNG2EQData.mat'};
+fileName={'GPS1143962787_6_9Earthquake.mat','GPS1156480217_Atlantic.mat',...
+    'GPS1163070017_7k_EQ5.mat','GPS1166005817_10k_EQ7_PapNG.mat','GPS1155000017_7k_EQ8_NewC.mat','PNG2EQData.mat'...
+    'GPS1177682913_6_3_Alaska.mat','GPS1177676532_6_2_Alaska.mat','GPS1171992542_6_9_Fiji.mat'};
 %We changed data file formats so this accommodates different formats
-newArray=[1, 2, 2, 2, 2, 3];
+newArray=[1, 2, 2, 2, 2, 3, 3, 3, 3];
 sampf =8;
 noiseThreshold=0.5; % approx 5*BRS noise
 phaseThreshold=20; % threshold for phase between seismometer signal and BRS signal
@@ -24,7 +26,6 @@ avgAng=[];
 avgErrAng=[];
 
  for m=0:5
-% for m=4
     Astop1 = 20;
     Apass  = .5;
     Astop2 = 20;
@@ -85,7 +86,7 @@ avgErrAng=[];
         end
         Sttime =9;
         Endtime=length(rawBRSY)-9;
-% 
+
         ETMXZ=1e-9 *rawETMXZ(Sttime:Endtime);
         ETMYZ=1e-9 *rawETMYZ(Sttime:Endtime);
         ITMYZ=1e-9 *rawITMYZ(Sttime:Endtime);
@@ -94,7 +95,8 @@ avgErrAng=[];
 %         ETMYZ=1e-9 *rawETMYZ(Sttime+8:Endtime+8);
 %         ITMYZ=1e-9 *rawETMYZ(Sttime:Endtime);
 %         BRSY=1/4e3*1e-9*rawETMYZ(Sttime+8:Endtime+8);
-    end
+    end    
+    
     localg = 9.8;
     BRSscale=1;  
     Navg =9;
@@ -109,7 +111,7 @@ avgErrAng=[];
     Rot_time = transpose(1/sampf * (0:1:length(BRSY)-1));
 
     %% Response inversion
-    [bb,aa] = butter(3,[2*0.01/sampf 2*0.100/sampf],'bandpass');
+    [bb,aa] = butter(3,[2*0.01/sampf 2*1.00/sampf],'bandpass');
 
     % %STS response inversion filter
     STSInvertFilt = zpk(-2*pi*[pairQ(8.3e-3,0.7)],-2*pi*[0 0],1);
@@ -129,15 +131,12 @@ avgErrAng=[];
     % %Apply filters
     %
     T240cal_vel = lsim(STSInvertFilt,ETMYZ,Rot_time);
-%     T240cal_disp = lsim(IntFilt,T240cal_vel,Rot_time);
     ETMYZ_out=filter(bb,aa,ETMYZ);
     
     T240cal_vel = lsim(STSInvertFilt,ETMXZ,Rot_time);
-%     T240cal_disp = lsim(IntFilt,T240cal_vel,Rot_time);
     ETMXZ_out=filter(bb,aa,ETMXZ);
 
     T240cal_vel = lsim(STSInvertFilt,ITMYZ,Rot_time);
-%     T240cal_disp = lsim(IntFilt,T240cal_vel,Rot_time);
     ITMYZ_out=filter(bb,aa,ITMYZ);
 
     BRSYcal_out = lsim(BRSYInvertFilt,BRSY, Rot_time);
@@ -165,20 +164,15 @@ avgErrAng=[];
     title('BRSY')
 
     %Gives the filters time to ring down
-    startTime=400*sampf;
+    startTime=500*sampf;
     endTime=length(ETMXZ_out);
-    ampThreshold=max(BRSY_out*1e9)/5;
+%     endTime=4000*sampf;
+    ampThreshold=max(BRSY_out*1e9)/10;
       
     for a=0:iter
         %% Data Crunching  
         % Bandpass filtering to get data into frequency bins
         freq=(startFreq+a*freqStep);
-%         d = designfilt('bandpassiir', ...
-%           'StopbandFrequency1',(a-2)*freqStep+startFreq,'PassbandFrequency1', (a-1)*freqStep+startFreq, ...
-%           'PassbandFrequency2',(a+1)*freqStep+startFreq,'StopbandFrequency2', (a+2)*freqStep+startFreq, ...
-%           'StopbandAttenuation1',Astop1,'PassbandRipple', Apass, ...
-%           'StopbandAttenuation2',Astop2, ...
-%           'DesignMethod','butter','SampleRate',sampf);
         [bb,aa]= butter(3,[2*((a-1/2)*freqStep+startFreq)/sampf 2*((a+1/2)*freqStep+startFreq)/sampf],'bandpass');
 
         filtData=filter(bb,aa,ETMXZ_out-mean(ETMXZ_out));
@@ -207,13 +201,13 @@ avgErrAng=[];
                g = fittype( @(a,b,cen_fr,x) a*sin(2*pi*cen_fr*x)+b*cos(2*pi*cen_fr*x), 'problem', 'cen_fr' );
                [myfit,st] = fit(tim,cut, g,'problem',freq,'StartPoint', [1, 1]);
                r2z=[r2z;st.rsquare];
-               a1=abs(coeffvalues(myfit));
+               a1=coeffvalues(myfit);
                %Fitting the BRS
                cut=1e12*seriesRX(j*fitLength:(j+1)*fitLength);
                g = fittype( @(a,b,cen_fr,x) a*sin(2*pi*cen_fr*x)+b*cos(2*pi*cen_fr*x), 'problem', 'cen_fr' );
                [myfit,st] = fit(tim,cut, g,'problem',freq,'StartPoint', [1, 1]);
                r2rx=[r2rx;st.rsquare];
-               a2=abs(coeffvalues(myfit));
+               a2=coeffvalues(myfit);
                FitData(j*fitLength:(j+1)*fitLength) = a2(1)*sin(2*pi*freq.*tim)+a2(2)*cos(2*pi*freq.*tim);
                % Extracting amplitude as a complex number
                if (abs(r2rx)>0) % Fit quality check
@@ -338,9 +332,10 @@ avgErrAng=[];
         velS=[velS; mean(seriesVS(find(not(isnan(seriesVS)))))];
         r2zavg=[mean(r2z);r2zavg];
         r2rxavg=[mean(r2rx);r2rxavg];
-        % Diagnostic velocity plot       
+        % Diagnostic velocity plot   
         figure(4)
-        line4=plot(sTime,seriesVS,aTime,4e3./sqrt((delta_t_X).^2+(delta_t_Y).^2),'--');
+        hold on
+        line4=plot(sTime-2700+100,seriesVS,aTime-2700+100,4e3./sqrt((delta_t_X).^2+(delta_t_Y).^2)-500,'--');
         set(line4,'LineWidth',1.2)
         set(gca,'FontSize',12)
         title('Velocity Over Time (One freq bin)')
@@ -436,27 +431,27 @@ end
 cInd1=cell2mat(avgV.keys);
 for k=1:length(avgV.keys)
     N=length(avgV(cInd1(k)));
-%     avgVErrP(cInd1(k))=sqrt(1/sum(1./avgVErr(cInd1(k)).^2));
-%     avgVP(cInd1(k))=sum(abs(avgV(cInd1(k))./(avgVErr(cInd1(k)).^2)))/sum(1/avgVErrP(cInd1(k)).^2);
-    avgVErrP(cInd1(k))=std(avgV(cInd1(k)));
+    avgVErrP(cInd1(k))=sqrt(1/sum(1./avgVErr(cInd1(k)).^2));
+    avgVP(cInd1(k))=sum(abs(avgV(cInd1(k))./(avgVErr(cInd1(k)).^2)))/sum(1/avgVErrP(cInd1(k)).^2);
+%     avgVErrP(cInd1(k))=std(avgV(cInd1(k)));
 %     avgVErrP(cInd1(k))=sqrt(sum(avgVErr(cInd1(k)).^2))/length(avgVErr(cInd1(k)));
-    avgVP(cInd1(k))=mean(avgV(cInd1(k)));
+%     avgVP(cInd1(k))=mean(avgV(cInd1(k)));
 end
 cInd2=cell2mat(avgVel.keys);
 for k=1:length(avgVel.keys)
     N=length(avgVel(cInd2(k)));
-%     avgVelErrP(cInd2(k))=sqrt(1/sum(1./avgVelErr(cInd2(k)).^2));
-%     avgVelP(cInd2(k))=sum(abs(avgVel(cInd2(k))./(avgVelErr(cInd2(k)).^2)))/sum(1/avgVelErrP(cInd2(k)).^2);
-    avgVelErrP(cInd2(k))=std(avgVel(cInd2(k)));
+    avgVelErrP(cInd2(k))=sqrt(1/sum(1./avgVelErr(cInd2(k)).^2));
+    avgVelP(cInd2(k))=sum(abs(avgVel(cInd2(k))./(avgVelErr(cInd2(k)).^2)))/sum(1/avgVelErrP(cInd2(k)).^2);
+%     avgVelErrP(cInd2(k))=std(avgVel(cInd2(k)));
 %     avgVelErrP(cInd2(k))=sqrt(sum(avgVelErr(cInd2(k)).^2))/length(avgVelErr(cInd2(k)));
-    avgVelP(cInd2(k))=mean(avgVel(cInd2(k)));
+%     avgVelP(cInd2(k))=mean(avgVel(cInd2(k)));
 end
 
 % Final dispersion plot for both methods
 fig2=figure(21);
 hold on
-l=errorbar(((cInd1-1)*freqStep+startFreq)+10^-4,cell2mat(avgV.values)/1000,-cell2mat(avgVErr.values)/1000,cell2mat(avgVErr.values)/1000);
-ll=errorbar(((cInd2-1)*freqStep+startFreq),cell2mat(avgVel.values)/1000,-cell2mat(avgVelErr.values)/1000,cell2mat(avgVelErr.values)/1000,'--');
+l=errorbar(((cInd1-1)*freqStep+startFreq)+10^-4,cell2mat(avgVP.values)/1000,-cell2mat(avgVErrP.values)/1000,cell2mat(avgVErrP.values)/1000);
+ll=errorbar(((cInd2-1)*freqStep+startFreq),cell2mat(avgVelP.values)/1000,-cell2mat(avgVelErrP.values)/1000,cell2mat(avgVelErrP.values)/1000,'--');
 ylabel('Average Phase Velocity (km/s)')
 xlabel('Frequency (Hz)')
 legend('Single Station','Array')
@@ -465,7 +460,9 @@ set(ll,'LineWidth',1.2)
 set(gca,'FontSize',12)
 set(gca,'XTick',0.005*(0:100))
 set(gca,'YTick',.5*(0:100))
-xlim([0.01,0.11]);
+xlim([0.02,0.075]);
 ylim([0,8]);
 grid on
 box on
+
+RayWaveSpec

@@ -7,15 +7,20 @@ avgVelPS=containers.Map('ValueType','any','KeyType','double');
 avgVPS=containers.Map('ValueType','any','KeyType','double');
 avgVelErrPS=containers.Map('ValueType','any','KeyType','double');
 avgVErrPS=containers.Map('ValueType','any','KeyType','double');
+avgFreqsP=containers.Map('ValueType','any','KeyType','double');
 %6.7 Vanuatu 4/6/16, 7.1 Atlantic 8/29/16, 7.8 New Zealand 11/13/16
 %7.9 Papa New Guinea 12/17/16, 7.2 New Caledonia 8/12/16, 
 %7.9 Papa New Guinea 1/22/17, 6.5 Botswana 4/3/17
-fileName={'GPS1143962787_6_9Earthquake.mat','GPS1156480217_Atlantic.mat','GPS1163070017_7k_EQ5.mat','GPS1166005817_10k_EQ7_PapNG.mat','GPS1155000017_7k_EQ8_NewC.mat','PNG2EQData.mat'};
+fileName={'GPS1143962787_6_9Earthquake.mat','GPS1156480217_Atlantic.mat',...
+    'GPS1163070017_7k_EQ5.mat','GPS1166005817_10k_EQ7_PapNG.mat','GPS1155000017_7k_EQ8_NewC.mat','PNG2EQData.mat'...
+    'GPS1177682913_6_3_Alaska.mat','GPS1177676532_6_2_Alaska.mat','GPS1171992542_6_9_Fiji.mat'};
 %We changed data file formats so this accommodates different formats
-newArray=[1, 2, 2, 2, 2, 3];
+newArray=[1, 2, 2, 2, 2, 3, 3, 3, 3];
 sampf =8;
 
  for m=0:5
+% for m=[0 2 3 4 5]
+% for m=4
     Astop1 = 20;
     Apass  = .5;
     Astop2 = 20;
@@ -24,10 +29,7 @@ sampf =8;
     errAS=[]; 
     errSS=[];
     
-    startFreq=0.025;
-    freqStep=.005;
 %     mockFreq=0.06;
-    iter=floor((.1-startFreq)/freqStep);
     % Mock Data to produce 8*sqrt(2)/2 km/s with both methods at 45 degrees
     if m==-1
         mockFreq=0.06;
@@ -63,7 +65,7 @@ sampf =8;
         end
         Sttime =9;
         Endtime=length(rawBRSY)-9;
-% 
+
         ETMXZ=1e-9 *rawETMXZ(Sttime:Endtime);
         ETMYZ=1e-9 *rawETMYZ(Sttime:Endtime);
         ITMYZ=1e-9 *rawITMYZ(Sttime:Endtime);
@@ -87,7 +89,7 @@ sampf =8;
     Rot_time = transpose(1/sampf * (0:1:length(BRSY)-1));
 
     %% Response inversion
-    [bb,aa] = butter(3,[2*0.01/sampf 2*0.100/sampf],'bandpass');
+    [bb,aa] = butter(3,[2*0.02/sampf 2*1.00/sampf],'bandpass');
 
     % %STS response inversion filter
     STSInvertFilt = zpk(-2*pi*[pairQ(8.3e-3,0.7)],-2*pi*[0 0],1);
@@ -122,18 +124,30 @@ sampf =8;
     BRSY_out=filter(bb,aa,BRSYcal_out);
 
     time=(1:length(ETMYZ_out))/sampf;
+    
+%     startTime=find(abs(BRSY_out(1000:end))==max(abs(BRSY_out(1000:end))))-8000;
+    startTime=1;
+%     endTime=find(abs(BRSY_out(1000:end))==max(abs(BRSY_out(1000:end))))+24000;
+    endTime=length(BRSY_out);
+    
+    if(endTime>length(BRSY_out))
+        endTime=length(BRSY_out)-1;
+    end
+    if(startTime<0)
+        startTime=1;
+    end
  
-    ETMXZ_out=ETMXZ_out(100*sampf:length(ETMXZ_out));
-    ETMYZ_out=ETMYZ_out(100*sampf:length(ETMYZ_out));
-    ITMYZ_out=ITMYZ_out(100*sampf:length(ITMYZ_out));
-    BRSY_out=BRSY_out(100*sampf:length(BRSY_out));
+    ETMXZ_out=ETMXZ_out(startTime:endTime);
+    ETMYZ_out=ETMYZ_out(startTime:endTime);
+    ITMYZ_out=ITMYZ_out(startTime:endTime);
+    BRSY_out=BRSY_out(startTime:endTime);
     
     Navg2 = 1;
     [TfIYEY,~]=tfe2(ITMYZ_out,ETMYZ_out,1/sampf,Navg2,1,@hann);
     [TfIYEX,~]=tfe2(ITMYZ_out,ETMXZ_out,1/sampf,Navg2,1,@hann);
     [TfrXEY,freqs2]=tfe2(BRSY_out,ETMYZ_out,1/sampf,Navg2,1,@hann);
     
-    avgFreqs=[];
+    avgFreqs=(0:20)*0.005+0.02;
     
     avgXCS=[];
     avgYCS=[];
@@ -143,20 +157,18 @@ sampf =8;
     errYCS=[];
     errYRS=[];
     
-    for fI=1:floor(length(freqs2)/20)-1
-        if(freqs2(fI*20)<0.1)
-            avgFreqs=[avgFreqs mean(freqs2(fI*20:(fI+1)*20))];
+    for fI=1:floor(length(avgFreqs))-1
+            aInd=intersect(find(freqs2>avgFreqs(fI)),find(freqs2<avgFreqs(fI+1)));
+            avgXCS=[avgXCS mean(angle(TfIYEX(aInd)))];
+            avgYCS=[avgYCS mean(angle(TfIYEY(aInd)))];
+            avgYRS=[avgYRS mean(abs(TfrXEY(aInd)))];
 
-            avgXCS=[avgXCS mean(angle(TfIYEX(fI*20:(fI+1)*20)))];
-            avgYCS=[avgYCS mean(angle(TfIYEY(fI*20:(fI+1)*20)))];
-            avgYRS=[avgYRS mean(abs(TfrXEY(fI*20:(fI+1)*20)))];
-
-            errXCS=[errXCS std(angle(TfIYEX(fI*20:(fI+1)*20)))];
-            errYCS=[errYCS std(angle(TfIYEY(fI*20:(fI+1)*20)))];
-            errYRS=[errYRS std(abs(TfrXEY(fI*20:(fI+1)*20)))];
-        end
+            errXCS=[errXCS std(angle(TfIYEX(aInd)))];
+            errYCS=[errYCS std(angle(TfIYEY(aInd)))];
+            errYRS=[errYRS std(abs(TfrXEY(aInd)))];
+            
     end
-    
+    avgFreqs=avgFreqs(2:end)-.0025;
     tXS=avgXCS/2/pi./avgFreqs;
     tYS=avgYCS/2/pi./avgFreqs;
     
@@ -222,6 +234,7 @@ sampf =8;
         if(not(isnan(velSS(newV(k))))&&not(isinf(velSS(newV(k))))&&not(isnan(errSS(newV(k))))&&not(0==errSS(newV(k))))
             avgVS(newV(k))=velSS(newV(k));
             avgVErrS(newV(k))=errSS(newV(k));
+            avgFreqsP(newV(k))=avgFreqs(newV(k));
         end
     end
     for k=1:length(newVel)
@@ -234,35 +247,35 @@ sampf =8;
  cInd1=cell2mat(avgVS.keys);
 for k=1:length(avgVS.keys)
     N=length(avgVS(cInd1(k)));
-%     avgVErrPS(cInd1(k))=sqrt(1/sum(1./avgVErr(cInd1(k)).^2));
-%     avgVP(cInd1(k))=sum(abs(avgVS(cInd1(k))./(avgVErr(cInd1(k)).^2)))/sum(1/avgVErrPS(cInd1(k)).^2);
-    avgVErrPS(cInd1(k))=std(avgVS(cInd1(k)));
-%     avgVErrPS(cInd1(k))=sqrt(sum(avgVErr(cInd1(k)).^2))/length(avgVErr(cInd1(k)));
-    avgVPS(cInd1(k))=mean(avgVS(cInd1(k)));
+    avgVErrPS(cInd1(k))=sqrt(1/sum(1./avgVErrS(cInd1(k)).^2));
+    avgVPS(cInd1(k))=sum(abs(avgVS(cInd1(k))./(avgVErrS(cInd1(k)).^2)))/sum(1/avgVErrPS(cInd1(k)).^2);
+%     avgVErrPS(cInd1(k))=std(avgVS(cInd1(k)));
+%     avgVErrPS(cInd1(k))=sqrt(sum(avgVErrS(cInd1(k)).^2))/length(avgVErrS(cInd1(k)));
+%     avgVPS(cInd1(k))=mean(avgVS(cInd1(k)));
 end
 cInd2=cell2mat(avgVelS.keys);
 for k=1:length(avgVelS.keys)
     N=length(avgVelS(cInd2(k)));
-%     avgVelErrPS(cInd2(k))=sqrt(1/sum(1./avgVelErr(cInd2(k)).^2));
-%     avgVelP(cInd2(k))=sum(abs(avgVelS(cInd2(k))./(avgVelErr(cInd2(k)).^2)))/sum(1/avgVelErrPS(cInd2(k)).^2);
-    avgVelErrPS(cInd2(k))=std(avgVelS(cInd2(k)));
-%     avgVelErrPS(cInd2(k))=sqrt(sum(avgVelErr(cInd2(k)).^2))/length(avgVelErr(cInd2(k)));
-    avgVelPS(cInd2(k))=mean(avgVelS(cInd2(k)));
+    avgVelErrPS(cInd2(k))=sqrt(1/sum(1./avgVelErrS(cInd2(k)).^2));
+    avgVelPS(cInd2(k))=sum(abs(avgVelS(cInd2(k))./(avgVelErrS(cInd2(k)).^2)))/sum(1/avgVelErrPS(cInd2(k)).^2);
+%     avgVelErrPS(cInd2(k))=std(avgVelS(cInd2(k)));
+%     avgVelErrPS(cInd2(k))=sqrt(sum(avgVelErrS(cInd2(k)).^2))/length(avgVelErrS(cInd2(k)));
+%     avgVelPS(cInd2(k))=mean(avgVelS(cInd2(k)));
 end
 % Final dispersion plot for both methods
 fig2=figure(121);
 hold on
-l=errorbar(((cInd1-1)*freqStep+startFreq)+10^-4,cell2mat(avgVPS.values)/1000,-cell2mat(avgVErrPS.values)/1000,cell2mat(avgVErrPS.values)/1000);
-ll=errorbar(((cInd2-1)*freqStep+startFreq),cell2mat(avgVelPS.values)/1000,-cell2mat(avgVelErrPS.values)/1000,cell2mat(avgVelErrPS.values)/1000,'--');
+l=errorbar(cell2mat(avgFreqsP.values)+2e-4,cell2mat(avgVPS.values)/1000,-cell2mat(avgVErrPS.values)/1000,cell2mat(avgVErrPS.values)/1000);
+ll=errorbar(cell2mat(avgFreqsP.values)+3e-4,cell2mat(avgVelPS.values)/1000,-cell2mat(avgVelErrPS.values)/1000,cell2mat(avgVelErrPS.values)/1000,'--');
 ylabel('Average Phase Velocity (km/s)')
 xlabel('Frequency (Hz)')
-legend('Single Station','Array')
+legend('Single Station','Array','Single Station Spec','Array Spec')
 set(l,'LineWidth',1.2)
 set(ll,'LineWidth',1.2)
 set(gca,'FontSize',12)
 set(gca,'XTick',0.005*(0:100))
 set(gca,'YTick',.5*(0:100))
-xlim([0.01,0.11]);
+xlim([0.02,0.075]);
 ylim([0,8]);
 grid on
 box on
