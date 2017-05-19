@@ -6,28 +6,28 @@ sampf = 8;
 
 % if (exist('GPS1166005817_10k_EQ7_PapNG','file')&& fileload==true)
 
-        myfile = load('PNG2EQData.mat');
+        myfile = load('GPS1143962787_6_9Earthquake.mat');
 
-        mydata = myfile.rawdata8Hz1;
-%         mydata=myfile.mydata;
-
-        rawBRSY= mydata(:,4);
-
-        rawETMXZ = mydata(:,2);
-
-        rawETMYZ = mydata(:,1);
-
-        rawITMYZ = mydata(:,3);
+%         mydata = myfile.rawdata8Hz1;
+        mydata=myfile.mydata;
+% 
+%         rawBRSY= mydata(:,4);
+% 
+%         rawETMXZ = mydata(:,2);
+% 
+%         rawETMYZ = mydata(:,1);
+% 
+%         rawITMYZ = mydata(:,3);
 
 %         rawETMYY = mydata(:,5);
 % 
-%         rawBRSY= mydata(:,10);
-% 
-%         rawETMXZ = mydata(:,3);
-% 
-%         rawETMYZ = mydata(:,6);
-% 
-%         rawITMYZ = mydata(:,9);
+        rawBRSY= mydata(:,10);
+
+        rawETMXZ = mydata(:,3);
+
+        rawETMYZ = mydata(:,6);
+
+        rawITMYZ = mydata(:,9);
 % 
 %         rawETMYY = mydata(:,5);
         
@@ -45,7 +45,7 @@ sampf = 8;
 
 
 
-sttime =400*sampf + 1;
+sttime =00*sampf + 1;
 
 % edtime = sttime + 2000*sampf;
 
@@ -153,12 +153,13 @@ figure(4)
 plot(BRSY_out)
 
 figure(1)
-
-    subplot('Position',[0.1, 0.59, 0.8, 0.35])
+    subplot('Position',[0.1, 0.59, 0.8, 0.35])   
 
     l = plot(eqtime(sampf*250:end)-250, EYZ_vel_filt(sampf*250:end));
 
     legend('Z velocity','Location','SouthEast');
+    
+    title('6.7 Vanuatu')
 
     set(l,'LineWidth',1);
 
@@ -166,13 +167,13 @@ figure(1)
 
     %xlabel('time (s)');
 
-    xlim([0 4000])
+    xlim([0 2500])
 
-    ylim([-2e-4 2e-4])
+    ylim([-2e-5 2e-5])
 
     set(gca,'xtick',500*[0:10])
 
-    set(gca,'ytick',5e-5*[-4:4])
+    set(gca,'ytick',.5e-5*[-4:4])
 
     set(gca,'xticklabel',[])
 
@@ -192,15 +193,15 @@ figure(1)
 
     set(gca,'FontSize',15)
 
-    xlim([0 4000])
+    xlim([0 2500])
 
-    ylim([-4e-8 4e-8])
+    ylim([-4.5e-9 4.5e-9])
 
-    %xlabel('time (s)');
+    xlabel('Time (s)');
 
     set(gca,'xtick',500*[0:10])
 
-    set(gca,'ytick',1e-8*[-4:4])
+    set(gca,'ytick',1e-9*[-4:4])
 
     ylabel('Angle (rad)');
 
