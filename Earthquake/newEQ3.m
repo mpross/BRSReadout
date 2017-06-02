@@ -6,10 +6,10 @@ sampf = 8;
 
 % if (exist('GPS1166005817_10k_EQ7_PapNG','file')&& fileload==true)
 
-        myfile = load('GPS1143962787_6_9Earthquake.mat');
+        myfile = load('GPS1143961145_6_9_Vanuatu.mat');
 
-%         mydata = myfile.rawdata8Hz1;
-        mydata=myfile.mydata;
+        mydata = myfile.rawdata8Hz1;
+%         mydata=myfile.mydata;
 % 
 %         rawBRSY= mydata(:,4);
 % 
@@ -21,23 +21,23 @@ sampf = 8;
 
 %         rawETMYY = mydata(:,5);
 % 
-        rawBRSY= mydata(:,10);
-
-        rawETMXZ = mydata(:,3);
-
-        rawETMYZ = mydata(:,6);
-
-        rawITMYZ = mydata(:,9);
-% 
-%         rawETMYY = mydata(:,5);
-        
-%         rawBRSY= mydata(:,4);
+%         rawBRSY= mydata(:,10);
 % 
 %         rawETMXZ = mydata(:,3);
 % 
-%         rawETMYZ = mydata(:,2);
+%         rawETMYZ = mydata(:,6);
 % 
-%         rawITMYZ = mydata(:,1);
+%         rawITMYZ = mydata(:,9);
+% 
+%         rawETMYY = mydata(:,5);
+        
+        rawBRSY= mydata(:,4);
+
+        rawETMXZ = mydata(:,3);
+
+        rawETMYZ = mydata(:,2);
+
+        rawITMYZ = mydata(:,1);
 % 
         rawETMYY = zeros(length(rawITMYZ),1);
 
@@ -97,9 +97,9 @@ IntFilt = 1*IntFilt/abs(freqresp(IntFilt,2*pi*0.1592));
 
 % Apply filters
 
-BRSYcal_out = lsim(BRSYInvertFilt,BRSY, eqtime);
+% BRSYcal_out = lsim(BRSYInvertFilt,BRSY, eqtime);
 
-BRSY_out=filter(bb,aa,BRSYcal_out);
+BRSY_out=filter(bb,aa,BRSY);
 
 
 
@@ -137,7 +137,7 @@ Navg2=9;
 
 [ABRSY,~]=asd2(BRSY,1/sampf,Navg,1,@hann);
 
-[ABRSYcal,~]=asd2(BRSYcal_out,1/sampf,Navg,1,@hann);
+[ABRSY,~]=asd2(BRSY_out,1/sampf,Navg,1,@hann);
 
 
 
@@ -167,13 +167,13 @@ figure(1)
 
     %xlabel('time (s)');
 
-    xlim([0 2500])
+    xlim([0 5000])
 
-    ylim([-2e-5 2e-5])
+%     ylim([-2e-5 2e-5])
 
-    set(gca,'xtick',500*[0:10])
+%     set(gca,'xtick',500*[0:10])
 
-    set(gca,'ytick',.5e-5*[-4:4])
+%     set(gca,'ytick',.5e-5*[-4:4])
 
     set(gca,'xticklabel',[])
 
@@ -193,15 +193,15 @@ figure(1)
 
     set(gca,'FontSize',15)
 
-    xlim([0 2500])
+    xlim([0 5000])
 
-    ylim([-4.5e-9 4.5e-9])
+%     ylim([-4.5e-9 4.5e-9])
 
     xlabel('Time (s)');
 
-    set(gca,'xtick',500*[0:10])
+%     set(gca,'xtick',500*[0:10])
 
-    set(gca,'ytick',1e-9*[-4:4])
+%     set(gca,'ytick',1e-9*[-4:4])
 
     ylabel('Angle (rad)');
 
@@ -237,7 +237,7 @@ figure(1)
 
 figure(2)
 
-    ll = loglog(freqs,AEYZ,freqs,AEYY,'--',freqs, ABRSYcal);
+    ll = loglog(freqs,AEYZ,freqs,AEYY,'--',freqs, ABRSY);
 
     set(ll,'LineWidth',2);
 

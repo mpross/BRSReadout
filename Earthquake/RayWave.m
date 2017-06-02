@@ -3,11 +3,10 @@ close all
 %6.7 Vanuatu 4/6/16, 7.1 Atlantic 8/29/16, 7.8 New Zealand 11/13/16
 %7.9 Papa New Guinea 12/17/16, 7.2 New Caledonia 8/12/16, 
 %7.9 Papa New Guinea 1/22/17, 6.5 Botswana 4/3/17
-fileName={'GPS1143962787_6_9Earthquake.mat','GPS1156480217_Atlantic.mat',...
-    'GPS1163070017_7k_EQ5.mat','GPS1166005817_10k_EQ7_PapNG.mat','GPS1155000017_7k_EQ8_NewC.mat','PNG2EQData.mat'...
-    'GPS1177682913_6_3_Alaska.mat','GPS1177676532_6_2_Alaska.mat','GPS1171992542_6_9_Fiji.mat'};
-%We changed data file formats so this accommodates different formats
-newArray=[1, 2, 2, 2, 2, 3, 3, 3, 3];
+fileName={'GPS1143961145_6_9_Vanuatu.mat','GPS1155000413_7_2_NewCaledonia.mat',...
+    'GPS1156480214_7_1_Atlantic.mat','GPS1163070193_7_8_NewZealand.mat','GPS1166007087_7_9_PapuaNewGuinea.mat'...
+    ,'PNG2EQData.mat'};
+
 sampf =8;
 noiseThreshold=0.5; % approx 5*BRS noise
 phaseThreshold=20; % threshold for phase between seismometer signal and BRS signal
@@ -15,8 +14,7 @@ phaseThreshold=20; % threshold for phase between seismometer signal and BRS sign
 avgAng=[];
 avgErrAng=[];
 
- for m=0:5
-% for m=3
+for m=0:5
     Astop1 = 20;
     Apass  = .5;
     Astop2 = 20;
@@ -43,24 +41,8 @@ avgErrAng=[];
         ETMXZ = awgn(3.2*10^-4*sin(2*pi*mockFreq*(1:8*4000)/sampf).*exp(-((1:8*4000)/sampf-8*2000/sampf).^2/(50)^2),180);
         ITMYZ = awgn(3.2*10^-4*sin(2*pi*mockFreq*(1-6:8*4000-6)/sampf).*exp(-((1-6:8*4000-6)/sampf-8*2000/sampf).^2/(50)^2),180);   
     else
-        % Data Reading
-        if (exist(fileName{m+1},'file')&& newArray(m+1)==1)
-            myfile = load(fileName{m+1});
-            mydata = myfile.mydata;
-            rawETMXZ = mydata(:,3);
-            rawETMYZ = mydata(:,6);
-            rawITMYZ = mydata(:,9);
-            rawBRSY= mydata(:,10);
-        end   
-        if (exist(fileName{m+1},'file')&& newArray(m+1)==2)
-            myfile = load(fileName{m+1});
-            mydata = myfile.rawdata8Hz1;
-            rawBRSY= mydata(:,4);        
-            rawETMXZ = mydata(:,2);
-            rawETMYZ = mydata(:,1);
-            rawITMYZ = mydata(:,3);       
-        end
-        if (exist(fileName{m+1},'file')&& newArray(m+1)==3)
+        % Data Reading        
+        if (exist(fileName{m+1},'file'))
             myfile = load(fileName{m+1});
             mydata = myfile.rawdata8Hz1;
             rawBRSY= mydata(:,4);        
@@ -68,7 +50,7 @@ avgErrAng=[];
             rawETMYZ = mydata(:,2);
             rawITMYZ = mydata(:,1);       
         end
-        Sttime =9;
+        Sttime =1000*8;
         Endtime=length(rawBRSY)-9;
 
         ETMXZ=1e-9 *rawETMXZ(Sttime:Endtime);
@@ -86,51 +68,15 @@ avgErrAng=[];
 %         BRSY=1/4e3*1e-9*rawETMYZ(Sttime+8:Endtime+8);
 
     end    
-    
-    localg = 9.8;
-    BRSscale=1;  
-    Navg =9;
-    %% BRS parameters
-    Mtotal = 4.5; % Total mass in kg
-    Ibar = 0.61; % Moment of Inertia in kg m^2
-    localg = 9.8; % local gravitation acceleration
-    doffsetY = .5e-6; % CoM offset from pivot in m. d is plus if CoM below pivot
-    doffsetX = 30e-6; 
-    resfreq = 2*pi*7.7e-3;
-    Qbar = 3000;
-    Rot_time = transpose(1/sampf * (0:1:length(BRSY)-1));
+    %% Filter to remove low frequency junk caused by reponse inversion (done before the data is written)
+    [bb,aa] = butter(3,[2*0.01/sampf 2*.200/sampf],'bandpass');
 
-    %% Response inversion
-    [bb,aa] = butter(3,[2*0.01/sampf 2*.100/sampf],'bandpass');
-
-    % %STS response inversion filter
-    STSInvertFilt = zpk(-2*pi*[pairQ(8.3e-3,0.7)],-2*pi*[0 0],1);
-    STSInvertFilt = 1*STSInvertFilt/abs(freqresp(STSInvertFilt,2*pi*100));
-    % 
-    % %BRS response inversion filter
-    BRSYInvertFilt = zpk(-2*pi*[pairQ(7.74e-3,3000)],-2*pi*[0 0],1);
-    BRSYInvertFilt = 1*BRSYInvertFilt/abs(freqresp(BRSYInvertFilt,2*pi*100));
-    % 
-    % %Filters to differentiate and integrate
-    DiffFilt = zpk(-2*pi*[0], -2*pi*2,1);
-    DiffFilt = 1*DiffFilt/abs(freqresp(DiffFilt,2*pi*0.1592));
-    % 
-    IntFilt = zpk(-2*pi*[], -2*pi*5e-4,1);
-    IntFilt = 1*IntFilt/abs(freqresp(IntFilt,2*pi*0.1592));
-    % 
-    % %Apply filters
-    %
-    T240cal_vel = lsim(STSInvertFilt,ETMYZ,Rot_time);
-    ETMYZ_out=filter(bb,aa,ETMYZ);
+    %Apply filter
     
-    T240cal_vel = lsim(STSInvertFilt,ETMXZ,Rot_time);
+    ETMYZ_out=filter(bb,aa,ETMYZ);    
     ETMXZ_out=filter(bb,aa,ETMXZ);
-
-    T240cal_vel = lsim(STSInvertFilt,ITMYZ,Rot_time);
     ITMYZ_out=filter(bb,aa,ITMYZ);
-
-    BRSYcal_out = lsim(BRSYInvertFilt,BRSY, Rot_time);
-    BRSY_out=filter(bb,aa,BRSYcal_out);
+    BRSY_out=filter(bb,aa,BRSY);
 
     time=(1:length(ETMYZ_out))/sampf;
  
@@ -153,8 +99,8 @@ avgErrAng=[];
     ylim([5e-3 0.5])
     title('BRS')
 
-    %Gives the filters time to ring down
-    startTime=500*sampf;
+    %Gives the filter time to ring down
+    startTime=300*sampf;
     endTime=length(ETMXZ_out);
     ampThreshold=max(BRSY_out*1e9)/10;
       
