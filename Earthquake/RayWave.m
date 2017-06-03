@@ -1,11 +1,11 @@
 close all
 
-%6.7 Vanuatu 4/6/16, 7.1 Atlantic 8/29/16, 7.8 New Zealand 11/13/16
-%7.9 Papa New Guinea 12/17/16, 7.2 New Caledonia 8/12/16, 
-%7.9 Papa New Guinea 1/22/17, 6.5 Botswana 4/3/17
-fileName={'GPS1143961145_6_9_Vanuatu.mat','GPS1155000413_7_2_NewCaledonia.mat',...
+%6.7 Vanuatu 4/6/16, 7.2 New Caledonia 8/12/16, 7.1 Atlantic 8/29/16, 
+%7.8 New Zealand 11/13/16, 7.9 Papua New Guinea 12/17/16, 
+%7.9 Papua New Guinea 1/22/17
+fileName={'GPS1143961145_6_7_Vanuatu.mat','GPS1155000413_7_2_NewCaledonia.mat',...
     'GPS1156480214_7_1_Atlantic.mat','GPS1163070193_7_8_NewZealand.mat','GPS1166007087_7_9_PapuaNewGuinea.mat'...
-    ,'PNG2EQData.mat'};
+    ,'GPS1169094640_7_9_PapuaNewGuinea2.mat'};
 
 sampf =8;
 noiseThreshold=0.5; % approx 5*BRS noise

@@ -6,20 +6,20 @@ sampf = 8;
 
 % if (exist('GPS1166005817_10k_EQ7_PapNG','file')&& fileload==true)
 
-        myfile = load('GPS1143961145_6_9_Vanuatu.mat');
+        myfile = load('GPS1166005817_10k_EQ7_PapNG.mat');
 
         mydata = myfile.rawdata8Hz1;
 %         mydata=myfile.mydata;
 % 
-%         rawBRSY= mydata(:,4);
-% 
-%         rawETMXZ = mydata(:,2);
-% 
-%         rawETMYZ = mydata(:,1);
-% 
-%         rawITMYZ = mydata(:,3);
+        rawBRSY= mydata(:,4);
 
-%         rawETMYY = mydata(:,5);
+        rawETMXZ = mydata(:,2);
+
+        rawETMYZ = mydata(:,1);
+
+        rawITMYZ = mydata(:,3);
+
+        rawETMYY = mydata(:,5);
 % 
 %         rawBRSY= mydata(:,10);
 % 
@@ -31,25 +31,25 @@ sampf = 8;
 % 
 %         rawETMYY = mydata(:,5);
         
-        rawBRSY= mydata(:,4);
-
-        rawETMXZ = mydata(:,3);
-
-        rawETMYZ = mydata(:,2);
-
-        rawITMYZ = mydata(:,1);
+%         rawBRSY= mydata(:,4);
 % 
-        rawETMYY = zeros(length(rawITMYZ),1);
+%         rawETMXZ = mydata(:,3);
+% 
+%         rawETMYZ = mydata(:,2);
+% 
+%         rawITMYZ = mydata(:,1);
+% % 
+%         rawETMYY = mydata(:,5);
 
 % end
 
 
 
-sttime =00*sampf + 1;
+sttime =000*sampf + 1;
 
-% edtime = sttime + 2000*sampf;
+edtime = sttime + 2000*sampf;
 
-edtime = length(rawBRSY);
+% edtime = length(rawBRSY);
 
 
 
@@ -65,7 +65,7 @@ eqtime = [1:length(BRSY)]*1/8-1/8;
 
 %% Filters
 
-[bb,aa] = butter(4,[2*0.03/sampf, 2*.3/sampf]);
+[bb,aa] = butter(4,[2*0.001/sampf, 2*3/sampf]);
 
     % %T240 response inversion filter
 
@@ -97,9 +97,9 @@ IntFilt = 1*IntFilt/abs(freqresp(IntFilt,2*pi*0.1592));
 
 % Apply filters
 
-% BRSYcal_out = lsim(BRSYInvertFilt,BRSY, eqtime);
+BRSYcal_out = lsim(BRSYInvertFilt,BRSY, eqtime);
 
-BRSY_out=filter(bb,aa,BRSY);
+BRSY_out=filter(bb,aa,BRSYcal_out);
 
 
 
@@ -153,13 +153,13 @@ figure(4)
 plot(BRSY_out)
 
 figure(1)
-    subplot('Position',[0.1, 0.59, 0.8, 0.35])   
+    subplot('Position',[0.1, 0.7, 0.8, 0.25]) 
 
-    l = plot(eqtime(sampf*250:end)-250, EYZ_vel_filt(sampf*250:end));
+    l = plot(eqtime(sampf*250:end)-250, EYZ_vel_filt(sampf*250:end)/1e-6);
 
     legend('Z velocity','Location','SouthEast');
     
-    title('6.7 Vanuatu')
+    title('M7.9 Papua New Guinea')
 
     set(l,'LineWidth',1);
 
@@ -167,25 +167,25 @@ figure(1)
 
     %xlabel('time (s)');
 
-    xlim([0 5000])
+    xlim([0 4750])
 
-%     ylim([-2e-5 2e-5])
+    ylim([-175 175])
 
-%     set(gca,'xtick',500*[0:10])
+    set(gca,'xtick',500*[0:10])
 
-%     set(gca,'ytick',.5e-5*[-4:4])
+    set(gca,'ytick',50*[-40:40])
 
     set(gca,'xticklabel',[])
 
-    ylabel('Velocity (m/s)');
+    ylabel('Velocity (\mum/s)');
 
     grid on
 
 
 
-   subplot('Position',[0.1, 0.15, 0.8, 0.35])
+   subplot('Position',[0.1, 0.4, 0.8, 0.25])
 
-    ll = plot(eqtime(sampf*250:end)-250, BRSY_out(sampf*250:end));
+    ll = plot(eqtime(sampf*250:end)-250, BRSY_out(sampf*250:end)/1e-9);
 
     legend('BRS output','Location','SouthEast');
 
@@ -193,45 +193,47 @@ figure(1)
 
     set(gca,'FontSize',15)
 
-    xlim([0 5000])
+    xlim([0 4750])
 
-%     ylim([-4.5e-9 4.5e-9])
+    ylim([-40 40])
 
     xlabel('Time (s)');
 
-%     set(gca,'xtick',500*[0:10])
+    set(gca,'xtick',500*[0:10])
 
-%     set(gca,'ytick',1e-9*[-4:4])
+    set(gca,'ytick',10*[-40:40])
+    
+    set(gca,'xticklabel',[])
 
-    ylabel('Angle (rad)');
+    ylabel('Angle (nrad)');
 
     grid on
 
     
 
-%     subplot('Position',[0.1, 0.1, 0.8, 0.25])
-% 
-%     lll = plot(eqtime(sampf*250:end)-250, EYY_disp_filt(sampf*250:end));
-% 
-%     legend('Y displacement','Location','SouthEast');
-% 
-%     set(lll,'LineWidth',1);
-% 
-%     set(gca,'FontSize',15)
-% 
-%     xlim([0 4800])
-% 
-%     set(gca,'xtick',500*[0:10])
-% 
-%     xlabel('time (s)');
-% 
-%     ylabel('displacement (m)');
-% 
-%     ylim([-7e-4 7e-4])
-% 
-%     set(gca,'ytick',2e-4*[-3:3])
-% 
-%     grid on
+    subplot('Position',[0.1, 0.1, 0.8, 0.25])
+
+    lll = plot(eqtime(sampf*250:end)-250, EYY_disp_filt(sampf*250:end)/1e-6);
+
+    legend('Y displacement','Location','SouthEast');
+
+    set(lll,'LineWidth',1);
+
+    set(gca,'FontSize',15)
+
+    xlim([0 4750])
+
+    set(gca,'xtick',500*[0:10])
+
+    xlabel('Time (s)');
+
+    ylabel('Displacement (\mum)');
+
+    ylim([-700 700])
+
+    set(gca,'ytick',200*[-3:3])
+
+    grid on
 
 
 
@@ -255,7 +257,7 @@ figure(2)
 
     xlabel('Frequency (Hz)')
 
-    ylabel('ASD (rad/\surd(Hz) or m/s/\surd(Hz))')
+    ylabel('ASD (rad/$\sqrt{Hz}$ or m/s/$\sqrt{Hz}$)','Interpreter','Latex')
 
     grid on
 

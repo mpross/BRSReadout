@@ -1,10 +1,10 @@
 
-%6.7 Vanuatu 4/6/16, 7.1 Atlantic 8/29/16, 7.8 New Zealand 11/13/16
-%7.9 Papa New Guinea 12/17/16, 7.2 New Caledonia 8/12/16, 
-%7.9 Papa New Guinea 1/22/17, 6.5 Botswana 4/3/17
-fileName={'GPS1459925928_6_9_Vanuatu.mat','GPS1156480217_Atlantic.mat',...
-    'GPS1163070017_7k_EQ5.mat','GPS1166005817_10k_EQ7_PapNG.mat','GPS1155000017_7k_EQ8_NewC.mat','PNG2EQData.mat'...
-    'GPS1177682913_6_3_Alaska.mat','GPS1177676532_6_2_Alaska.mat','GPS1171992542_6_9_Fiji.mat'};
+%6.7 Vanuatu 4/6/16, 7.2 New Caledonia 8/12/16, 7.1 Atlantic 8/29/16, 
+%7.8 New Zealand 11/13/16, 7.9 Papua New Guinea 12/17/16, 
+%7.9 Papua New Guinea 1/22/17
+fileName={'GPS1143961145_6_7_Vanuatu.mat','GPS1155000413_7_2_NewCaledonia.mat',...
+    'GPS1156480214_7_1_Atlantic.mat','GPS1163070193_7_8_NewZealand.mat','GPS1166007087_7_9_PapuaNewGuinea.mat'...
+    ,'GPS1169094640_7_9_PapuaNewGuinea2.mat'};
 
 sampf =8;
 
@@ -58,8 +58,8 @@ for m=0:5
 
     time=(1:length(ETMYZ_out))/sampf;
     
-    %Gives filter time to ring down
-    startTime=300*sampf;
+    %Gives filter time to ring down and removes non earthquake times
+    startTime=2300*sampf;
     endTime=length(BRSY_out);    
  
     ETMXZ_out=ETMXZ_out(startTime:endTime);
@@ -84,7 +84,7 @@ for m=0:5
         %Finds points within bin
          aInd=intersect(find(freqs2>avgFreqs(fI)),find(freqs2<avgFreqs(fI+1)));
         %Removes points with standard deviation of delay time > 0.3 s
-         if (abs(std(sqrt((angle(TfIYEX(aInd))/2/pi./freqs2(aInd)').^2+(angle(TfIYEY(aInd))/2/pi./freqs2(aInd)').^2)))<0.3)
+         if (abs(std(sqrt((angle(TfIYEX(aInd))/2/pi./freqs2(aInd)').^2+(angle(TfIYEY(aInd))/2/pi./freqs2(aInd)').^2)))<0.2)
             avgXCS=[avgXCS mean(angle(TfIYEX(aInd)))];
             avgYCS=[avgYCS mean(angle(TfIYEY(aInd)))];
             avgYRS=[avgYRS mean(abs(TfrXEY(aInd)))];
