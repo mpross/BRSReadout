@@ -68,14 +68,27 @@ for m=0:5
 %         BRSY=1/4e3*1e-9*rawETMYZ(Sttime+8:Endtime+8);
 
     end    
-    %% Filter to remove low frequency junk caused by reponse inversion (done before the data is written)
+    %% Filters
+    % Filter to remove low frequency junk caused by reponse inversion
     [bb,aa] = butter(3,[2*0.01/sampf 2*.200/sampf],'bandpass');
-
-    %Apply filter
     
-    ETMYZ_out=filter(bb,aa,ETMYZ);    
-    ETMXZ_out=filter(bb,aa,ETMXZ);
-    ITMYZ_out=filter(bb,aa,ITMYZ);
+    Rot_time = transpose(1/sampf * (0:1:length(BRSY)-1));
+    
+    %STS response inversion filter
+    STSInvertFilt = zpk(-2*pi*[pairQ(8.2e-3,0.7)],-2*pi*[0 0],1);
+    STSInvertFilt = 1*STSInvertFilt/abs(freqresp(STSInvertFilt,2*pi*100));
+    
+    % Apply filterS
+    T240cal_vel = lsim(STSInvertFilt,ETMYZ,Rot_time);    
+    ETMYZ_out=filter(bb,aa,T240cal_vel);
+    
+    T240cal_vel = lsim(STSInvertFilt,ETMXZ,Rot_time);
+    ETMXZ_out=filter(bb,aa,T240cal_vel);
+    
+    T240cal_vel = lsim(STSInvertFilt,ITMYZ,Rot_time);
+    ITMYZ_out=filter(bb,aa,T240cal_vel);
+    
+    % BRSY repsonse inversion is done before data is written
     BRSY_out=filter(bb,aa,BRSY);
 
     time=(1:length(ETMYZ_out))/sampf;
@@ -109,7 +122,7 @@ for m=0:5
         % Bandpass filtering to get data into frequency bins
         freq=(startFreq+a*freqStep);
         [bb,aa]= butter(3,[2*((a-1/2)*freqStep+startFreq)/sampf 2*((a+1/2)*freqStep+startFreq)/sampf],'bandpass');
-
+        
         filtData=filter(bb,aa,ETMXZ_out-mean(ETMXZ_out));
         X=filtData(startTime:endTime);        
         filtData=filter(bb,aa,ETMYZ_out-mean(ETMYZ_out));
