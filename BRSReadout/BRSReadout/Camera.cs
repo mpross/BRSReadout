@@ -133,8 +133,16 @@ class Camera
                 if(cameraType=="none")
                 {
                     masterDataDelegate = dd;
+                    data = new ushort[4096];
                     for (int i=0; i<data.Length;i++){
-                        data[i] = (ushort)(data[i] + 1300.0);
+                        if (i > 40 && i < 1540)
+                        {
+                            data[i] = (ushort)(data[i] + 1300.0);
+                        }
+                        if (i > 1740 && i < 3240)
+                        {
+                            data[i] = (ushort)(data[i] + 1300.0);
+                        }
                     }
                     System.Threading.Thread.Sleep(10);
                     masterDataDelegate(data);

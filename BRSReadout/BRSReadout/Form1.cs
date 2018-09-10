@@ -82,7 +82,7 @@ namespace BRSReadout
 
             double voltagewrite = 0;
 
-            static int gFrames = 28; //Amount of frames collected before fitting and downsampling  - changed on 11/08/17 - Krishna
+            static int gFrames = 3; //Amount of frames collected before fitting and downsampling  - changed on 11/08/17 - Krishna
 
             static TcAdsClient tcAds = new TcAdsClient();
             static AdsStream ds = new AdsStream(16);
@@ -301,8 +301,7 @@ namespace BRSReadout
                 }
                 curFrame = currentData.AddData(data, Frameco); // Returns the number of frames in the RawData object
                 
-                //if (curFrame == gFrames)
-                if(true)
+                if (curFrame == gFrames)
                 {
                     try
                     {
@@ -679,7 +678,7 @@ namespace BRSReadout
                             lightSourceStatus = 0;
                         }
                     }
-                    if (startIndex1Ref < 0)
+                    if (startIndex1Ref < halflength)
                     {
                         startIndex1Ref = 0;
                     }
