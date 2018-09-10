@@ -46,7 +46,6 @@ namespace BRSReadout
 
             int startIndex2 = 1800; //Beginning of right pattern
             int startIndex2Ref = 0; //Beginning of right pattern
-            int frameCount = 0;
             bool noMoreData = false;
             volatile bool gquitting = false;
             public volatile bool gRecord = false;
@@ -62,7 +61,6 @@ namespace BRSReadout
             int gsampfrequcounter = 0;
             int gsampfrequcountermax = 10000;
             int gsampfrequcountermaxlater = 10000;
-            double[,] SlowData;
             ushort[] refFrame = new ushort[4096];
             ushort[] refFrameRef = new ushort[4096];
             volatile bool dataWritingThreadOn;
@@ -71,12 +69,6 @@ namespace BRSReadout
             private Queue<PeakQueueItem> dataWritingQueue;
             public volatile SyncEvents dataWritingSyncEvent;
 
-            double[] gLPkernel;
-            double[,] gLPrawring;
-            double[] gLPresult;
-            int gLPSensNo;
-            int gLPkernelLen;
-            int gSlowDataCo = 1000;
             DateTime DTFrameCo0;
             double dayFrameCo0;
 
@@ -118,7 +110,6 @@ namespace BRSReadout
             {
                 try
                 {
-                    double fc; int len;
                     //Calls calculation method for filters
                     highCoeff = filterCoeff(0.0005, 2000.0 / gFrames, "High");
                     lowCoeff = filterCoeff(0.1, 2000.0 / gFrames, "Low");
@@ -853,8 +844,9 @@ namespace BRSReadout
                 label7.Location = new Point(iS, lay);
                 numericUpDown3.Location = new Point(iS, coy); iS = iS + numericUpDown3.Width;
                 buRecord.Location = new Point(ClientRectangle.Width - buRecord.Size.Width - 10, 20);
+                buGraph.Location = new Point(ClientRectangle.Width - buGraph.Size.Width - 10, ClientRectangle.Height-buGraph.Size.Height-20);
 
-            }
+        }
 
 
             private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -878,6 +870,9 @@ namespace BRSReadout
             private void Form1_Resize(object sender, EventArgs e)
             {
                 SetSize();
+            }
+            private void buGraph_Click(object sender, EventArgs e)
+            {
             }
             private void buRecord_Click(object sender, EventArgs e)
             {

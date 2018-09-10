@@ -37,6 +37,7 @@
             this.components = new System.ComponentModel.Container();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.buRecord = new System.Windows.Forms.Button();
+            this.buGraph = new System.Windows.Forms.Button();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.textBox3 = new System.Windows.Forms.TextBox();
             this.textBox4 = new System.Windows.Forms.TextBox();
@@ -63,6 +64,13 @@
             this.textBox1.Size = new System.Drawing.Size(50, 20);
             this.textBox1.TabIndex = 0;
 
+            this.buGraph.Location = new System.Drawing.Point(456, 29);
+            this.buGraph.Name = "buGraph";
+            this.buGraph.Size = new System.Drawing.Size(75, 23);
+            this.buGraph.TabIndex = 2;
+            this.buGraph.Text = "Graph";
+            this.buGraph.UseVisualStyleBackColor = true;
+            this.buGraph.Click += new System.EventHandler(this.buGraph_Click);
 
             this.buRecord.Location = new System.Drawing.Point(456, 29);
             this.buRecord.Name = "buRecord";
@@ -223,22 +231,15 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(534, 120);
-            //this.Controls.Add(this.label19);
-            //this.Controls.Add(this.label7);
-            //this.Controls.Add(this.label6);
-            //this.Controls.Add(this.label5);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
-            //this.Controls.Add(this.numericUpDown3);
-            //this.Controls.Add(this.numericUpDown2);
-            //this.Controls.Add(this.numericUpDown1);
             this.Controls.Add(this.textBox4);
             this.Controls.Add(this.textBox3);
             this.Controls.Add(this.textBox2);
             this.Controls.Add(this.buRecord);
-            this.Controls.Add(this.buDamping);
+            this.Controls.Add(this.buGraph);
             this.Controls.Add(this.textBox1);
             this.MinimumSize = new System.Drawing.Size(550, 150); // Original 550, 350
             this.Name = "Form1";
@@ -257,7 +258,7 @@
 
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Button buRecord;
-        private System.Windows.Forms.Button buDamping;
+        private System.Windows.Forms.Button buGraph;
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.TextBox textBox3;
         private System.Windows.Forms.TextBox textBox4;
