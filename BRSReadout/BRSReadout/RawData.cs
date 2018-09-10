@@ -9,7 +9,7 @@ using BRSReadout;
      */
     class RawData
     {
-        int Frames = 2048*2; // Krishna - 2/17/2016
+        int Frames = 2048*2;
         ushort[,] data; // First index is the data count and second index is the actual data corresponding to that data count
         private long[] timeStamp;
         int length;

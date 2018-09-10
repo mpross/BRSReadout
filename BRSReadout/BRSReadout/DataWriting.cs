@@ -54,7 +54,7 @@ class DataWriting
                 for (i = 0; i< data.Length;i++) {
                     ds3 = ds3 + " " + data[i].ToString();
                 }
-                ds3 = ds3 + "\n";
+                ds3 = ds3 + "\n\r";
                 info = new System.Text.UTF8Encoding(true).GetBytes(ds3);
                 gfdata.Write(info, 0, info.Length);
                 gfdata.Flush();

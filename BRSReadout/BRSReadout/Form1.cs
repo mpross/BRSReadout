@@ -25,9 +25,8 @@ namespace BRSReadout
          */
         public partial class Form1 : Form
         {
-            public bool testing = ("true" == ConfigurationManager.AppSettings.Get("testing"));
             public bool twinCatBool = ("true" == ConfigurationManager.AppSettings.Get("twinCat"));
-            public string cameraSwitch = ConfigurationManager.AppSettings.Get("camera");
+            public string cameraType = ConfigurationManager.AppSettings.Get("camera");
 
             public const int datalen = 4096;
             public const int datamax = 4096;
@@ -53,8 +52,8 @@ namespace BRSReadout
             public volatile bool gRecord = false;
             public volatile bool gDamp = false;
             
-            double gsampfreq = 2000;
-            double gmastersampfreq = 2000;
+            double gsampfreq = 100;
+            double gmastersampfreq = 100;
 
             public int gMaiIx = 1700; 
             public volatile int Frameco = 0;
@@ -119,8 +118,6 @@ namespace BRSReadout
             {
                 try
                 {
-                    
-
                     double fc; int len;
                     //Calls calculation method for filters
                     highCoeff = filterCoeff(0.0005, 2000.0 / gFrames, "High");
@@ -304,7 +301,8 @@ namespace BRSReadout
                 }
                 curFrame = currentData.AddData(data, Frameco); // Returns the number of frames in the RawData object
                 
-                if (curFrame == gFrames)
+                //if (curFrame == gFrames)
+                if(true)
                 {
                     try
                     {
@@ -331,10 +329,10 @@ namespace BRSReadout
                 try
                 {
                     myCamera = new Camera();
-                    myCamera.cameraInit();
-                    Camera.dataDelegate dd = new Camera.dataDelegate(onNewData);
-                    myCamera.startFrameGrab(0x8888, 0, dd);
-                    cameraStatus = 1;
+                        myCamera.cameraInit(cameraType);
+                        Camera.dataDelegate dd = new Camera.dataDelegate(onNewData);
+                        myCamera.startFrameGrab(0x8888, 0, dd, cameraType);
+                        cameraStatus = 1;
                 }
                 catch (Exception ex)
                 {
@@ -343,12 +341,13 @@ namespace BRSReadout
                     ds = new AdsStream(4);
                     BinaryWriter bw = new BinaryWriter(ds);
                     bw.Write(cameraStatus);
-                    if (twinCatBool) { 
+                    if (twinCatBool)
+                    {
                         tcAds.Write(0x4020, 40, ds);
                     }
                     EmailError.emailAlert(ex);
                     throw (ex);
-                }            
+                }
             }
 
             //GUI display of queue length, time, and capacitor voltage
@@ -581,7 +580,10 @@ namespace BRSReadout
                         sum = 0;
                         for (int m = 0; m < length; m++)
                         {
-                            sum += frame[m + startIndex1 + k] * refFrame[m + startIndex2];
+                            if ((m + startIndex1 + k) > 0 && (m + startIndex2) > 0)
+                            {
+                                sum += frame[m + startIndex1 + k] * refFrame[m + startIndex2];
+                            }
                         }
                         if (sum == 0)
                         {
@@ -688,7 +690,10 @@ namespace BRSReadout
                         sum = 0;
                         for (int m = 0; m < length; m++)
                         {
-                            sum += frame[m + startIndex1Ref + k] * refFrame[m + startIndex2Ref];
+                            if ((m + startIndex1Ref + k) > 0 && (m + startIndex2Ref) > 0)
+                            {
+                                sum += frame[m + startIndex1Ref + k] * refFrame[m + startIndex2Ref];
+                            }
                         }
                         crossCor[k + halflength] = sum;
                     }
@@ -744,14 +749,6 @@ namespace BRSReadout
                     newdata[frameNo, 1] = mu + startIndex1Ref;
                     refValue = mu + startIndex1Ref;
                     newdata[frameNo, 0] = newdata[frameNo, 0] - refValue;
-
-                    // 11/08/17 - Changed code for online ref subtraction - Krishna
-                    //}
-                    //else
-                    //{
-                    //    frameCount++;
-                    //    newdata[frameNo, 1] = refValue;
-                    //}
 
                 }
             }
@@ -866,7 +863,7 @@ namespace BRSReadout
                 int i;
                 gquitting = true;
                 cameraThread.Abort();
-                myCamera.stopFrameGrab();
+                myCamera.stopFrameGrab(cameraType);
                 dataWritingSyncEvent.ExitThreadEvent.Set();
                 for (i = 0; i < consumerd.Length; i++)
                 {

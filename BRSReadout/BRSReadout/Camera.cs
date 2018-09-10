@@ -21,8 +21,6 @@ using BRSReadout;
  */
 class Camera
 {
-    public string cameraType = ConfigurationManager.AppSettings.Get("camera");
-
     public delegate void frameCallbackDelegate(PylonBuffer<Byte> buffer);
     public delegate void dataDelegate(ushort[] data);
 
@@ -49,7 +47,7 @@ class Camera
     public Camera()
     {
     }
-    public void cameraInit()
+    public void cameraInit(string cameraType)
     {
         //Initiates camera to run in 12 bit mode with continuous acquisition.
         int i = 0;
@@ -58,7 +56,7 @@ class Camera
         {
             Pylon.Initialize();
             numDevices = Pylon.EnumerateDevices();
-            while (ip != "10.110.136.138")
+            while (ip != ConfigurationManager.AppSettings.Get("ipAddress"))
             {
                 hDev = Pylon.CreateDeviceByIndex(j);
                 prop = Pylon.DeviceGetDeviceInfoHandle(hDev);
@@ -110,7 +108,7 @@ class Camera
         }
     }
 
-    public void startFrameGrab(int nr, int trigmode, dataDelegate dd)
+    public void startFrameGrab(int nr, int trigmode, dataDelegate dd,string cameraType)
     {
         //Start frame grabbing loop and pushes data into the data delegate as a ushort array.
         int bufferIndex;
@@ -132,6 +130,15 @@ class Camera
                     masterDataDelegate(data);
                     Pylon.StreamGrabberQueueBuffer(hGrabber, grabResult.hBuffer, bufferIndex);
                 }
+                if(cameraType=="none")
+                {
+                    masterDataDelegate = dd;
+                    for (int i=0; i<data.Length;i++){
+                        data[i] = (ushort)(data[i] + 1300.0);
+                    }
+                    System.Threading.Thread.Sleep(10);
+                    masterDataDelegate(data);
+                }
             }
             catch (Exception ex)
             {
@@ -141,7 +148,7 @@ class Camera
         }
     }
 
-    public void stopFrameGrab()
+    public void stopFrameGrab(string cameraType)
     {
         if (cameraType == "basler")
         {

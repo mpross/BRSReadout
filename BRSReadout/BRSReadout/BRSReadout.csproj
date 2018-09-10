@@ -101,7 +101,6 @@
       <SubType>Code</SubType>
     </Compile>
     <None Include="app.config" />
-    <None Include="settings.config" />
     <None Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </None>
