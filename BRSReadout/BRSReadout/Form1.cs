@@ -28,6 +28,8 @@ namespace BRSReadout
             public bool twinCatBool = ("true" == ConfigurationManager.AppSettings.Get("twinCat"));
             public string cameraType = ConfigurationManager.AppSettings.Get("camera");
 
+            public Form2 graphWindow = new Form2();
+
             public const int datalen = 4096;
             public const int datamax = 4096;
             public bool firstFrame = true;
@@ -873,6 +875,15 @@ namespace BRSReadout
             }
             private void buGraph_Click(object sender, EventArgs e)
             {
+                if (Application.OpenForms.OfType<Form2>().Count() == 0)
+                {
+                    graphWindow = new Form2();
+                    graphWindow.Show();
+                }
+                else
+                {
+                    graphWindow.BringToFront();
+                }
             }
             private void buRecord_Click(object sender, EventArgs e)
             {
