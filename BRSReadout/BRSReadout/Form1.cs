@@ -10,6 +10,8 @@ using System.Text;
 using System.IO;
 using System.Windows.Forms;
 using System.Threading;
+using System.Configuration;
+using System.Collections.Specialized;
 using System.Runtime.InteropServices;
 using TwinCAT.Ads;
 
@@ -23,6 +25,9 @@ namespace BRSReadout
          */
         public partial class Form1 : Form
         {
+            public bool testing = ("true" == ConfigurationManager.AppSettings.Get("testing"));
+            public bool twinCatBool = ("true" == ConfigurationManager.AppSettings.Get("twinCat"));
+            public string cameraSwitch = ConfigurationManager.AppSettings.Get("camera");
 
             public const int datalen = 4096;
             public const int datamax = 4096;
@@ -109,11 +114,13 @@ namespace BRSReadout
             int cameraStatus=1; 
 
             int displayCount = 0;
-        
+
             public Form1()
             {
                 try
                 {
+                    
+
                     double fc; int len;
                     //Calls calculation method for filters
                     highCoeff = filterCoeff(0.0005, 2000.0 / gFrames, "High");
@@ -131,16 +138,11 @@ namespace BRSReadout
                     currentData = new RawData(gFrames);
                     //Initialization of TwinCAT connection. 851 is the port for PLC runtime 1
                     //tcAds.Dispose();
-                    tcAds.Connect(851);
-
-                    //SlowData = new double[gSlowDataCo, 7];
-                    //fc = 1.0 / gFrames / 4;
-                    //len = (int)(8.0 / fc);
-
-                    //initLPKernel(len, fc, 2);
-
-
-
+                    if (twinCatBool)
+                    {
+                        tcAds.Connect(851);
+                    }
+                    
                     myStopwatch = new Stopwatch();
                     dataWritingSyncEvent = new SyncEvents();
 
@@ -163,40 +165,16 @@ namespace BRSReadout
                     cameraThread = new Thread(initCamera);
                     cameraThread.Priority = ThreadPriority.AboveNormal;
                     cameraThread.Start();
-
-                    System.Diagnostics.Process.Start("C:\\SlowControls\\BRS2 C#\\L1BRSEY\\BRSReadout\\AffinitySet.bat");
+                    string curDirec = System.IO.Path.GetDirectoryName(Application.ExecutablePath);
+                    curDirec = curDirec.Replace("\\bin\\Debug", "");
+                    System.Diagnostics.Process.Start(curDirec+"\\AffinitySet.bat");
                 }
                 catch (Exception ex)
                 {
                     EmailError.emailAlert(ex);
-                    //throw (ex);
+                    throw (ex);
                 }
         }
-
-            ////// FIR Filter Setup
-            //public void initLPKernel(int len, double freq0, int nosens)
-            //{
-            //    double fc;
-            //    int i;
-            //    int aix;
-            //    double kernelsum;
-
-            //    fc = freq0;
-            //    gLPSensNo = nosens;
-            //    gLPkernel = new double[len];
-            //    gLPrawring = new double[nosens, len];
-            //    gLPresult = new double[nosens];
-            //    gLPkernelLen = len;
-            //    aix = -gLPkernelLen / 2;
-            //    for (i = aix; i < gLPkernelLen + aix; i++) gLPkernel[i - aix] = (i != 0) ? Math.Sin(2 * Math.PI * fc * i) / (i * Math.PI) : 2.0 * fc;
-            //    for (i = 0; i < gLPkernelLen; i++)
-            //        gLPkernel[i] = gLPkernel[i] *
-            //            (0.42 - 0.5 * Math.Cos(2 * Math.PI * i / gLPkernelLen) + 0.08 * Math.Cos(4 * Math.PI * i / gLPkernelLen));
-
-            //    for (i = 0, kernelsum = 0; i < gLPkernelLen; i++) kernelsum += gLPkernel[i];
-            //    for (i = 0; i < gLPkernelLen; i++) gLPkernel[i] = gLPkernel[i] / kernelsum;
-            //    return;
-            //}
             // Local data writing
             void dataWrite()
             {                
@@ -263,30 +241,6 @@ namespace BRSReadout
              *  Takes a two dimensional array of doubles and int and returns an array of doubles
              *  Low pass filter for data
              */
-            //double[] lp(double[,] newv, int frames)  // first index is frame, second is sensor
-            //{
-            //    int i, j, iS;
-            //    int len;
-            //    double[] sum;
-            //    len = gLPkernelLen;
-            //    sum = new double[gLPSensNo];
-            //    for (j = 0; j < gLPSensNo; j++)
-            //    {
-            //        for (i = 0; i < len - frames; i++)
-            //        {
-            //            gLPrawring[j, i] = gLPrawring[j, i + frames];
-            //        }
-            //        for (i = 0; i < frames; i++)
-            //        {
-            //            iS = len - frames + i;
-            //            gLPrawring[j, iS] = newv[i, j];
-            //        }
-            //        for (i = 0; i < len; i++) sum[j] += gLPrawring[j, i] * gLPkernel[len - i - 1];
-            //        gLPresult[j] = sum[j];
-            //    }
-
-            //    return sum;
-            //}
             double[] lp(double[,] data, int frames)
             {
                 double[] output = new double[gFrames];
@@ -389,8 +343,9 @@ namespace BRSReadout
                     ds = new AdsStream(4);
                     BinaryWriter bw = new BinaryWriter(ds);
                     bw.Write(cameraStatus);
-                    tcAds.Write(0x4020, 40, ds);
-
+                    if (twinCatBool) { 
+                        tcAds.Write(0x4020, 40, ds);
+                    }
                     EmailError.emailAlert(ex);
                     throw (ex);
                 }            
@@ -496,26 +451,27 @@ namespace BRSReadout
                 {
                     velocity = Math.Sign(velocity)*30760;
                 }
-
-                ds = new AdsStream(28);
-                BinaryWriter bw = new BinaryWriter(ds);
-                //Tilt signal. TwinCAT variable tilt at MW0.
-                bw.Write((int)tilt);
-                //Drift signal. TwinCAT variable drift at MW1
-                bw.Write((int)drift);
-                //Velocity signal. TwinCAT variable cap at MW2
-                bw.Write((int)velocity);
-                voltagewrite = velocity / 3276;
-                //Reference signal. TwinCAT variable ref at MW3
-                bw.Write((int)refAng);
-                //C# pulse. Sets TwinCAT variable cPulse=1 at MW4
-                bw.Write((int)1);
-                //Light source status bit at MW5
-                bw.Write((int)lightSourceStatus);
-                //Camera status bit at MW6
-                bw.Write((int)cameraStatus);
-                tcAds.Write(0x4020, 0, ds);
-
+                if (twinCatBool)
+                {
+                    ds = new AdsStream(28);
+                    BinaryWriter bw = new BinaryWriter(ds);
+                    //Tilt signal. TwinCAT variable tilt at MW0.
+                    bw.Write((int)tilt);
+                    //Drift signal. TwinCAT variable drift at MW1
+                    bw.Write((int)drift);
+                    //Velocity signal. TwinCAT variable cap at MW2
+                    bw.Write((int)velocity);
+                    voltagewrite = velocity / 3276;
+                    //Reference signal. TwinCAT variable ref at MW3
+                    bw.Write((int)refAng);
+                    //C# pulse. Sets TwinCAT variable cPulse=1 at MW4
+                    bw.Write((int)1);
+                    //Light source status bit at MW5
+                    bw.Write((int)lightSourceStatus);
+                    //Camera status bit at MW6
+                    bw.Write((int)cameraStatus);
+                    tcAds.Write(0x4020, 0, ds);
+                }
 
                 xHighPass[2] = xHighPass[1];
                 xHighPass[1] = xHighPass[0];
@@ -553,13 +509,10 @@ namespace BRSReadout
             double mu = 0;
             double mu1 = 0;
             double mu2 = 0;
-            //double sigma = 0;
-            //double A = 0;
             double N = fitLength;
             double y = 0;
             double xy = 0;
             double xxy = 0;
-            //double a, Da;
             double b, c, D, Db, Dc;// a,b, and c are the values we solve for then derive mu,sigma, and A from them.
 
             if (gquitting) return;

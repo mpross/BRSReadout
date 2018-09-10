@@ -19,3 +19,16 @@ C:\Users\Eotwash\Documents\BRSReadout\BRSReadout\obj\Debug\BRSReadout.csproj.Gen
 C:\Users\Eotwash\Documents\BRSReadout\BRSReadout\obj\Debug\BRSReadout.exe
 C:\Users\Eotwash\Documents\BRSReadout\BRSReadout\obj\Debug\BRSReadout.pdb
 C:\Users\Eotwash\Documents\BRSReadout\BRSReadout\obj\Debug\BRSReadout.csprojResolveAssemblyReference.cache
+C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\obj\Debug\BRSReadout.csprojAssemblyReference.cache
+C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\obj\Debug\BRSReadout.Form1.resources
+C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\obj\Debug\BRSReadout.Properties.Resources.resources
+C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\obj\Debug\BRSReadout.csproj.GenerateResource.cache
+C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\obj\Debug\BRSReadout.csproj.CoreCompileInputs.cache
+C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\obj\Debug\BRSReadout.exe
+C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\obj\Debug\BRSReadout.pdb
+C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\bin\Debug\BRSReadout.exe.config
+C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\bin\Debug\BRSReadout.exe
+C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\bin\Debug\BRSReadout.pdb
+C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\bin\Debug\PylonC.NET.dll
+C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\bin\Debug\PylonC.NET.xml
+C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\obj\Debug\BRSReadout.csproj.CopyComplete

@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Windows.Forms;
 
-    /*
-     *  This class writes down data to the main run ouput file
-     */
-    class DataWriting
+/*
+ *  This class writes down data to the main run ouput file
+ */
+class DataWriting
     {
-
-        const string DataDir = "C:\\Users\\controls\\Documents\\BRS Data";
         const string DataFilePreFix = "FA_";
         const string DataFileSufFix = ".dat";
 
@@ -23,7 +22,9 @@ using System.IO;
         char ch;
         public DataWriting()
         {
-
+            string DataDir = Path.GetDirectoryName(Application.ExecutablePath);
+            DataDir = DataDir.Replace("\\BRSReadout\\bin\\Debug", "");
+            DataDir = DataDir + "\\Data";
             if (DataWritingOn == true) return;
             DataWritingOn = true;
             CurTime = DateTime.Now;
