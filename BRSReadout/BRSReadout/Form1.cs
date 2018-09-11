@@ -37,6 +37,8 @@ namespace BRSReadout
             public double zeroValue = 0;
             public double refZeroValue = 0;
             public double refValue = 0;
+
+            
             Camera myCamera;
             DataConsumerDelegate[] consumerd;
 
@@ -63,7 +65,11 @@ namespace BRSReadout
             int gsampfrequcounter = 0;
             int gsampfrequcountermax = 10000;
             int gsampfrequcountermaxlater = 10000;
+
             ushort[] refFrame = new ushort[4096];
+
+
+            public static ushort[] frame= new ushort[4096];
             ushort[] refFrameRef = new ushort[4096];
             volatile bool dataWritingThreadOn;
             Thread dataWritingThread;
@@ -77,7 +83,7 @@ namespace BRSReadout
             double voltagewrite = 0;
 
             static int gFrames = 3; //Amount of frames collected before fitting and downsampling  - changed on 11/08/17 - Krishna
-
+            public static double[,] newdata = new double[gFrames, 2];
             static TcAdsClient tcAds = new TcAdsClient();
             static AdsStream ds = new AdsStream(16);
 
@@ -463,6 +469,10 @@ namespace BRSReadout
                     bw.Write((int)cameraStatus);
                     tcAds.Write(0x4020, 0, ds);
                 }
+                if (Application.OpenForms.OfType<Form2>().Count() == 1)
+                {
+                    graphWindow.updatePlot();
+                }
 
                 xHighPass[2] = xHighPass[1];
                 xHighPass[1] = xHighPass[0];
@@ -484,8 +494,6 @@ namespace BRSReadout
             PeakQueueItem quI;
             int ql;
             long[] timestamps;
-            double[,] newdata;
-            ushort[] frame;
             double fitLength = 15; //Amount of pixels to be used in fit of correlation  - changed on 11/08/2017 by Krishna
             int halflength = (int)Math.Floor(fitLength / 2) + 1;  // increased by 1 pixel to allow two fits
             int length = 1500; //Length of patterns
@@ -493,6 +501,7 @@ namespace BRSReadout
             int startIndex1 = 60; //Beginning of left pattern
             int startIndex1Ref = 60; //Beginning of left pattern
             int pixshift = 1;  // Direction of shift required to estimate slope of fit correction
+
 
             float sum = 0;
             double[] offset = new double[1];
@@ -883,6 +892,7 @@ namespace BRSReadout
                 else
                 {
                     graphWindow.BringToFront();
+                    graphWindow.updatePlot();
                 }
             }
             private void buRecord_Click(object sender, EventArgs e)
