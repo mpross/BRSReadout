@@ -82,6 +82,8 @@ namespace BRSReadout
             public static Queue<graphData> graphQueue = new Queue<graphData>();
             public static AutoResetEvent graphSignal = new AutoResetEvent(false);
             Thread graphThread;
+            public double graphSum;
+            public int graphAverages=1;
 
             DateTime DTFrameCo0;
             double dayFrameCo0;
@@ -123,8 +125,8 @@ namespace BRSReadout
             public struct graphData
             {
                 public ushort[] frame;
-                public double[,] angle;
-                public graphData(ushort[] inFrame, double[,] inAngle)
+                public double angle;
+                public graphData(ushort[] inFrame, double inAngle)
                 {
                     angle = inAngle;
                     frame = inFrame;
@@ -245,18 +247,28 @@ namespace BRSReadout
                         {
                             myDataWriter.Write(curTimeStamp / gmastersampfreq / 3600 / 24 + dayFrameCo0, refLP);
                         }
-                        if (Application.OpenForms.OfType<Form2>().Count() == 1 && frameCount >= 10)
+                        if (Application.OpenForms.OfType<Form2>().Count() == 1 && frameCount >= graphAverages)
                         {
-                            graphData outData = new graphData(frame, newdata);
+                            for (int i = 0; i < newdata.GetLength(0); i++)
+                            {
+                                graphSum += newdata[i, 0];
+                            }
+                            graphSum = graphSum / ((double)graphAverages * newdata.GetLength(0));
+                            graphData outData = new graphData(frame, graphSum);
                             lock (graphLock)
                             {
                                 graphQueue.Enqueue(outData);
                             }
                             graphSignal.Set();
                             frameCount = 0;
+                            graphSum = 0;
                         }
                         else
                         {
+                            for (int i = 0; i < newdata.GetLength(0); i++)
+                            {
+                                graphSum += newdata[i, 0];
+                            }
                             frameCount++;
                         }
 

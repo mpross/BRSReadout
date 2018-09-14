@@ -135,6 +135,8 @@ class Camera
                     masterDataDelegate = dd;
                     data = new ushort[4096];
                     Random random = new Random();
+                    TimeSpan ts = DateTime.Now.Subtract(new DateTime(2011, 2, 1));
+                    double offset = 300*Math.Sin(2 * Math.PI * 0.1 * ts.TotalSeconds);
                     for (int i=0; i<data.Length;i++){
                         if (i < 40)
                         {
@@ -144,11 +146,15 @@ class Camera
                         {
                             data[i] = (ushort)(data[i] + 1300.0 + random.Next(0, 5));
                         }
-                        if (i > 1740 && i < 3240)
+                        if (i > 1540 && i<1940+offset)
+                        {
+                            data[i] = (ushort)(data[i] + random.Next(0, 5));
+                        }
+                        if (i > 1940 + offset && i < 3440 + offset)
                         {
                             data[i] = (ushort)(data[i] + 1300.0 + random.Next(0, 5));
                         }
-                        if (i > 3240)
+                        if (i > 3440 + offset)
                         {
                             data[i] = (ushort)(data[i] + random.Next(0, 5));
                         }
