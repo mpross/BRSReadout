@@ -37,7 +37,8 @@ namespace BRSReadout
             public double zeroValue = 0;
             public double refZeroValue = 0;
             public double refValue = 0;
-
+            
+            public int frameCount=0;
             
             Camera myCamera;
             DataConsumerDelegate[] consumerd;
@@ -77,6 +78,11 @@ namespace BRSReadout
             private Queue<PeakQueueItem> dataWritingQueue;
             public volatile SyncEvents dataWritingSyncEvent;
 
+            public static object graphLock = new object();
+            public static Queue<graphData> graphQueue = new Queue<graphData>();
+            public static AutoResetEvent graphSignal = new AutoResetEvent(false);
+            Thread graphThread;
+
             DateTime DTFrameCo0;
             double dayFrameCo0;
 
@@ -113,6 +119,17 @@ namespace BRSReadout
             int cameraStatus=1; 
 
             int displayCount = 0;
+            
+            public struct graphData
+            {
+                public ushort[] frame;
+                public double[,] angle;
+                public graphData(ushort[] inFrame, double[,] inAngle)
+                {
+                    angle = inAngle;
+                    frame = inFrame;
+                }
+            }
 
             public Form1()
             {
@@ -228,10 +245,25 @@ namespace BRSReadout
                         {
                             myDataWriter.Write(curTimeStamp / gmastersampfreq / 3600 / 24 + dayFrameCo0, refLP);
                         }
-                        
-                    }
+                        if (Application.OpenForms.OfType<Form2>().Count() == 1 && frameCount >= 10)
+                        {
+                            graphData outData = new graphData(frame, newdata);
+                            lock (graphLock)
+                            {
+                                graphQueue.Enqueue(outData);
+                            }
+                            graphSignal.Set();
+                            frameCount = 0;
+                        }
+                        else
+                        {
+                            frameCount++;
+                        }
+
 
                 }
+
+            }
             }
             /*
              *  Takes a two dimensional array of doubles and int and returns an array of doubles
@@ -468,10 +500,6 @@ namespace BRSReadout
                     //Camera status bit at MW6
                     bw.Write((int)cameraStatus);
                     tcAds.Write(0x4020, 0, ds);
-                }
-                if (Application.OpenForms.OfType<Form2>().Count() == 1)
-                {
-                    graphWindow.updatePlot();
                 }
 
                 xHighPass[2] = xHighPass[1];
@@ -885,14 +913,15 @@ namespace BRSReadout
             private void buGraph_Click(object sender, EventArgs e)
             {
                 if (Application.OpenForms.OfType<Form2>().Count() == 0)
-                {
+                {                
                     graphWindow = new Form2();
-                    graphWindow.Show();
+                    graphThread = new Thread(Program.Main2);
+                    graphThread.SetApartmentState(ApartmentState.STA);
+                    graphThread.Start();
                 }
                 else
                 {
                     graphWindow.BringToFront();
-                    graphWindow.updatePlot();
                 }
             }
             private void buRecord_Click(object sender, EventArgs e)

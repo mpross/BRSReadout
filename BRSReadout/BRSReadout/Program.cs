@@ -40,5 +40,12 @@ namespace BRSReadout
             System.Diagnostics.Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
             Application.Run(new Form1());
         }
+        public static void Main2()
+        {
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            System.Diagnostics.Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
+            Application.Run(new Form2());
+        }
     }
 }
