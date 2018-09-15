@@ -78,7 +78,7 @@ class Camera
             Pylon.DeviceFeatureFromString(hDev, "PixelFormat", "Mono12");
             Pylon.DeviceFeatureFromString(hDev, "AcquisitionMode", "Continuous");
             Pylon.DeviceSetIntegerFeature(hDev, "Height", 1);
-            Pylon.DeviceSetFloatFeature(hDev, "ExposureTimeAbs", 500); //Exposure time is in microseconds and rounded to the closest 100 ns.
+            Pylon.DeviceSetFloatFeature(hDev, "ExposureTimeAbs", double.Parse(ConfigurationManager.AppSettings.Get("cameraExposureTime"))); //Exposure time is in microseconds and rounded to the closest 100 ns.
             isAvail = Pylon.DeviceFeatureIsWritable(hDev, "GevSCPSPacketSize");
             if (isAvail)
             {
@@ -144,7 +144,7 @@ class Camera
                         }
                         if (i > 40 && i < 1540)
                         {
-                            data[i] = (ushort)(data[i] + 1300.0 + random.Next(0, 5));
+                            data[i] = (ushort)(data[i] + Math.Pow(2,11) + random.Next(0, 5));
                         }
                         if (i > 1540 && i<1940+offset)
                         {
@@ -152,14 +152,14 @@ class Camera
                         }
                         if (i > 1940 + offset && i < 3440 + offset)
                         {
-                            data[i] = (ushort)(data[i] + 1300.0 + random.Next(0, 5));
+                            data[i] = (ushort)(data[i] + Math.Pow(2, 11) + random.Next(0, 5));
                         }
                         if (i > 3440 + offset)
                         {
                             data[i] = (ushort)(data[i] + random.Next(0, 5));
                         }
                     }
-                    System.Threading.Thread.Sleep(10);
+                    System.Threading.Thread.Sleep(int.Parse(ConfigurationManager.AppSettings.Get("cameraExposureTime"))/1000);
                     masterDataDelegate(data);
                 }
             }
