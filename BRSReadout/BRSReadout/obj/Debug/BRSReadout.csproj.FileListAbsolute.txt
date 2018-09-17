@@ -19,7 +19,6 @@ C:\Users\Eotwash\Documents\BRSReadout\BRSReadout\obj\Debug\BRSReadout.csproj.Gen
 C:\Users\Eotwash\Documents\BRSReadout\BRSReadout\obj\Debug\BRSReadout.exe
 C:\Users\Eotwash\Documents\BRSReadout\BRSReadout\obj\Debug\BRSReadout.pdb
 C:\Users\Eotwash\Documents\BRSReadout\BRSReadout\obj\Debug\BRSReadout.csprojResolveAssemblyReference.cache
-C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\obj\Debug\BRSReadout.csprojAssemblyReference.cache
 C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\obj\Debug\BRSReadout.Form1.resources
 C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\obj\Debug\BRSReadout.Properties.Resources.resources
 C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\obj\Debug\BRSReadout.csproj.GenerateResource.cache
@@ -42,3 +41,4 @@ C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\bin\Debug\LiveCharts.W
 C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\bin\Debug\LiveCharts.Wpf.pdb
 C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\bin\Debug\LiveCharts.Wpf.xml
 C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\obj\Debug\BRSReadout.Form2.resources
+C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\obj\Debug\BRSReadout.csprojAssemblyReference.cache

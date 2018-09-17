@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Configuration;
 using System.Diagnostics;
 using System.Drawing;
@@ -24,7 +25,7 @@ namespace BRSReadout
         public bool twinCatBool = ("true" == ConfigurationManager.AppSettings.Get("twinCat"));
         public string cameraType = ConfigurationManager.AppSettings.Get("camera");
 
-        public Form2 graphWindow = new Form2();
+        public static Form2 graphWindow =null;
 
         public const int datalen = 4096;
         public const int datamax = 4096;
@@ -33,8 +34,6 @@ namespace BRSReadout
         public double zeroValue = 0;
         public double refZeroValue = 0;
         public double refValue = 0;
-
-        public int frameCount = 0;
 
         Camera myCamera;
         DataConsumerDelegate[] consumerd;
@@ -77,7 +76,7 @@ namespace BRSReadout
         public static object graphLock = new object();
         public static Queue<graphData> graphQueue = new Queue<graphData>();
         public static AutoResetEvent graphSignal = new AutoResetEvent(false);
-        Thread graphThread;
+        public static Thread graphThread;
         public double graphSum;
 
         DateTime DTFrameCo0;
@@ -85,7 +84,7 @@ namespace BRSReadout
 
         double voltagewrite = 0;
 
-        static int gFrames = 10; //Amount of frames collected before fitting and downsampling 
+        static int gFrames = 100; //Amount of frames collected before fitting and downsampling 
         public static double[,] newdata = new double[gFrames, 2];
         static TcAdsClient tcAds = new TcAdsClient();
         static AdsStream ds = new AdsStream(16);
@@ -249,7 +248,7 @@ namespace BRSReadout
                     {
                         myDataWriter.Write(curTimeStamp / gmastersampfreq / 3600 / 24 + dayFrameCo0, refLP);
                     }
-                    if (Application.OpenForms.OfType<Form2>().Count() == 1)
+                    if (graphWindow!=null && !graphWindow.IsDisposed)
                     {
                         for (int i = 0; i < newdata.GetLength(0); i++)
                         {
@@ -265,12 +264,7 @@ namespace BRSReadout
                             graphQueue.Enqueue(outData);
                         }
                         graphSignal.Set();
-                        frameCount = 0;
                         graphSum = 0;
-                    }
-                    else
-                    {
-                        frameCount++;
                     }
 
 
@@ -938,23 +932,33 @@ namespace BRSReadout
             {
                 consumerd[i].myThread.Join();
             }
+            graphThread.Abort();
+            dataWritingThread.Abort();
+            Environment.Exit(1);
         }
-
+        private void Form2_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            graphWindow.stopLoop();
+            graphWindow.Hide();
+            e.Cancel = true;
+        }
         private void Form1_Resize(object sender, EventArgs e)
         {
             SetSize();
         }
         private void buGraph_Click(object sender, EventArgs e)
         {
-            if (Application.OpenForms.OfType<Form2>().Count() == 0)
-            {
+            if (graphWindow == null) { 
                 graphWindow = new Form2();
+                graphWindow.FormClosing += new FormClosingEventHandler(Form2_FormClosing);
                 graphThread = new Thread(Program.Main2);
                 graphThread.SetApartmentState(ApartmentState.STA);
                 graphThread.Start();
+                graphWindow.Show();
             }
             else
             {
+                graphWindow.Show();
                 graphWindow.BringToFront();
             }
         }

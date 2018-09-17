@@ -45,7 +45,8 @@ namespace BRSReadout
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             System.Diagnostics.Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
-            Application.Run(new Form2());
+            var graphForm= new Form2();
+            Application.Run();
         }
     }
 }

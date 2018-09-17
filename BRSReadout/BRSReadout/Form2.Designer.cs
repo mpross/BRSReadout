@@ -30,6 +30,7 @@ namespace BRSReadout
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form2));
             this.imagePlot = new LiveCharts.WinForms.CartesianChart();
             this.anglePlot = new LiveCharts.WinForms.CartesianChart();
             this.SuspendLayout();
@@ -37,7 +38,7 @@ namespace BRSReadout
             // imagePlot
             // 
             this.imagePlot.Location = new System.Drawing.Point(12, 12);
-            this.imagePlot.Name = "image";
+            this.imagePlot.Name = "imagePlot";
             this.imagePlot.Size = new System.Drawing.Size(902, 674);
             this.imagePlot.TabIndex = 0;
             this.imagePlot.Text = "image";
@@ -57,6 +58,7 @@ namespace BRSReadout
             this.ClientSize = new System.Drawing.Size(1541, 698);
             this.Controls.Add(this.anglePlot);
             this.Controls.Add(this.imagePlot);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form2";
             this.Text = "BRS Graph";
             this.ResumeLayout(false);
