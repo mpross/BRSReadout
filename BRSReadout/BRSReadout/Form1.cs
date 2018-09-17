@@ -936,6 +936,14 @@ namespace BRSReadout
             dataWritingThread.Abort();
             Environment.Exit(1);
         }
+
+        private void Form2_Resize(object sender, System.EventArgs e)
+        {
+            graphWindow.imagePlot.Size = new Size((graphWindow.ClientRectangle.Width / 2)-40, graphWindow.ClientRectangle.Height - 40);
+            graphWindow.anglePlot.Size = new Size((graphWindow.ClientRectangle.Width / 2) - 40, graphWindow.ClientRectangle.Height - 40);
+            graphWindow.imagePlot.Location = new Point(20, 20);
+            graphWindow.anglePlot.Location = new Point((graphWindow.ClientRectangle.Width / 2)-20, 20);
+        }
         private void Form2_FormClosing(object sender, FormClosingEventArgs e)
         {
             graphWindow.stopLoop();
@@ -951,6 +959,7 @@ namespace BRSReadout
             if (graphWindow == null) { 
                 graphWindow = new Form2();
                 graphWindow.FormClosing += new FormClosingEventHandler(Form2_FormClosing);
+                graphWindow.ClientSizeChanged += new EventHandler(Form2_Resize);
                 graphThread = new Thread(Program.Main2);
                 graphThread.SetApartmentState(ApartmentState.STA);
                 graphThread.Start();

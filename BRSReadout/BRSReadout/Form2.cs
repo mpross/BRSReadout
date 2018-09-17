@@ -98,8 +98,10 @@ namespace BRSReadout
             anglePlot.Hoverable = false;
             anglePlot.DataTooltip = null;
 
-            imagePlot.Size = new Size(ClientRectangle.Width / 2, ClientRectangle.Height);
-            anglePlot.Size = new Size(ClientRectangle.Width / 10, ClientRectangle.Height);
+            imagePlot.Anchor = AnchorStyles.Left;
+            anglePlot.Anchor = AnchorStyles.Right;
+            imagePlot.Anchor = AnchorStyles.Top;
+            anglePlot.Anchor = AnchorStyles.Top;
 
             if (dataLoopThread == null)
             {

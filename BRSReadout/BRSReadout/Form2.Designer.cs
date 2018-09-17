@@ -66,7 +66,7 @@ namespace BRSReadout
         }
         #endregion
 
-        private LiveCharts.WinForms.CartesianChart imagePlot;
-        private LiveCharts.WinForms.CartesianChart anglePlot;
+        public LiveCharts.WinForms.CartesianChart imagePlot;
+        public LiveCharts.WinForms.CartesianChart anglePlot;
     }
 }
