@@ -38,6 +38,8 @@
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.buRecord = new System.Windows.Forms.Button();
             this.buGraph = new System.Windows.Forms.Button();
+            this.buRecap = new System.Windows.Forms.Button();
+            this.buCBit = new System.Windows.Forms.Button();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.textBox3 = new System.Windows.Forms.TextBox();
             this.textBox4 = new System.Windows.Forms.TextBox();
@@ -71,6 +73,22 @@
             this.buGraph.Text = "Graph";
             this.buGraph.UseVisualStyleBackColor = true;
             this.buGraph.Click += new System.EventHandler(this.buGraph_Click);
+
+            this.buCBit.Location = new System.Drawing.Point(456, 54);
+            this.buCBit.Name = "cOver";
+            this.buCBit.Size = new System.Drawing.Size(75, 23);
+            this.buCBit.TabIndex = 2;
+            this.buCBit.Text = "CBit Override";
+            this.buCBit.UseVisualStyleBackColor = true;
+            this.buCBit.Click += new System.EventHandler(this.buCBit_Click);
+
+            this.buRecap.Location = new System.Drawing.Point(456, 79);
+            this.buRecap.Name = "recap";
+            this.buRecap.Size = new System.Drawing.Size(75, 23);
+            this.buRecap.TabIndex = 2;
+            this.buRecap.Text = "Recapture";
+            this.buRecap.UseVisualStyleBackColor = true;
+            this.buRecap.Click += new System.EventHandler(this.buRecap_Click);
 
             this.buRecord.Location = new System.Drawing.Point(456, 29);
             this.buRecord.Name = "buRecord";
@@ -240,6 +258,8 @@
             this.Controls.Add(this.textBox2);
             this.Controls.Add(this.buRecord);
             this.Controls.Add(this.buGraph);
+            this.Controls.Add(this.buRecap);
+            this.Controls.Add(this.buCBit);
             this.Controls.Add(this.textBox1);
             this.MinimumSize = new System.Drawing.Size(550, 150); // Original 550, 350
             this.Name = "Form1";
@@ -269,6 +289,8 @@
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Button buRecord;
         private System.Windows.Forms.Button buGraph;
+        private System.Windows.Forms.Button buCBit;
+        private System.Windows.Forms.Button buRecap;
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.TextBox textBox3;
         private System.Windows.Forms.TextBox textBox4;

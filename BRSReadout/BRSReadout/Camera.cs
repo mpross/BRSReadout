@@ -136,7 +136,7 @@ class Camera
                     data = new ushort[4096];
                     Random random = new Random();
                     TimeSpan ts = DateTime.Now.Subtract(new DateTime(2011, 2, 1));
-                    double offset = 300*Math.Sin(2 * Math.PI * 0.01 * ts.TotalSeconds);
+                    double offset = 1000*Math.Sin(2 * Math.PI * 0.01 * ts.TotalSeconds);
                     for (int i=0; i<data.Length;i++){
                         if (i < 40)
                         {
