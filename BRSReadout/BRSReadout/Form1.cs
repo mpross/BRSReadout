@@ -27,8 +27,6 @@ namespace BRSReadout
 
         public static Form2 graphWindow =null;
 
-        public const int datalen = 4096;
-        public const int datamax = 4096;
         public bool firstFrame = true;
         public int firstValueCounter = 0;
         public double zeroValue = 0;
@@ -44,33 +42,20 @@ namespace BRSReadout
         Stopwatch myStopwatch;
         DataWriting myDataWriter;
 
-        public string toWrite;
-        private RawData currentData;
-
         int startIndex2 = 1800; //Beginning of right pattern
         int startIndex2Ref = 0; //Beginning of right pattern
-        bool noMoreData = false;
-        volatile bool gquitting = false;
-        public volatile bool gRecord = false;
-        public volatile bool gDamp = false;
 
-        double gsampfreq = Math.Pow(10,6)/double.Parse(ConfigurationManager.AppSettings.Get("cameraExposureTime"))/2;
-        double gmastersampfreq = Math.Pow(10, 6) / double.Parse(ConfigurationManager.AppSettings.Get("cameraExposureTime"))/2;
+        bool dampOverride = false;
+        volatile bool quittingBool = false;
+        public volatile bool recordBool = false;
 
-        public int gMaiIx = 1700;
-        public volatile int Frameco = 0;
-        public volatile int gNoPeaks = 1, gOldNoPeaks = 0;
-        int Trig = 0;
-        int gsampfrequcounter = 0;
-        int gsampfrequcountermax = 1000;
-        int gsampfrequcountermaxlater = 1000;
+        double sampFreq = Math.Pow(10, 6) / double.Parse(ConfigurationManager.AppSettings.Get("cameraExposureTime"));
 
+        public volatile int Frameco = 0;        
         ushort[] refFrame = new ushort[4096];
-
-
         public static ushort[] frame = new ushort[4096];
-        ushort[] refFrameRef = new ushort[4096];
-        volatile bool dataWritingThreadOn;
+
+        volatile bool dataWritingThreadBool;
         Thread dataWritingThread;
         Thread cameraThread;
         private Queue<PeakQueueItem> dataWritingQueue;
@@ -81,14 +66,13 @@ namespace BRSReadout
         public static AutoResetEvent graphSignal = new AutoResetEvent(false);
         public static Thread graphThread;
         public double graphSum;
-
-        DateTime DTFrameCo0;
+        
         double dayFrameCo0;
 
         double voltagewrite = 0;
 
-        static int gFrames = 100; //Amount of frames collected before fitting and downsampling 
-        public static double[,] newdata = new double[gFrames, 2];
+        static int graphFrames = int.Parse(ConfigurationManager.AppSettings.Get("graphingFrameNumber")); //Amount of frames collected before fitting and downsampling 
+        public static double[,] newdata = new double[graphFrames, 2];
         static TcAdsClient tcAds = new TcAdsClient();
         static AdsStream ds = new AdsStream(16);
 
@@ -135,19 +119,16 @@ namespace BRSReadout
             try
             {
                 //Calls calculation method for filters
-                highCoeff = filterCoeff(0.0005, 2000.0 / gFrames, "High");
-                lowCoeff = filterCoeff(0.1, 2000.0 / gFrames, "Low");
-                bandHighCoeff = filterCoeff(0.002, 2000.0 / gFrames, "High");
-                bandLowCoeff = filterCoeff(0.02, 2000.0 / gFrames, "Low");//2*10^-2
+                highCoeff = filterCoeff(0.0005, 2000.0 / graphFrames, "High");
+                lowCoeff = filterCoeff(0.1, 2000.0 / graphFrames, "Low");
+                bandHighCoeff = filterCoeff(0.002, 2000.0 / graphFrames, "High");
+                bandLowCoeff = filterCoeff(0.02, 2000.0 / graphFrames, "Low");//2*10^-2
 
                 InitializeComponent(); // Initializes the visual components
                 SetSize(); // Sets up the size of the window and the corresponding location of the components
                 Frameco = 0;
-                DTFrameCo0 = DateTime.Now;
-                dayFrameCo0 = DayNr.GetDayNr(DTFrameCo0);
-
-                toWrite = "";
-                currentData = new RawData(gFrames);
+                dayFrameCo0 = DayNr.GetDayNr(DateTime.Now);
+                
                 //Initialization of TwinCAT connection. 851 is the port for PLC runtime 1
                 //tcAds.Dispose();
                 if (twinCatBool)
@@ -168,7 +149,7 @@ namespace BRSReadout
                 }
                 dataWritingQueue = new Queue<PeakQueueItem>();
 
-                dataWritingThreadOn = true;
+                dataWritingThreadBool = true;
                 dataWritingThread = new Thread(dataWrite);
                 dataWritingThread.Priority = ThreadPriority.Highest;
                 dataWritingThread.Start();
@@ -191,30 +172,24 @@ namespace BRSReadout
         void dataWrite()
         {
             int f;
-            double diff;
-            double reff;
-            StringBuilder ds1, ds2;
             PeakQueueItem curItem;
-            double[,] dataA;
-            long[] timeStampA;
             long curTimeStamp;
-
-
-            double[] refLP;
+        
+            double[] lowPassedData;
             double[,] values;
 
             values = new double[10000, 2];
             curItem = new PeakQueueItem();
-            while (dataWritingThreadOn)
+            while (dataWritingThreadBool)
             {
-                if (gquitting)
+                if (quittingBool)
                 {
                     return;
                 }
 
                 while ((WaitHandle.WaitAny(dataWritingSyncEvent.EventArray) != 1))
                 {
-                    if (gquitting)
+                    if (quittingBool)
                     {
                         return;
                     }
@@ -228,28 +203,20 @@ namespace BRSReadout
                         }
 
                     }
-                    ds1 = new StringBuilder(100000);
-                    ds2 = new StringBuilder(100000);
-                    timeStampA = curItem.TimeStamp;
-                    dataA = curItem.Data;
                     curTimeStamp = 0;
-                    for (f = 0; f < gFrames; f++)
+                    for (f = 0; f < graphFrames; f++)
                     {
-                        curTimeStamp = timeStampA[f];
-                        ds1.AppendFormat("{0,10:F2}", curTimeStamp.ToString());
-                        ds2.AppendFormat("{0,10:F2}", curTimeStamp.ToString());
-                        diff = dataA[f, 0];
-                        reff = dataA[f, 1];
-                        values[f, 0] = diff;
-                        values[f, 1] = reff;
+                        curTimeStamp = curItem.TimeStamp[f];
+                        values[f, 0] = curItem.Data[f, 0]; //Diff
+                        values[f, 1] = curItem.Data[f, 1]; //Ref
                     }
-                    refLP = lp(values, gFrames);
-                    dataSend(refLP);
+                    lowPassedData = lp(values, graphFrames);
+                    dataSend(lowPassedData);
 
                     f = f - 1;
-                    if (gRecord)
+                    if (recordBool)
                     {
-                        myDataWriter.Write(curTimeStamp / gmastersampfreq / 3600 / 24 + dayFrameCo0, refLP);
+                        myDataWriter.Write(curTimeStamp / sampFreq / 3600 / 24 + dayFrameCo0, lowPassedData);
                     }
                     if (graphWindow!=null && !graphWindow.IsDisposed)
                     {
@@ -281,10 +248,10 @@ namespace BRSReadout
          */
         double[] lp(double[,] data, int frames)
         {
-            double[] output = new double[gFrames];
+            double[] output = new double[graphFrames];
             double mainSum = 0;
             double refSum = 0;
-            for (int i = 0; i < gFrames; i++)
+            for (int i = 0; i < graphFrames; i++)
             {
                 xLowPass1[0] = data[i, 0];
 
@@ -307,8 +274,8 @@ namespace BRSReadout
                 mainSum += yLowPass1[0];
                 refSum += yLowPass2[0];
             }
-            output[0] = mainSum / gFrames;
-            output[1] = refSum / gFrames;
+            output[0] = mainSum / graphFrames;
+            output[1] = refSum / graphFrames;
             return output;
         }
         // This method takes new data from the camera and inserts it, with proper timing, into the queue to be processed by the consumerd
@@ -317,37 +284,14 @@ namespace BRSReadout
         {
             int i;
             int curFrame;
+            RawData currentData=new RawData(graphFrames);
             Frameco++;
-            if (gquitting)
+            if (quittingBool)
             {
                 return;
-            }
-
-            gsampfrequcounter++;
-            if (gsampfrequcounter == 1)
-            {
-                myStopwatch.Reset();
-                myStopwatch.Start();
-            }
-            if (gsampfrequcounter == gsampfrequcountermax)
-            {
-                myStopwatch.Stop();
-                TimeSpan ts = myStopwatch.Elapsed;
-                gsampfreq = ((gsampfrequcountermax - 1.0) / ts.TotalMilliseconds * 1000.0);
-                gsampfrequcounter = 0;
-                if (gsampfrequcountermax != gsampfrequcountermaxlater)
-                {
-                    gsampfrequcountermax = gsampfrequcountermaxlater;
-                }
-            }
-            // Enque the Data
-            if (noMoreData)
-            {
-                return;
-            }
+            }            
             curFrame = currentData.AddData(data, Frameco); // Returns the number of frames in the RawData object
-
-            if (curFrame == gFrames)
+            if (curFrame == graphFrames)
             {
                 try
                 {
@@ -364,8 +308,7 @@ namespace BRSReadout
                 {
                     EmailError.emailAlert(ex);
                     throw (ex);
-                }
-                currentData = new RawData(gFrames);
+                }            
             }
         }
         //Camera initialization
@@ -401,7 +344,7 @@ namespace BRSReadout
             if (displayCount == 10)
             {
                 double ti;
-                ti = data.TimeStamp(0) * 1.0 / gmastersampfreq;
+                ti = data.TimeStamp(0) * 1.0 / sampFreq;
                 setTextBox1(ti.ToString("F1"));
                 setTextBox4(String.Format("{0:0.00}", (voltagewrite)));
                 displayCount = 0;
@@ -476,7 +419,7 @@ namespace BRSReadout
             yBandLowPass[0] = bandLowCoeff[3] * yBandLowPass[1] + bandLowCoeff[4] * yBandLowPass[2] + bandLowCoeff[0] * xBandLowPass[0] + bandLowCoeff[1] * xBandLowPass[1] + bandLowCoeff[2] * xBandLowPass[2];
             xBandHighPass[0] = yBandLowPass[0];
             yBandHighPass[0] = bandHighCoeff[3] * yBandHighPass[1] + bandHighCoeff[4] * yBandHighPass[2] + bandHighCoeff[0] * xBandHighPass[0] + bandHighCoeff[1] * xBandHighPass[1] + bandHighCoeff[2] * xBandHighPass[2];
-            velocity = -2000000 * Math.Round((double)200 / gFrames) * (yBandHighPass[0] - yBandHighPass[1]);
+            velocity = -2000000 * Math.Round((double)200 / graphFrames) * (yBandHighPass[0] - yBandHighPass[1]);
 
             //Contact potential check. If above contact potential, the force is approximately proportional to V^2. If below, to -V*Vcontact.
             if (Math.Abs(velocity) > 00)
@@ -537,7 +480,6 @@ namespace BRSReadout
         // This functions processes a pattern, obtains the data and send it out to be written
         private void Pattern(RawData data)
         {
-            int nf;
             PeakQueueItem quI;
             int ql;
             long[] timestamps;
@@ -562,17 +504,15 @@ namespace BRSReadout
             double xxy = 0;
             double b, c, D, Db, Dc;// a,b, and c are the values we solve for then derive mu,sigma, and A from them.
 
-            if (gquitting)
+            if (quittingBool)
             {
                 return;
             }
+            
+            timestamps = new long[graphFrames];
+            newdata = new double[graphFrames, 2];
 
-            Trig++;
-            nf = gFrames;
-            timestamps = new long[nf];
-            newdata = new double[nf, 2];
-
-            for (int frameNo = 0; frameNo < gFrames; frameNo++)
+            for (int frameNo = 0; frameNo < graphFrames; frameNo++)
             {
                 try
                 {
@@ -597,6 +537,10 @@ namespace BRSReadout
                                 break;
                             }
                         }
+                        x = 0;
+                        xSquar = 0;
+                        xCube = 0;
+                        xFourth = 0;
                         for (int j = 0; j < fitLength; j++)
                         {
                             x += j;
@@ -718,105 +662,106 @@ namespace BRSReadout
 
                         angleLastValue = mu + startIndex1;
 
+                    
+
+                    ////////////////////////////Reference Pattern/////////////////////
+                    y = 0;
+                    xy = 0;
+                    xxy = 0;
+                    //Finds beginning of pattern using a threshold
+
+                    // 11/08/17 - Changed code to online subtraction of Ref signal - Krishna
+                    //if (frameCount >= 10)
+                    //{
+                    //    frameCount = 0;
+
+                    for (int j = 0; j < frame.Length; j++)
+                    {
+                        if (frame[j] > 1200)//&& j < 1600)
+                        {
+                            startIndex1Ref = j - 30;
+                            lightSourceStatus = 1;
+                            break;
+                        }
+
+                        if (j == frame.Length - 1)
+                        {
+                            lightSourceStatus = 0;
+                        }
+                    }
+                    if (startIndex1Ref < halflength)
+                    {
+                        startIndex1Ref = 0;
                     }
 
-                        ////////////////////////////Reference Pattern/////////////////////
-                        y = 0;
-                        xy = 0;
-                        xxy = 0;
-                        //Finds beginning of pattern using a threshold
-
-                        // 11/08/17 - Changed code to online subtraction of Ref signal - Krishna
-                        //if (frameCount >= 10)
-                        //{
-                        //    frameCount = 0;
-
-                        for (int j = 0; j < frame.Length; j++)
+                    //Calcualtes the crosscorrelation between the two patterns at shifts 
+                    for (int k = -halflength; k <= halflength; k++)
+                    {
+                        sum = 0;
+                        for (int m = 0; m < length; m++)
                         {
-                            if (frame[j] > 1200)//&& j < 1600)
+                            if ((m + startIndex1Ref + k) > 0 && (m + startIndex2Ref) > 0)
                             {
-                                startIndex1Ref = j - 30;
-                                lightSourceStatus = 1;
-                                break;
-                            }
-
-                            if (j == frame.Length - 1)
-                            {
-                                lightSourceStatus = 0;
+                                sum += frame[m + startIndex1Ref + k] * refFrame[m + startIndex2Ref];
                             }
                         }
-                        if (startIndex1Ref < halflength)
-                        {
-                            startIndex1Ref = 0;
-                        }
+                        crossCor[k + halflength] = sum;
+                    }
+                    //Sums x,x^2,x^3,x^4,ln(y),x ln(y),x^2 ln(y)
 
-                        //Calcualtes the crosscorrelation between the two patterns at shifts 
-                        for (int k = -halflength; k <= halflength; k++)
-                        {
-                            sum = 0;
-                            for (int m = 0; m < length; m++)
-                            {
-                                if ((m + startIndex1Ref + k) > 0 && (m + startIndex2Ref) > 0)
-                                {
-                                    sum += frame[m + startIndex1Ref + k] * refFrame[m + startIndex2Ref];
-                                }
-                            }
-                            crossCor[k + halflength] = sum;
-                        }
-                        //Sums x,x^2,x^3,x^4,ln(y),x ln(y),x^2 ln(y)
+                    for (int j = 0; j < fitLength; j++)
+                    {
+                        y += Math.Log(crossCor[j + 1]);
+                        xy += j * Math.Log(crossCor[j + 1]);
+                        xxy += j * j * Math.Log(crossCor[j + 1]);
+                    }
+                    //Solves system of equations using Cramer's rule
+                    D = N * (xSquar * xFourth - xCube * xCube) - x * (x * xFourth - xCube * xSquar) + xSquar * (x * xCube - xSquar * xSquar);
+                    //Da = y * (xSquar * xFourth - xCube * xCube) - x * (xy * xFourth - xCube * xxy) + xSquar * (xy * xCube - xSquar * xxy);
+                    Db = N * (xy * xFourth - xCube * xxy) - y * (x * xFourth - xCube * xSquar) + xSquar * (x * xxy - xy * xSquar);
+                    Dc = N * (xSquar * xxy - xy * xCube) - x * (x * xxy - xy * xSquar) + y * (x * xCube - xSquar * xSquar);
+                    //a = Da / D;
+                    b = Db / D;
+                    c = Dc / D;
 
-                        for (int j = 0; j < fitLength; j++)
-                        {
-                            y += Math.Log(crossCor[j + 1]);
-                            xy += j * Math.Log(crossCor[j + 1]);
-                            xxy += j * j * Math.Log(crossCor[j + 1]);
-                        }
-                        //Solves system of equations using Cramer's rule
-                        D = N * (xSquar * xFourth - xCube * xCube) - x * (x * xFourth - xCube * xSquar) + xSquar * (x * xCube - xSquar * xSquar);
-                        //Da = y * (xSquar * xFourth - xCube * xCube) - x * (xy * xFourth - xCube * xxy) + xSquar * (xy * xCube - xSquar * xxy);
-                        Db = N * (xy * xFourth - xCube * xxy) - y * (x * xFourth - xCube * xSquar) + xSquar * (x * xxy - xy * xSquar);
-                        Dc = N * (xSquar * xxy - xy * xCube) - x * (x * xxy - xy * xSquar) + y * (x * xCube - xSquar * xSquar);
-                        //a = Da / D;
-                        b = Db / D;
-                        c = Dc / D;
+                    mu1 = -b / (2 * c);
 
-                        mu1 = -b / (2 * c);
+                    // If fit-center is to left of center of crosscor pattern, shift cross-cor pattern by 1 pixel to right or vice versa
+                    if (mu1 < (halflength - 1))
+                    {
+                        pixshift = -1;
+                    }
+                    else
+                    {
+                        pixshift = 1;
+                    }
 
-                        // If fit-center is to left of center of crosscor pattern, shift cross-cor pattern by 1 pixel to right or vice versa
-                        if (mu1 < (halflength - 1))
-                        {
-                            pixshift = -1;
-                        }
-                        else
-                        {
-                            pixshift = 1;
-                        }
+                    //Redo the fit
+                    y = 0;
+                    xy = 0;
+                    xxy = 0;
+                    for (int j = 0; j < fitLength; j++)
+                    {
+                        y += Math.Log(crossCor[j + 1 + pixshift]);
+                        xy += j * Math.Log(crossCor[j + 1 + pixshift]);
+                        xxy += j * j * Math.Log(crossCor[j + 1 + pixshift]);
+                    }
+                    D = N * (xSquar * xFourth - xCube * xCube) - x * (x * xFourth - xCube * xSquar) + xSquar * (x * xCube - xSquar * xSquar);
+                    Db = N * (xy * xFourth - xCube * xxy) - y * (x * xFourth - xCube * xSquar) + xSquar * (x * xxy - xy * xSquar);
+                    Dc = N * (xSquar * xxy - xy * xCube) - x * (x * xxy - xy * xSquar) + y * (x * xCube - xSquar * xSquar);
+                    b = Db / D;
+                    c = Dc / D;
 
-                        //Redo the fit
-                        y = 0;
-                        xy = 0;
-                        xxy = 0;
-                        for (int j = 0; j < fitLength; j++)
-                        {
-                            y += Math.Log(crossCor[j + 1 + pixshift]);
-                            xy += j * Math.Log(crossCor[j + 1 + pixshift]);
-                            xxy += j * j * Math.Log(crossCor[j + 1 + pixshift]);
-                        }
-                        D = N * (xSquar * xFourth - xCube * xCube) - x * (x * xFourth - xCube * xSquar) + xSquar * (x * xCube - xSquar * xSquar);
-                        Db = N * (xy * xFourth - xCube * xxy) - y * (x * xFourth - xCube * xSquar) + xSquar * (x * xxy - xy * xSquar);
-                        Dc = N * (xSquar * xxy - xy * xCube) - x * (x * xxy - xy * xSquar) + y * (x * xCube - xSquar * xSquar);
-                        b = Db / D;
-                        c = Dc / D;
+                    mu2 = -b / (2 * c);
 
-                        mu2 = -b / (2 * c);
+                    mu = (halflength - 1) - (mu1 - (halflength - 1)) * pixshift / (mu2 - mu1);
 
-                        mu = (halflength - 1) - (mu1 - (halflength - 1)) * pixshift / (mu2 - mu1);
+                    newdata[frameNo, 1] = mu + startIndex1Ref;
+                    refValue = mu + startIndex1Ref;
+                    newdata[frameNo, 0] = newdata[frameNo, 0] - refValue;
 
-                        newdata[frameNo, 1] = mu + startIndex1Ref;
-                        refValue = mu + startIndex1Ref;
-                        newdata[frameNo, 0] = newdata[frameNo, 0] - refValue;
-
-                        refLastValue = refValue;                    
+                    refLastValue = refValue;
+                }
                 }
 
                 catch (Exception ex)
@@ -840,7 +785,7 @@ namespace BRSReadout
                 setTextBox2(data.QueueLen.ToString());
                 setTextBox3(ql.ToString());
             }
-            if (gquitting)
+            if (quittingBool)
             {
                 return;
             }
@@ -851,62 +796,61 @@ namespace BRSReadout
 
         //===========================GUI=====================
 
-        public void setTextBox1(string o)
+        public void setTextBox1(string inString)
         {
             if (textBox1.InvokeRequired)
             {
                 textBox1.BeginInvoke(
                    new MethodInvoker(
-                   delegate () { setTextBox1(o); }));
+                   delegate () { setTextBox1(inString); }));
             }
             else
             {
-                textBox1.Text = o;
+                textBox1.Text = inString;
             }
 
         }
 
-        public void setTextBox2(string o)
+        public void setTextBox2(string inString)
         {
             if (textBox2.InvokeRequired)
             {
                 textBox2.BeginInvoke(
                    new MethodInvoker(
-                   delegate () { setTextBox2(o); }));
+                   delegate () { setTextBox2(inString); }));
             }
             else
             {
-                textBox2.Text = o;
+                textBox2.Text = inString;
             }
         }
 
-        public void setTextBox3(string o)
+        public void setTextBox3(string inString)
         {
             if (textBox3.InvokeRequired)
             {
                 textBox3.BeginInvoke(
                    new MethodInvoker(
-                   delegate () { setTextBox3(o); }));
+                   delegate () { setTextBox3(inString); }));
             }
             else
             {
-                textBox3.Text = o;
+                textBox3.Text = inString;
             }
         }
-        public void setTextBox4(string o)
+        public void setTextBox4(string inString)
         {
             if (textBox4.InvokeRequired)
             {
                 textBox4.BeginInvoke(
                    new MethodInvoker(
-                   delegate () { setTextBox4(o); }));
+                   delegate () { setTextBox4(inString); }));
             }
             else
             {
-                textBox4.Text = o;
+                textBox4.Text = inString;
             }
         }
-
 
         /*
          *  Sets the size of the box and the corresponding locations of all relevant graphical components
@@ -934,7 +878,7 @@ namespace BRSReadout
             buRecord.Location = new Point(ClientRectangle.Width - buRecord.Size.Width - 10, 20);
             buGraph.Location = new Point(ClientRectangle.Width - buGraph.Size.Width - 10, ClientRectangle.Height - buGraph.Size.Height - 20);
             buRecap.Location = new Point(ClientRectangle.Width - buRecap.Size.Width - 10, ClientRectangle.Height - buRecap.Size.Height - 50);
-            buCBit.Location = new Point(ClientRectangle.Width - buCBit.Size.Width - 10, ClientRectangle.Height - buCBit.Size.Height - 80);
+            buDamp.Location = new Point(ClientRectangle.Width - buDamp.Size.Width - 10, ClientRectangle.Height - buDamp.Size.Height - 80);
 
         }
 
@@ -942,7 +886,7 @@ namespace BRSReadout
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             int i;
-            gquitting = true;
+            quittingBool = true;
             cameraThread.Abort();
             myCamera.stopFrameGrab(cameraType);
             dataWritingSyncEvent.ExitThreadEvent.Set();
@@ -955,7 +899,6 @@ namespace BRSReadout
             {
                 consumerd[i].myThread.Join();
             }
-            graphThread.Abort();
             dataWritingThread.Abort();
             Environment.Exit(1);
         }
@@ -996,38 +939,41 @@ namespace BRSReadout
         }
         private void buRecord_Click(object sender, EventArgs e)
         {
-            if (gRecord == false)
+            if (recordBool == false)
             {
                 Frameco = 0;
-                DTFrameCo0 = DateTime.Now;
-                dayFrameCo0 = DayNr.GetDayNr(DTFrameCo0);
-
-
-                buRecord.Text = "Stop Rec.";
+                dayFrameCo0 = DayNr.GetDayNr(DateTime.Now);
+                buRecord.Text = "Stop Recording";
                 myDataWriter = new DataWriting();
-                gRecord = true;
+                recordBool = true;
             }
             else
             {
 
-                buRecord.Text = "Record";
-                gRecord = false;
+                buRecord.Text = "Record to Disk";
+                recordBool = false;
                 myDataWriter.stopit();
             }
         }
         private void buRecap_Click(object sender, EventArgs e)
         {
-            firstFrame = false;
-        }
-        private void buCBit_Click(object sender, EventArgs e)
-        {
             firstFrame = true;
         }
-
-        private void numericUpDown3_ValueChanged(object sender, EventArgs e)
+        private void buDamp_Click(object sender, EventArgs e)
         {
-            gNoPeaks = (int)numericUpDown3.Value;
+            if (dampOverride)
+            {
+                buDamp.BackColor = System.Drawing.Color.LightGray;
+                dampOverride = false;
+            }
+            else
+            {
+                buDamp.BackColor = System.Drawing.Color.Red;
+                dampOverride = true;
+            }
+
         }
+        
 
     }
 }

@@ -39,7 +39,7 @@
             this.buRecord = new System.Windows.Forms.Button();
             this.buGraph = new System.Windows.Forms.Button();
             this.buRecap = new System.Windows.Forms.Button();
-            this.buCBit = new System.Windows.Forms.Button();
+            this.buDamp = new System.Windows.Forms.Button();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.textBox3 = new System.Windows.Forms.TextBox();
             this.textBox4 = new System.Windows.Forms.TextBox();
@@ -63,38 +63,38 @@
             // 
             this.textBox1.Location = new System.Drawing.Point(10, 29);
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(50, 20);
+            this.textBox1.Size = new System.Drawing.Size(100, 20);
             this.textBox1.TabIndex = 0;
 
             this.buGraph.Location = new System.Drawing.Point(456, 29);
             this.buGraph.Name = "buGraph";
-            this.buGraph.Size = new System.Drawing.Size(75, 23);
+            this.buGraph.Size = new System.Drawing.Size(100, 23);
             this.buGraph.TabIndex = 2;
             this.buGraph.Text = "Graph";
             this.buGraph.UseVisualStyleBackColor = true;
             this.buGraph.Click += new System.EventHandler(this.buGraph_Click);
 
-            this.buCBit.Location = new System.Drawing.Point(456, 54);
-            this.buCBit.Name = "cOver";
-            this.buCBit.Size = new System.Drawing.Size(75, 23);
-            this.buCBit.TabIndex = 2;
-            this.buCBit.Text = "CBit Override";
-            this.buCBit.UseVisualStyleBackColor = true;
-            this.buCBit.Click += new System.EventHandler(this.buCBit_Click);
+            this.buDamp.Location = new System.Drawing.Point(456, 54);
+            this.buDamp.Name = "cOver";
+            this.buDamp.Size = new System.Drawing.Size(100, 23);
+            this.buDamp.TabIndex = 2;
+            this.buDamp.Text = "Damping Override";
+            this.buDamp.UseVisualStyleBackColor = true;
+            this.buDamp.Click += new System.EventHandler(this.buDamp_Click);
 
             this.buRecap.Location = new System.Drawing.Point(456, 79);
             this.buRecap.Name = "recap";
-            this.buRecap.Size = new System.Drawing.Size(75, 23);
+            this.buRecap.Size = new System.Drawing.Size(100, 23);
             this.buRecap.TabIndex = 2;
-            this.buRecap.Text = "Recapture";
+            this.buRecap.Text = "Recapture Frame";
             this.buRecap.UseVisualStyleBackColor = true;
             this.buRecap.Click += new System.EventHandler(this.buRecap_Click);
 
             this.buRecord.Location = new System.Drawing.Point(456, 29);
             this.buRecord.Name = "buRecord";
-            this.buRecord.Size = new System.Drawing.Size(75, 23);
+            this.buRecord.Size = new System.Drawing.Size(100, 23);
             this.buRecord.TabIndex = 2;
-            this.buRecord.Text = "Record";
+            this.buRecord.Text = "Record To Disk";
             this.buRecord.UseVisualStyleBackColor = true;
             this.buRecord.Click += new System.EventHandler(this.buRecord_Click);
             // 
@@ -102,21 +102,21 @@
             // 
             this.textBox2.Location = new System.Drawing.Point(66, 29);
             this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(50, 20);
+            this.textBox2.Size = new System.Drawing.Size(100, 20);
             this.textBox2.TabIndex = 3;
             // 
             // textBox3
             // 
             this.textBox3.Location = new System.Drawing.Point(122, 29);
             this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(50, 20);
+            this.textBox3.Size = new System.Drawing.Size(100, 20);
             this.textBox3.TabIndex = 4;
             // 
             // textBox4
             // 
             this.textBox4.Location = new System.Drawing.Point(178, 29);
             this.textBox4.Name = "textBox4";
-            this.textBox4.Size = new System.Drawing.Size(50, 20);
+            this.textBox4.Size = new System.Drawing.Size(100, 20);
             this.textBox4.TabIndex = 5;
            
             // numericUpDown1
@@ -129,7 +129,7 @@
             131072});
             this.numericUpDown1.Location = new System.Drawing.Point(235, 29);
             this.numericUpDown1.Name = "numericUpDown1";
-            this.numericUpDown1.Size = new System.Drawing.Size(50, 20);
+            this.numericUpDown1.Size = new System.Drawing.Size(100, 20);
             this.numericUpDown1.TabIndex = 7;
             // 
             // numericUpDown2
@@ -142,7 +142,7 @@
             131072});
             this.numericUpDown2.Location = new System.Drawing.Point(291, 29);
             this.numericUpDown2.Name = "numericUpDown2";
-            this.numericUpDown2.Size = new System.Drawing.Size(50, 20);
+            this.numericUpDown2.Size = new System.Drawing.Size(100, 20);
             this.numericUpDown2.TabIndex = 8;
             this.numericUpDown2.Value = new decimal(new int[] {
             2,
@@ -154,19 +154,19 @@
             // 
             this.numericUpDown3.Location = new System.Drawing.Point(347, 29);
             this.numericUpDown3.Name = "numericUpDown3";
-            this.numericUpDown3.Size = new System.Drawing.Size(50, 20);
+            this.numericUpDown3.Size = new System.Drawing.Size(100, 20);
             this.numericUpDown3.TabIndex = 9;
             this.numericUpDown3.Value = new decimal(new int[] {
             50,
             0,
             0,
             0});
-            this.numericUpDown3.ValueChanged += new System.EventHandler(this.numericUpDown3_ValueChanged);
+            //this.numericUpDown3.ValueChanged += new System.EventHandler(this.numericUpDown3_ValueChanged);
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("MingLiU", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Font = new System.Drawing.Font("MingLiU", 8.15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label1.Location = new System.Drawing.Point(15, 11);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(29, 11);
@@ -177,21 +177,21 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("MingLiU", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(64, 10);
+            this.label2.Location = new System.Drawing.Point(100, 10);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(41, 11);
+            this.label2.Size = new System.Drawing.Size(75, 11);
             this.label2.TabIndex = 11;
-            this.label2.Text = "Queue1";
+            this.label2.Text = "Camera Queue";
             // 
             // label3
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("MingLiU", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(120, 10);
+            this.label3.Location = new System.Drawing.Point(200, 10);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(41, 11);
+            this.label3.Size = new System.Drawing.Size(75, 11);
             this.label3.TabIndex = 12;
-            this.label3.Text = "Queue2";
+            this.label3.Text = "Graphing Queue";
             // 
             // label4
             // 
@@ -202,47 +202,9 @@
             this.label4.Size = new System.Drawing.Size(29, 11);
             this.label4.TabIndex = 13;
             //this.label4.Text = "Rate";
-            this.label4.Text = "VoltageOut";
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Font = new System.Drawing.Font("MingLiU", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label5.Location = new System.Drawing.Point(233, 11);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(35, 11);
-            this.label5.TabIndex = 14;
-            this.label5.Text = "RefTr";
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Font = new System.Drawing.Font("MingLiU", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label6.Location = new System.Drawing.Point(289, 10);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(41, 11);
-            this.label6.TabIndex = 15;
-            this.label6.Text = "MainTr";
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Font = new System.Drawing.Font("MingLiU", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label7.Location = new System.Drawing.Point(345, 10);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(47, 11);
-            this.label7.TabIndex = 16;
-            this.label7.Text = "NoPeaks";
-            // 
-            // label9
-            // 
-            this.label19.AutoSize = true;
-            this.label19.Font = new System.Drawing.Font("MingLiU", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label19.Location = new System.Drawing.Point(451, 10);
-            this.label19.Name = "label7";
-            this.label19.Size = new System.Drawing.Size(47, 11);
-            this.label19.TabIndex = 16;
-            this.label19.Text = "Ref right, Ref left, Main right, Main left";
+            this.label4.Text = "Voltage Out";
+
+           
             
             // Form1
             // 
@@ -259,7 +221,7 @@
             this.Controls.Add(this.buRecord);
             this.Controls.Add(this.buGraph);
             this.Controls.Add(this.buRecap);
-            this.Controls.Add(this.buCBit);
+            this.Controls.Add(this.buDamp);
             this.Controls.Add(this.textBox1);
             this.MinimumSize = new System.Drawing.Size(550, 150); // Original 550, 350
             this.Name = "Form1";
@@ -276,7 +238,6 @@
             this.SuspendLayout();
             // 
             // Form1
-            // 
             this.ClientSize = new System.Drawing.Size(278, 244);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
@@ -289,7 +250,7 @@
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Button buRecord;
         private System.Windows.Forms.Button buGraph;
-        private System.Windows.Forms.Button buCBit;
+        private System.Windows.Forms.Button buDamp;
         private System.Windows.Forms.Button buRecap;
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.TextBox textBox3;
