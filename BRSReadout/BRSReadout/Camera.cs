@@ -108,10 +108,11 @@ class Camera
         }
     }
 
-    public void startFrameGrab(int nr, int trigmode, dataDelegate dd,string cameraType)
+    public void startFrameGrab(int nr, int trigmode, dataDelegate dd, string cameraType)
     {
         //Start frame grabbing loop and pushes data into the data delegate as a ushort array.
         int bufferIndex;
+        masterDataDelegate = dd;
         while (true)
         {
             try
@@ -125,14 +126,12 @@ class Camera
 
                     bufferIndex = (int)grabResult.Context;
                     while (buffers.TryGetValue(grabResult.hBuffer, out buffer) != true) ;
-                    masterDataDelegate = dd;
                     Buffer.BlockCopy(buffer.Array, 0, data, 0, buffer.Array.Length);
                     masterDataDelegate(data);
                     Pylon.StreamGrabberQueueBuffer(hGrabber, grabResult.hBuffer, bufferIndex);
                 }
                 if(cameraType=="none")
                 {
-                    masterDataDelegate = dd;
                     data = new ushort[4096];
                     Random random = new Random();
                     TimeSpan ts = DateTime.Now.Subtract(new DateTime(2011, 2, 1));

@@ -73,6 +73,9 @@ namespace BRSReadout
 
         static int graphFrames = int.Parse(ConfigurationManager.AppSettings.Get("graphingFrameNumber")); //Amount of frames collected before fitting and downsampling 
         public static double[,] newdata = new double[graphFrames, 2];
+
+        RawData currentData = new RawData(graphFrames);
+
         static TcAdsClient tcAds = new TcAdsClient();
         static AdsStream ds = new AdsStream(16);
 
@@ -186,7 +189,6 @@ namespace BRSReadout
                 {
                     return;
                 }
-
                 while ((WaitHandle.WaitAny(dataWritingSyncEvent.EventArray) != 1))
                 {
                     if (quittingBool)
@@ -236,10 +238,7 @@ namespace BRSReadout
                         graphSignal.Set();
                         graphSum = 0;
                     }
-
-
                 }
-
             }
         }
         /*
@@ -284,7 +283,6 @@ namespace BRSReadout
         {
             int i;
             int curFrame;
-            RawData currentData=new RawData(graphFrames);
             Frameco++;
             if (quittingBool)
             {
@@ -308,7 +306,8 @@ namespace BRSReadout
                 {
                     EmailError.emailAlert(ex);
                     throw (ex);
-                }            
+                }
+                currentData = new RawData(graphFrames);
             }
         }
         //Camera initialization
@@ -382,100 +381,6 @@ namespace BRSReadout
             }
             output[0] = a1; output[1] = a2; output[2] = a3; output[3] = b1; output[4] = b2;
             return output;
-        }
-        //Prepares data to be sent to TwinCAT software
-        private void dataSend(double[] data)
-        {
-            double tilt;
-            double drift = 0;
-            double velocity = 0;
-            double angle = 0;
-            double refAng = 0;
-            angle = data[0];
-            refAng = 58.33 * 60 * (data[1] - refZeroValue);
-            //Has a DC subtraction to help filters. Should be about the center of the signal.
-            if (firstValueCounter < 40)
-            {
-                firstValueCounter++;
-                zeroValue = data[0];
-                refZeroValue = data[1];
-            }
-            xHighPass[0] = angle - zeroValue;
-            xBandLowPass[0] = angle - zeroValue;
-
-            //Drift signal calculation, just scaled signal
-            drift = 60 * (angle - 2100 + 80);
-            //Drift rail logic
-            if (Math.Abs(drift) >= 32760)
-            {
-                drift = Math.Sign(drift) * 32760;
-            }
-
-            //Tilt signal calculations, high pass at 10^-3 Hz then scaling.
-            yHighPass[0] = highCoeff[3] * yHighPass[1] + highCoeff[4] * yHighPass[2] + highCoeff[0] * xHighPass[0] + highCoeff[1] * xHighPass[1] + highCoeff[2] * xHighPass[2];
-            tilt = 0.729 * 5000 * yHighPass[0];
-
-            //Capacitor signal calculations, low passed at Hz then high passed at Hz then differentiated and scaled
-            yBandLowPass[0] = bandLowCoeff[3] * yBandLowPass[1] + bandLowCoeff[4] * yBandLowPass[2] + bandLowCoeff[0] * xBandLowPass[0] + bandLowCoeff[1] * xBandLowPass[1] + bandLowCoeff[2] * xBandLowPass[2];
-            xBandHighPass[0] = yBandLowPass[0];
-            yBandHighPass[0] = bandHighCoeff[3] * yBandHighPass[1] + bandHighCoeff[4] * yBandHighPass[2] + bandHighCoeff[0] * xBandHighPass[0] + bandHighCoeff[1] * xBandHighPass[1] + bandHighCoeff[2] * xBandHighPass[2];
-            velocity = -2000000 * Math.Round((double)200 / graphFrames) * (yBandHighPass[0] - yBandHighPass[1]);
-
-            //Contact potential check. If above contact potential, the force is approximately proportional to V^2. If below, to -V*Vcontact.
-            if (Math.Abs(velocity) > 00)
-            {
-                if (velocity > 0)
-                {
-                    velocity = 50 * Math.Sqrt(velocity);
-                }
-                else
-                {
-                    velocity = -50 * Math.Sqrt(-velocity);
-                }
-            }
-            else
-            {
-                velocity *= -1.5;
-            }
-
-            if (Math.Abs(velocity) >= 30760)
-            {
-                velocity = Math.Sign(velocity) * 30760;
-            }
-            if (twinCatBool)
-            {
-                ds = new AdsStream(28);
-                BinaryWriter bw = new BinaryWriter(ds);
-                //Tilt signal. TwinCAT variable tilt at MW0.
-                bw.Write((int)tilt);
-                //Drift signal. TwinCAT variable drift at MW1
-                bw.Write((int)drift);
-                //Velocity signal. TwinCAT variable cap at MW2
-                bw.Write((int)velocity);
-                voltagewrite = velocity / 3276;
-                //Reference signal. TwinCAT variable ref at MW3
-                bw.Write((int)refAng);
-                //C# pulse. Sets TwinCAT variable cPulse=1 at MW4
-                bw.Write((int)1);
-                //Light source status bit at MW5
-                bw.Write((int)lightSourceStatus);
-                //Camera status bit at MW6
-                bw.Write((int)cameraStatus);
-                tcAds.Write(0x4020, 0, ds);
-            }
-
-            xHighPass[2] = xHighPass[1];
-            xHighPass[1] = xHighPass[0];
-            yHighPass[2] = yHighPass[1];
-            yHighPass[1] = yHighPass[0];
-            xBandLowPass[2] = xBandLowPass[1];
-            xBandLowPass[1] = xBandLowPass[0];
-            yBandLowPass[2] = yBandLowPass[1];
-            yBandLowPass[1] = yBandLowPass[0];
-            xBandHighPass[2] = xBandHighPass[1];
-            xBandHighPass[1] = xBandHighPass[0];
-            yBandHighPass[2] = yBandHighPass[1];
-            yBandHighPass[1] = yBandHighPass[0];
         }
         // This functions processes a pattern, obtains the data and send it out to be written
         private void Pattern(RawData data)
@@ -664,104 +569,104 @@ namespace BRSReadout
 
                     
 
-                    ////////////////////////////Reference Pattern/////////////////////
-                    y = 0;
-                    xy = 0;
-                    xxy = 0;
-                    //Finds beginning of pattern using a threshold
+                        ////////////////////////////Reference Pattern/////////////////////
+                        y = 0;
+                        xy = 0;
+                        xxy = 0;
+                        //Finds beginning of pattern using a threshold
 
-                    // 11/08/17 - Changed code to online subtraction of Ref signal - Krishna
-                    //if (frameCount >= 10)
-                    //{
-                    //    frameCount = 0;
+                        // 11/08/17 - Changed code to online subtraction of Ref signal - Krishna
+                        //if (frameCount >= 10)
+                        //{
+                        //    frameCount = 0;
 
-                    for (int j = 0; j < frame.Length; j++)
-                    {
-                        if (frame[j] > 1200)//&& j < 1600)
+                        for (int j = 0; j < frame.Length; j++)
                         {
-                            startIndex1Ref = j - 30;
-                            lightSourceStatus = 1;
-                            break;
-                        }
-
-                        if (j == frame.Length - 1)
-                        {
-                            lightSourceStatus = 0;
-                        }
-                    }
-                    if (startIndex1Ref < halflength)
-                    {
-                        startIndex1Ref = 0;
-                    }
-
-                    //Calcualtes the crosscorrelation between the two patterns at shifts 
-                    for (int k = -halflength; k <= halflength; k++)
-                    {
-                        sum = 0;
-                        for (int m = 0; m < length; m++)
-                        {
-                            if ((m + startIndex1Ref + k) > 0 && (m + startIndex2Ref) > 0)
+                            if (frame[j] > 1200)//&& j < 1600)
                             {
-                                sum += frame[m + startIndex1Ref + k] * refFrame[m + startIndex2Ref];
+                                startIndex1Ref = j - 30;
+                                lightSourceStatus = 1;
+                                break;
+                            }
+
+                            if (j == frame.Length - 1)
+                            {
+                                lightSourceStatus = 0;
                             }
                         }
-                        crossCor[k + halflength] = sum;
+                        if (startIndex1Ref < halflength)
+                        {
+                            startIndex1Ref = 0;
+                        }
+
+                        //Calcualtes the crosscorrelation between the two patterns at shifts 
+                        for (int k = -halflength; k <= halflength; k++)
+                        {
+                            sum = 0;
+                            for (int m = 0; m < length; m++)
+                            {
+                                if ((m + startIndex1Ref + k) > 0 && (m + startIndex2Ref) > 0)
+                                {
+                                    sum += frame[m + startIndex1Ref + k] * refFrame[m + startIndex2Ref];
+                                }
+                            }
+                            crossCor[k + halflength] = sum;
+                        }
+                        //Sums x,x^2,x^3,x^4,ln(y),x ln(y),x^2 ln(y)
+
+                        for (int j = 0; j < fitLength; j++)
+                        {
+                            y += Math.Log(crossCor[j + 1]);
+                            xy += j * Math.Log(crossCor[j + 1]);
+                            xxy += j * j * Math.Log(crossCor[j + 1]);
+                        }
+                        //Solves system of equations using Cramer's rule
+                        D = N * (xSquar * xFourth - xCube * xCube) - x * (x * xFourth - xCube * xSquar) + xSquar * (x * xCube - xSquar * xSquar);
+                        //Da = y * (xSquar * xFourth - xCube * xCube) - x * (xy * xFourth - xCube * xxy) + xSquar * (xy * xCube - xSquar * xxy);
+                        Db = N * (xy * xFourth - xCube * xxy) - y * (x * xFourth - xCube * xSquar) + xSquar * (x * xxy - xy * xSquar);
+                        Dc = N * (xSquar * xxy - xy * xCube) - x * (x * xxy - xy * xSquar) + y * (x * xCube - xSquar * xSquar);
+                        //a = Da / D;
+                        b = Db / D;
+                        c = Dc / D;
+
+                        mu1 = -b / (2 * c);
+
+                        // If fit-center is to left of center of crosscor pattern, shift cross-cor pattern by 1 pixel to right or vice versa
+                        if (mu1 < (halflength - 1))
+                        {
+                            pixshift = -1;
+                        }
+                        else
+                        {
+                            pixshift = 1;
+                        }
+
+                        //Redo the fit
+                        y = 0;
+                        xy = 0;
+                        xxy = 0;
+                        for (int j = 0; j < fitLength; j++)
+                        {
+                            y += Math.Log(crossCor[j + 1 + pixshift]);
+                            xy += j * Math.Log(crossCor[j + 1 + pixshift]);
+                            xxy += j * j * Math.Log(crossCor[j + 1 + pixshift]);
+                        }
+                        D = N * (xSquar * xFourth - xCube * xCube) - x * (x * xFourth - xCube * xSquar) + xSquar * (x * xCube - xSquar * xSquar);
+                        Db = N * (xy * xFourth - xCube * xxy) - y * (x * xFourth - xCube * xSquar) + xSquar * (x * xxy - xy * xSquar);
+                        Dc = N * (xSquar * xxy - xy * xCube) - x * (x * xxy - xy * xSquar) + y * (x * xCube - xSquar * xSquar);
+                        b = Db / D;
+                        c = Dc / D;
+
+                        mu2 = -b / (2 * c);
+
+                        mu = (halflength - 1) - (mu1 - (halflength - 1)) * pixshift / (mu2 - mu1);
+
+                        newdata[frameNo, 1] = mu + startIndex1Ref;
+                        refValue = mu + startIndex1Ref;
+                        newdata[frameNo, 0] = newdata[frameNo, 0] - refValue;
+
+                        refLastValue = refValue;
                     }
-                    //Sums x,x^2,x^3,x^4,ln(y),x ln(y),x^2 ln(y)
-
-                    for (int j = 0; j < fitLength; j++)
-                    {
-                        y += Math.Log(crossCor[j + 1]);
-                        xy += j * Math.Log(crossCor[j + 1]);
-                        xxy += j * j * Math.Log(crossCor[j + 1]);
-                    }
-                    //Solves system of equations using Cramer's rule
-                    D = N * (xSquar * xFourth - xCube * xCube) - x * (x * xFourth - xCube * xSquar) + xSquar * (x * xCube - xSquar * xSquar);
-                    //Da = y * (xSquar * xFourth - xCube * xCube) - x * (xy * xFourth - xCube * xxy) + xSquar * (xy * xCube - xSquar * xxy);
-                    Db = N * (xy * xFourth - xCube * xxy) - y * (x * xFourth - xCube * xSquar) + xSquar * (x * xxy - xy * xSquar);
-                    Dc = N * (xSquar * xxy - xy * xCube) - x * (x * xxy - xy * xSquar) + y * (x * xCube - xSquar * xSquar);
-                    //a = Da / D;
-                    b = Db / D;
-                    c = Dc / D;
-
-                    mu1 = -b / (2 * c);
-
-                    // If fit-center is to left of center of crosscor pattern, shift cross-cor pattern by 1 pixel to right or vice versa
-                    if (mu1 < (halflength - 1))
-                    {
-                        pixshift = -1;
-                    }
-                    else
-                    {
-                        pixshift = 1;
-                    }
-
-                    //Redo the fit
-                    y = 0;
-                    xy = 0;
-                    xxy = 0;
-                    for (int j = 0; j < fitLength; j++)
-                    {
-                        y += Math.Log(crossCor[j + 1 + pixshift]);
-                        xy += j * Math.Log(crossCor[j + 1 + pixshift]);
-                        xxy += j * j * Math.Log(crossCor[j + 1 + pixshift]);
-                    }
-                    D = N * (xSquar * xFourth - xCube * xCube) - x * (x * xFourth - xCube * xSquar) + xSquar * (x * xCube - xSquar * xSquar);
-                    Db = N * (xy * xFourth - xCube * xxy) - y * (x * xFourth - xCube * xSquar) + xSquar * (x * xxy - xy * xSquar);
-                    Dc = N * (xSquar * xxy - xy * xCube) - x * (x * xxy - xy * xSquar) + y * (x * xCube - xSquar * xSquar);
-                    b = Db / D;
-                    c = Dc / D;
-
-                    mu2 = -b / (2 * c);
-
-                    mu = (halflength - 1) - (mu1 - (halflength - 1)) * pixshift / (mu2 - mu1);
-
-                    newdata[frameNo, 1] = mu + startIndex1Ref;
-                    refValue = mu + startIndex1Ref;
-                    newdata[frameNo, 0] = newdata[frameNo, 0] - refValue;
-
-                    refLastValue = refValue;
-                }
                 }
 
                 catch (Exception ex)
@@ -792,6 +697,100 @@ namespace BRSReadout
 
         }
 
+        //Prepares data to be sent to TwinCAT software
+        private void dataSend(double[] data)
+        {
+            double tilt;
+            double drift = 0;
+            double velocity = 0;
+            double angle = 0;
+            double refAng = 0;
+            angle = data[0];
+            refAng = 58.33 * 60 * (data[1] - refZeroValue);
+            //Has a DC subtraction to help filters. Should be about the center of the signal.
+            if (firstValueCounter < 40)
+            {
+                firstValueCounter++;
+                zeroValue = data[0];
+                refZeroValue = data[1];
+            }
+            xHighPass[0] = angle - zeroValue;
+            xBandLowPass[0] = angle - zeroValue;
+
+            //Drift signal calculation, just scaled signal
+            drift = 60 * (angle - 2100 + 80);
+            //Drift rail logic
+            if (Math.Abs(drift) >= 32760)
+            {
+                drift = Math.Sign(drift) * 32760;
+            }
+
+            //Tilt signal calculations, high pass at 10^-3 Hz then scaling.
+            yHighPass[0] = highCoeff[3] * yHighPass[1] + highCoeff[4] * yHighPass[2] + highCoeff[0] * xHighPass[0] + highCoeff[1] * xHighPass[1] + highCoeff[2] * xHighPass[2];
+            tilt = 0.729 * 5000 * yHighPass[0];
+
+            //Capacitor signal calculations, low passed at Hz then high passed at Hz then differentiated and scaled
+            yBandLowPass[0] = bandLowCoeff[3] * yBandLowPass[1] + bandLowCoeff[4] * yBandLowPass[2] + bandLowCoeff[0] * xBandLowPass[0] + bandLowCoeff[1] * xBandLowPass[1] + bandLowCoeff[2] * xBandLowPass[2];
+            xBandHighPass[0] = yBandLowPass[0];
+            yBandHighPass[0] = bandHighCoeff[3] * yBandHighPass[1] + bandHighCoeff[4] * yBandHighPass[2] + bandHighCoeff[0] * xBandHighPass[0] + bandHighCoeff[1] * xBandHighPass[1] + bandHighCoeff[2] * xBandHighPass[2];
+            velocity = -2000000 * Math.Round((double)200 / graphFrames) * (yBandHighPass[0] - yBandHighPass[1]);
+
+            //Contact potential check. If above contact potential, the force is approximately proportional to V^2. If below, to -V*Vcontact.
+            if (Math.Abs(velocity) > 00)
+            {
+                if (velocity > 0)
+                {
+                    velocity = 50 * Math.Sqrt(velocity);
+                }
+                else
+                {
+                    velocity = -50 * Math.Sqrt(-velocity);
+                }
+            }
+            else
+            {
+                velocity *= -1.5;
+            }
+
+            if (Math.Abs(velocity) >= 30760)
+            {
+                velocity = Math.Sign(velocity) * 30760;
+            }
+            if (twinCatBool)
+            {
+                ds = new AdsStream(28);
+                BinaryWriter bw = new BinaryWriter(ds);
+                //Tilt signal. TwinCAT variable tilt at MW0.
+                bw.Write((int)tilt);
+                //Drift signal. TwinCAT variable drift at MW1
+                bw.Write((int)drift);
+                //Velocity signal. TwinCAT variable cap at MW2
+                bw.Write((int)velocity);
+                voltagewrite = velocity / 3276;
+                //Reference signal. TwinCAT variable ref at MW3
+                bw.Write((int)refAng);
+                //C# pulse. Sets TwinCAT variable cPulse=1 at MW4
+                bw.Write((int)1);
+                //Light source status bit at MW5
+                bw.Write((int)lightSourceStatus);
+                //Camera status bit at MW6
+                bw.Write((int)cameraStatus);
+                tcAds.Write(0x4020, 0, ds);
+            }
+
+            xHighPass[2] = xHighPass[1];
+            xHighPass[1] = xHighPass[0];
+            yHighPass[2] = yHighPass[1];
+            yHighPass[1] = yHighPass[0];
+            xBandLowPass[2] = xBandLowPass[1];
+            xBandLowPass[1] = xBandLowPass[0];
+            yBandLowPass[2] = yBandLowPass[1];
+            yBandLowPass[1] = yBandLowPass[0];
+            xBandHighPass[2] = xBandHighPass[1];
+            xBandHighPass[1] = xBandHighPass[0];
+            yBandHighPass[2] = yBandHighPass[1];
+            yBandHighPass[1] = yBandHighPass[0];
+        }
 
 
         //===========================GUI=====================
@@ -899,7 +898,7 @@ namespace BRSReadout
             {
                 consumerd[i].myThread.Join();
             }
-            dataWritingThread.Abort();
+            dataWritingThreadBool = false;
             Environment.Exit(1);
         }
 
