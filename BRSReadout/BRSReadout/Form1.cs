@@ -711,11 +711,20 @@ namespace BRSReadout
             xBandLowPass[0] = angle - zeroValue;
 
             //Drift signal calculation, just scaled signal
-            drift = 60 * (angle - 2100 + 80);
+            if (dampOverride)
+            {
+                drift = 10 * (angle - 1802);
+            }
+            else
+            {
+                drift = 60 * (angle - 2100 + 80);
+            }
+            Debug.WriteLine(drift);
             //Drift rail logic
             if (Math.Abs(drift) >= 32760)
             {
                 drift = Math.Sign(drift) * 32760;
+
             }
 
             //Tilt signal calculations, high pass at 10^-3 Hz then scaling.
