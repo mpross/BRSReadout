@@ -40,6 +40,7 @@
             this.buGraph = new System.Windows.Forms.Button();
             this.buRecap = new System.Windows.Forms.Button();
             this.buDamp = new System.Windows.Forms.Button();
+            this.buClear = new System.Windows.Forms.Button();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.textBox3 = new System.Windows.Forms.TextBox();
             this.textBox4 = new System.Windows.Forms.TextBox();
@@ -97,6 +98,14 @@
             this.buRecord.Text = "Record To Disk";
             this.buRecord.UseVisualStyleBackColor = true;
             this.buRecord.Click += new System.EventHandler(this.buRecord_Click);
+
+            this.buClear.Location = new System.Drawing.Point(356, 29);
+            this.buClear.Name = "buClear";
+            this.buClear.Size = new System.Drawing.Size(100, 23);
+            this.buClear.TabIndex = 2;
+            this.buClear.Text = "Clear Graph";
+            this.buClear.UseVisualStyleBackColor = true;
+            this.buClear.Click += new System.EventHandler(this.buClear_Click);
             // 
             // textBox2
             // 
@@ -218,6 +227,7 @@
             this.Controls.Add(this.textBox4);
             this.Controls.Add(this.textBox3);
             this.Controls.Add(this.textBox2);
+            this.Controls.Add(this.buClear);
             this.Controls.Add(this.buRecord);
             this.Controls.Add(this.buGraph);
             this.Controls.Add(this.buRecap);
@@ -252,6 +262,7 @@
         private System.Windows.Forms.Button buGraph;
         private System.Windows.Forms.Button buDamp;
         private System.Windows.Forms.Button buRecap;
+        private System.Windows.Forms.Button buClear;
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.TextBox textBox3;
         private System.Windows.Forms.TextBox textBox4;

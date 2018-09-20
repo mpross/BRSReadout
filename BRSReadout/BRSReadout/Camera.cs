@@ -43,7 +43,7 @@ class Camera
     PYLON_DEVICE_INFO_HANDLE prop;
     string ip;
     uint j;
-
+    
     public Camera()
     {
     }
@@ -135,11 +135,11 @@ class Camera
                     data = new ushort[4096];
                     Random random = new Random();
                     TimeSpan ts = DateTime.Now.Subtract(new DateTime(2011, 2, 1));
-                    double offset = 300*Math.Sin(2 * Math.PI * 0.01 * ts.TotalSeconds);
+                    double offset = 300 * Math.Sin(2 * Math.PI * 0.01 * ts.TotalSeconds);
                     for (int i=0; i<data.Length;i++){
                         if (i < 40)
                         {
-                            data[i] = (ushort)(data[i] +random.Next(0,5));
+                            data[i] = (ushort)(data[i] +random.Next(0, 5));
                         }
                         if (i > 40 && i < 1540)
                         {
@@ -158,7 +158,7 @@ class Camera
                             data[i] = (ushort)(data[i] + random.Next(0, 5));
                         }
                     }
-                    System.Threading.Thread.Sleep(int.Parse(ConfigurationManager.AppSettings.Get("cameraExposureTime"))/1000);
+                    Thread.Sleep(int.Parse(ConfigurationManager.AppSettings.Get("cameraExposureTime")) / 1000);
                     masterDataDelegate(data);
                 }
             }

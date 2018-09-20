@@ -104,8 +104,8 @@ namespace BRSReadout
         int lightSourceStatus;
         int cameraStatus = 1;
 
-        int displayCount = 0;
-
+        public DateTime initTime;
+        System.Windows.Forms.Timer plotTimer = new System.Windows.Forms.Timer();
         public struct graphData
         {
             public ushort[] frame;
@@ -121,6 +121,7 @@ namespace BRSReadout
         {
             try
             {
+                initTime = DateTime.Now;
                 //Calls calculation method for filters
                 highCoeff = filterCoeff(0.0005, 2000.0 / graphFrames, "High");
                 lowCoeff = filterCoeff(0.1, 2000.0 / graphFrames, "Low");
@@ -236,7 +237,7 @@ namespace BRSReadout
                             graphQueue.Enqueue(outData);
                         }
                         graphSignal.Set();
-                        graphSum = 0;
+                        graphSum = 0;                        
                     }
                 }
             }
@@ -287,7 +288,7 @@ namespace BRSReadout
             if (quittingBool)
             {
                 return;
-            }            
+            }
             curFrame = currentData.AddData(data, Frameco); // Returns the number of frames in the RawData object
             if (curFrame == graphFrames)
             {
@@ -340,16 +341,10 @@ namespace BRSReadout
         //GUI display of queue length, time, and capacitor voltage
         private void showStatistics(RawData data)
         {
-            if (displayCount == 10)
-            {
                 double ti;
                 ti = data.TimeStamp(0) * 1.0 / sampFreq;
                 setTextBox1(ti.ToString("F1"));
-                setTextBox4(String.Format("{0:0.00}", (voltagewrite)));
-                displayCount = 0;
-            }
-            displayCount++;
-
+                setTextBox4(String.Format("{0:0.00}", (voltagewrite)));                
         }
         //Calculates filter coefficients for a second order Butterworth of passed type
         double[] filterCoeff(double cutFreq, double sampFreq, string type)
@@ -685,11 +680,9 @@ namespace BRSReadout
                 ql = dataWritingQueue.Count;
             }
             dataWritingSyncEvent.NewItemEvent.Set();
-            if (displayCount == 10)
-            {
-                setTextBox2(data.QueueLen.ToString());
-                setTextBox3(ql.ToString());
-            }
+            setTextBox2(data.QueueLen.ToString());
+            setTextBox3(ql.ToString());
+
             if (quittingBool)
             {
                 return;
@@ -875,10 +868,10 @@ namespace BRSReadout
             label7.Location = new Point(iS, lay);
             numericUpDown3.Location = new Point(iS, coy); iS = iS + numericUpDown3.Width;
             buRecord.Location = new Point(ClientRectangle.Width - buRecord.Size.Width - 10, 20);
-            buGraph.Location = new Point(ClientRectangle.Width - buGraph.Size.Width - 10, ClientRectangle.Height - buGraph.Size.Height - 20);
+            buGraph.Location = new Point(ClientRectangle.Width - buGraph.Size.Width - buRecap.Size.Width - 20, ClientRectangle.Height - buGraph.Size.Height - 20);
+            buClear.Location = new Point(ClientRectangle.Width - buGraph.Size.Width - buRecap.Size.Width - 20, ClientRectangle.Height - buClear.Size.Height - 50);
             buRecap.Location = new Point(ClientRectangle.Width - buRecap.Size.Width - 10, ClientRectangle.Height - buRecap.Size.Height - 50);
-            buDamp.Location = new Point(ClientRectangle.Width - buDamp.Size.Width - 10, ClientRectangle.Height - buDamp.Size.Height - 80);
-
+            buDamp.Location = new Point(ClientRectangle.Width - buDamp.Size.Width - 10, ClientRectangle.Height - buDamp.Size.Height - 20);
         }
 
 
@@ -929,12 +922,18 @@ namespace BRSReadout
                 graphThread.SetApartmentState(ApartmentState.STA);
                 graphThread.Start();
                 graphWindow.Show();
+                plotTimer.Tick+= new EventHandler(plotTime_Tick);
+                plotTimer.Enabled = true;
             }
             else
             {
                 graphWindow.Show();
                 graphWindow.BringToFront();
             }
+        }
+        private void plotTime_Tick(object Sender, EventArgs e)
+        {
+            graphWindow.updateAxis();
         }
         private void buRecord_Click(object sender, EventArgs e)
         {
@@ -953,6 +952,16 @@ namespace BRSReadout
                 recordBool = false;
                 myDataWriter.stopit();
             }
+        }
+        private void buClear_Click(object sender, EventArgs e)
+        {
+            try {
+                graphWindow.anglePlot.Series[0].Values.Clear();
+                graphWindow.angleMax = 0;
+                graphWindow.angleMin = Math.Pow(10, 100);
+            }
+            catch { }
+
         }
         private void buRecap_Click(object sender, EventArgs e)
         {

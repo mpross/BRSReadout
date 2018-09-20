@@ -16,6 +16,10 @@ namespace BRSReadout
         public static AutoResetEvent graphSignal = Form1.graphSignal;
         public bool run=true;
         Thread dataLoopThread;
+        double dataPointNum;
+        public double angleMax;
+        public double angleMin=Math.Pow(10,100);
+
         public void stopLoop()
         {
             run = false;
@@ -78,15 +82,112 @@ namespace BRSReadout
             imagePlot.AxisX.Add(
             new Axis
             {
+                Title = "Pixel Number",
+                FontSize = 16,
+                Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0, 0, 0)),
                 MinValue = 0,
-                MaxValue = 4096
+                MaxValue = 4096,
+                Separator = new Separator
+                {
+                    StrokeThickness = 0.5,
+                    Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0, 0, 0)),
+                    Step = Math.Pow(2, double.Parse(ConfigurationManager.AppSettings.Get("cameraBitDepth"))) / 8.0
+                }
+            });
+            imagePlot.AxisX.Add(
+            new Axis
+            {
+                Labels =new string[4096],
+                MinValue = 0,
+                MaxValue = 4096,
+                Separator = new Separator
+                {
+                    StrokeThickness = 0.5,
+                    Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(220, 220, 220)),
+                    Step = Math.Pow(2, double.Parse(ConfigurationManager.AppSettings.Get("cameraBitDepth"))) / 64.0
+                }
             });
 
             imagePlot.AxisY.Add(
             new Axis
             {
+                Title = "Intensity",
+                FontSize = 16,
+                Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0, 0, 0)),
                 MinValue = 0,
-                MaxValue = Math.Pow(2, double.Parse(ConfigurationManager.AppSettings.Get("cameraBitDepth")))
+                MaxValue = Math.Pow(2, double.Parse(ConfigurationManager.AppSettings.Get("cameraBitDepth"))),
+                Separator = new Separator
+                {
+                    StrokeThickness=0.5,
+                    Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0, 0, 0)),
+                    Step=  4096.0 / 8.0
+                }
+            });
+            imagePlot.AxisY.Add(
+            new Axis
+            {
+                Labels = new string[4096],
+                MinValue = 0,
+                MaxValue = 4096,
+                Separator = new Separator
+                {
+                    StrokeThickness = 0.5,
+                    Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(220, 220, 220)),
+                    Step = 4096.0 / 64.0
+                }
+            });
+
+            anglePlot.AxisX.Add(
+            new Axis { 
+                Title="Time (data points)",
+                FontSize = 16,
+                MinValue = 0,
+                MaxValue = 10,
+                Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0, 0, 0)),
+                Separator = new Separator
+                {
+                    StrokeThickness=0.5,
+                    Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0, 0, 0)),
+                    Step=100.0
+                }
+            });
+            anglePlot.AxisX.Add(
+            new Axis
+            {
+                Labels = new string[1000],
+                MinValue = 0,
+                MaxValue = 10,
+                Separator = new Separator
+                {
+                    StrokeThickness = 0.5,
+                    Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(220, 220, 220)),
+                    Step = 10.0
+                }
+            });
+
+            anglePlot.AxisY.Add(
+            new Axis
+            {
+                Title = "Angle (pixel number)",
+                FontSize = 16,
+                Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0, 0, 0)),
+                Separator = new Separator
+                {
+                    StrokeThickness=0.5,
+                    Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0, 0, 0))
+                }
+            });
+            anglePlot.AxisY.Add(
+            new Axis
+            {
+                Labels = new string[1000],
+                MinValue = 0,
+                MaxValue = 10,
+                Separator = new Separator
+                {
+                    StrokeThickness = 0.5,
+                    Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(220, 220, 220))
+                }
             });
 
 
@@ -103,6 +204,13 @@ namespace BRSReadout
             imagePlot.Anchor = AnchorStyles.Top;
             anglePlot.Anchor = AnchorStyles.Top;
 
+
+            this.Size = new System.Drawing.Size(1600, 800);
+            imagePlot.Size = new Size((ClientRectangle.Width / 2) - 40, ClientRectangle.Height - 40);
+            anglePlot.Size = new Size((ClientRectangle.Width / 2) - 40, ClientRectangle.Height - 40);
+            imagePlot.Location = new Point(20, 20);
+            anglePlot.Location = new Point((ClientRectangle.Width / 2) - 20, 20);
+
             if (dataLoopThread == null)
             {
                 dataLoopThread = new Thread(dataLoop);
@@ -112,7 +220,6 @@ namespace BRSReadout
             {
                 dataLoopThread.Start();
             }
-
         }
         public static IEnumerable<T> ToEnumerable<T>(Array target)
         {
@@ -136,16 +243,36 @@ namespace BRSReadout
             imagePlot.Series[0].Values.Clear();
             var inFrame = Array.ConvertAll(rawFrame, item => (int)item);
             imagePlot.Series[0].Values.AddRange(ToEnumerable<object>(inFrame));
-        }
-        public void showWindow()
-        {
-            this.Show();
-            this.BringToFront();
-            try
+            dataPointNum++;
+            if (data > angleMax)
             {
-                dataLoopThread.Start();
+                angleMax = data;
             }
-            catch { }
+            if (data < angleMin)
+            {
+                angleMin = data;
+            }
+        }
+        public void updateAxis()
+        {
+            if (dataPointNum >= 1)
+            {
+                anglePlot.AxisX[0].MaxValue = dataPointNum;
+                anglePlot.AxisX[0].MinValue = 0;
+                anglePlot.AxisX[1].MaxValue = dataPointNum;
+                anglePlot.AxisX[1].MinValue = 0;
+                anglePlot.AxisX[0].Separator.Step = dataPointNum / 10;
+                anglePlot.AxisX[1].Separator.Step = dataPointNum / 100.0;
+
+                double plotMax = Math.Round(angleMax * 1.01);
+                double plotMin = Math.Round(angleMin * 0.99);
+                anglePlot.AxisY[0].MaxValue = plotMax;
+                anglePlot.AxisY[0].MinValue = plotMin;
+                anglePlot.AxisY[1].MaxValue = plotMax;
+                anglePlot.AxisY[1].MinValue = plotMin;
+                anglePlot.AxisY[0].Separator.Step = Math.Round((plotMax-plotMin) / 10.0,1);
+                anglePlot.AxisY[1].Separator.Step = (plotMax-plotMin) / 100.0;
+            }
         }
         private void Form2_FormClosing(object sender, FormClosingEventArgs e)
         {
