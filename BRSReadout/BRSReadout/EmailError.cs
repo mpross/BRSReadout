@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Windows;
 
 namespace BRSReadout
 {
@@ -18,16 +20,16 @@ namespace BRSReadout
 
             words.Append("Message: ");
             words.Append(ex.Message);
-            words.Append("\n");
+            words.Append("\n ");
             words.Append("Source: ");
             words.Append(ex.Source);
-            words.Append("\n");
+            words.Append("\n ");
             words.Append("Stack Trace: ");
             words.Append(ex.StackTrace);
-            words.Append("\n");
+            words.Append("\n ");
             words.Append("Target: ");
             words.Append(ex.TargetSite);
-            words.Append("\n");
+            words.Append("\n ");
 
             System.Net.Mail.MailMessage message = new System.Net.Mail.MailMessage();
             message.To.Add(toEmail);
@@ -39,6 +41,16 @@ namespace BRSReadout
             smtp.EnableSsl = true;
             smtp.Credentials = new System.Net.NetworkCredential(user, pass);
             //smtp.Send(message);
+            string dir = Form1.curDirec.Replace("\\BRSReadout\\BRSReadout\\bin\\Debug", "") + "\\log.txt";
+            StreamWriter w = File.AppendText(dir);
+            w.Write("\r\nLog Entry : ");
+            w.WriteLine("{0} {1}", DateTime.Now.ToLongTimeString(),
+                DateTime.Now.ToLongDateString());
+            w.WriteLine("  :");
+            w.WriteLine("  :{0}", words.ToString());
+            w.WriteLine("-------------------------------");
+            w.Flush();
+            
 
         }
     }

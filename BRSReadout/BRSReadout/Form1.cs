@@ -100,6 +100,7 @@ namespace BRSReadout
         double[] xLowPass2 = new double[3];
         double[] lowCoeff = new double[5];
 
+        public static string curDirec;
 
         int lightSourceStatus;
         int cameraStatus = 1;
@@ -162,9 +163,11 @@ namespace BRSReadout
                 cameraThread = new Thread(initCamera);
                 cameraThread.Priority = ThreadPriority.AboveNormal;
                 cameraThread.Start();
-                string curDirec = System.IO.Path.GetDirectoryName(Application.ExecutablePath);
+                curDirec = System.IO.Path.GetDirectoryName(Application.ExecutablePath);
                 curDirec = curDirec.Replace("\\bin\\Debug", "");
                 System.Diagnostics.Process.Start(curDirec + "\\AffinitySet.bat");
+                string[] nul=new string[2];
+                nul[3] = "4";
             }
             catch (Exception ex)
             {
