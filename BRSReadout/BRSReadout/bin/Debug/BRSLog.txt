@@ -1,0 +1,12 @@
+
+Log Entry : 4:43:45 PM Thursday, September 20, 2018
+  :
+  :Message: Exception from HRESULT: 0xC200000C
+ Source: PylonC.NET
+ Stack Trace:    at PylonC.NET.Pylon.PylonCreateDeviceByIndex(IntPtr index, IntPtr& phDev)
+   at PylonC.NET.Pylon.CreateDeviceByIndex(UInt32 index)
+   at Camera.cameraInit(String cameraType) in C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\Camera.cs:line 61
+   at BRSReadout.Form1.initCamera() in C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\Form1.cs:line 320
+ Target: Void PylonCreateDeviceByIndex(IntPtr, IntPtr ByRef)
+ 
+-------------------------------

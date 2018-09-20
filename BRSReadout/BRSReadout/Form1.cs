@@ -164,10 +164,7 @@ namespace BRSReadout
                 cameraThread.Priority = ThreadPriority.AboveNormal;
                 cameraThread.Start();
                 curDirec = System.IO.Path.GetDirectoryName(Application.ExecutablePath);
-                curDirec = curDirec.Replace("\\bin\\Debug", "");
                 System.Diagnostics.Process.Start(curDirec + "\\AffinitySet.bat");
-                string[] nul=new string[2];
-                nul[3] = "4";
             }
             catch (Exception ex)
             {

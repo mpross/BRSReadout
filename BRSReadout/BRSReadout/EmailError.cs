@@ -41,7 +41,7 @@ namespace BRSReadout
             smtp.EnableSsl = true;
             smtp.Credentials = new System.Net.NetworkCredential(user, pass);
             //smtp.Send(message);
-            string dir = Form1.curDirec.Replace("\\BRSReadout\\BRSReadout\\bin\\Debug", "") + "\\log.txt";
+            string dir = Form1.curDirec + "\\BRSLog.txt";
             StreamWriter w = File.AppendText(dir);
             w.Write("\r\nLog Entry : ");
             w.WriteLine("{0} {1}", DateTime.Now.ToLongTimeString(),

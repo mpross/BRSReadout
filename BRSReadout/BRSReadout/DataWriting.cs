@@ -10,7 +10,7 @@ using System.Windows.Forms;
  */
 class DataWriting
     {
-        const string DataFilePreFix = "FA_";
+        const string DataFilePreFix = "BRS_";
         const string DataFileSufFix = ".dat";
 
         bool DataWritingOn = false;
@@ -23,8 +23,11 @@ class DataWriting
         public DataWriting()
         {
             string DataDir = Path.GetDirectoryName(Application.ExecutablePath);
-            DataDir = DataDir.Replace("\\BRSReadout\\bin\\Debug", "");
             DataDir = DataDir + "\\Data";
+            if (!Directory.Exists(DataDir))
+            {
+                Directory.CreateDirectory(DataDir);
+            }
             if (DataWritingOn == true) return;
             DataWritingOn = true;
             CurTime = DateTime.Now;
