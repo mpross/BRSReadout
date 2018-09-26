@@ -10,3 +10,39 @@ Log Entry : 4:43:45 PM Thursday, September 20, 2018
  Target: Void PylonCreateDeviceByIndex(IntPtr, IntPtr ByRef)
  
 -------------------------------
+
+Log Entry : 12:07:28 PM Wednesday, September 26, 2018
+  :
+  :Message: Unable to load DLL '\\lib\\x86\\CCD_USBCamera_SDK_stdcall.dll': The network path was not found. (Exception from HRESULT: 0x80070035)
+ Source: BRSReadout
+ Stack Trace:    at Camera.CCDUSB_InitDevice()
+   at Camera.init() in C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\Camera.cs:line 334
+   at Camera.cameraInit(String cameraType) in C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\Camera.cs:line 198
+   at BRSReadout.Form1.initCamera() in C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\Form1.cs:line 323
+ Target: Int32 CCDUSB_InitDevice()
+ 
+-------------------------------
+
+Log Entry : 12:21:13 PM Wednesday, September 26, 2018
+  :
+  :Message: Unable to load DLL '\lib\x86\CCD_USBCamera_SDK_stdcall.dll': The specified module could not be found. (Exception from HRESULT: 0x8007007E)
+ Source: BRSReadout
+ Stack Trace:    at Camera.CCDUSB_InitDevice()
+   at Camera.init() in C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\Camera.cs:line 334
+   at Camera.cameraInit(String cameraType) in C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\Camera.cs:line 198
+   at BRSReadout.Form1.initCamera() in C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\Form1.cs:line 323
+ Target: Int32 CCDUSB_InitDevice()
+ 
+-------------------------------
+
+Log Entry : 12:22:17 PM Wednesday, September 26, 2018
+  :
+  :Message: An attempt was made to load a program with an incorrect format. (Exception from HRESULT: 0x8007000B)
+ Source: BRSReadout
+ Stack Trace:    at Camera.CCDUSB_InitDevice()
+   at Camera.init() in C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\Camera.cs:line 334
+   at Camera.cameraInit(String cameraType) in C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\Camera.cs:line 198
+   at BRSReadout.Form1.initCamera() in C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\Form1.cs:line 323
+ Target: Int32 CCDUSB_InitDevice()
+ 
+-------------------------------

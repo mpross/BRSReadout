@@ -39,3 +39,5 @@ C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\bin\Debug\LiveCharts.W
 C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\bin\Debug\LiveCharts.Wpf.xml
 C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\obj\Debug\BRSReadout.Form2.resources
 C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\obj\Debug\BRSReadout.csprojAssemblyReference.cache
+C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\bin\Debug\TwinCAT.Ads.dll
+C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\bin\Debug\TwinCAT.Ads.xml

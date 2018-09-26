@@ -24,6 +24,7 @@ namespace BRSReadout
     {
         public bool twinCatBool = ("true" == ConfigurationManager.AppSettings.Get("twinCat"));
         public string cameraType = ConfigurationManager.AppSettings.Get("camera");
+        public static int camWidth = int.Parse(ConfigurationManager.AppSettings.Get("cameraWidth"));
 
         public static Form2 graphWindow =null;
 
@@ -52,8 +53,8 @@ namespace BRSReadout
         double sampFreq = Math.Pow(10, 6) / double.Parse(ConfigurationManager.AppSettings.Get("cameraExposureTime"));
 
         public volatile int Frameco = 0;        
-        ushort[] refFrame = new ushort[4096];
-        public static ushort[] frame = new ushort[4096];
+        ushort[] refFrame = new ushort[camWidth];
+        public static ushort[] frame = new ushort[camWidth];
 
         volatile bool dataWritingThreadBool;
         Thread dataWritingThread;
@@ -317,7 +318,14 @@ namespace BRSReadout
             try
             {
                 myCamera = new Camera();
-                myCamera.cameraInit(cameraType);
+                if (cameraType == "mightex")
+                {
+                    myCamera.cameraInit(cameraType);
+                }
+                else
+                {
+                    myCamera.cameraInit(cameraType);
+                }
                 Camera.dataDelegate dd = new Camera.dataDelegate(onNewData);
                 myCamera.startFrameGrab(0x8888, 0, dd, cameraType);
                 cameraStatus = 1;

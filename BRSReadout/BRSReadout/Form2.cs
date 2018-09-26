@@ -19,6 +19,8 @@ namespace BRSReadout
         double dataPointNum;
         public double angleMax;
         public double angleMin=Math.Pow(10,100);
+        double numberPoints = double.Parse(ConfigurationManager.AppSettings.Get("numberOfGraphPoints"));
+        public static int camWidth = int.Parse(ConfigurationManager.AppSettings.Get("cameraWidth"));
 
         public void stopLoop()
         {
@@ -86,7 +88,7 @@ namespace BRSReadout
                 FontSize = 16,
                 Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0, 0, 0)),
                 MinValue = 0,
-                MaxValue = 4096,
+                MaxValue = camWidth,
                 Separator = new Separator
                 {
                     StrokeThickness = 0.5,
@@ -97,9 +99,9 @@ namespace BRSReadout
             imagePlot.AxisX.Add(
             new Axis
             {
-                Labels =new string[4096],
+                Labels =new string[camWidth],
                 MinValue = 0,
-                MaxValue = 4096,
+                MaxValue = camWidth,
                 Separator = new Separator
                 {
                     StrokeThickness = 0.5,
@@ -120,20 +122,20 @@ namespace BRSReadout
                 {
                     StrokeThickness=0.5,
                     Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0, 0, 0)),
-                    Step=  4096.0 / 8.0
+                    Step=  camWidth / 8.0
                 }
             });
             imagePlot.AxisY.Add(
             new Axis
             {
-                Labels = new string[4096],
+                Labels = new string[camWidth],
                 MinValue = 0,
-                MaxValue = 4096,
+                MaxValue = camWidth,
                 Separator = new Separator
                 {
                     StrokeThickness = 0.5,
                     Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(220, 220, 220)),
-                    Step = 4096.0 / 64.0
+                    Step = camWidth / 64.0
                 }
             });
 
@@ -230,7 +232,7 @@ namespace BRSReadout
         }
         public void updatePlot(ushort[] rawFrame, double data)
         {
-            if (anglePlot.Series[0].Values.Count > 1000)
+            if (anglePlot.Series[0].Values.Count > numberPoints)
             {
                 anglePlot.Series[0].Values.RemoveAt(0);
                 anglePlot.Series[0].Values.Add(data);
@@ -238,12 +240,12 @@ namespace BRSReadout
             else
             {
                 anglePlot.Series[0].Values.Add(data);
+                dataPointNum++;
             }
 
             imagePlot.Series[0].Values.Clear();
             var inFrame = Array.ConvertAll(rawFrame, item => (int)item);
             imagePlot.Series[0].Values.AddRange(ToEnumerable<object>(inFrame));
-            dataPointNum++;
             if (data > angleMax)
             {
                 angleMax = data;
