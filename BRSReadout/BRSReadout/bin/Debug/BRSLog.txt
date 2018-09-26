@@ -46,3 +46,15 @@ Log Entry : 12:22:17 PM Wednesday, September 26, 2018
  Target: Int32 CCDUSB_InitDevice()
  
 -------------------------------
+
+Log Entry : 12:59:21 PM Wednesday, September 26, 2018
+  :
+  :Message: An attempt was made to load a program with an incorrect format. (Exception from HRESULT: 0x8007000B)
+ Source: BRSReadout
+ Stack Trace:    at Camera.CCDUSB_InitDevice()
+   at Camera.init() in C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\Camera.cs:line 334
+   at Camera.cameraInit(String cameraType) in C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\Camera.cs:line 198
+   at BRSReadout.Form1.initCamera() in C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\Form1.cs:line 323
+ Target: Int32 CCDUSB_InitDevice()
+ 
+-------------------------------

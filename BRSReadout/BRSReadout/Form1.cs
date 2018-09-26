@@ -320,13 +320,10 @@ namespace BRSReadout
             try
             {
                 myCamera = new Camera();
+                myCamera.cameraInit(cameraType);
                 if (cameraType == "mightex")
                 {
-                    myCamera.cameraInit(cameraType);
-                }
-                else
-                {
-                    myCamera.cameraInit(cameraType);
+                    myCamera.addToEngine(this.Handle);
                 }
                 Camera.dataDelegate dd = new Camera.dataDelegate(onNewData);
                 myCamera.startFrameGrab(0x8888, 0, dd, cameraType);

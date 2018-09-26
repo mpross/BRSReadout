@@ -197,7 +197,6 @@ class Camera
             //   init();
             camNum = init();
             errNum = addCamera(camNum);
-            errNum = addToEngine(new IntPtr());
             errNum = setExposure(exp);
         }
     }
@@ -345,7 +344,7 @@ class Camera
         return CCDUSB_AddDeviceToWorkingSet(nr);
     }
 
-    private int addToEngine(IntPtr id)
+    public int addToEngine(IntPtr id)
     {
         IntPtr parent_wnd;
         parent_wnd = id;
