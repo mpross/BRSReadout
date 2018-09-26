@@ -36,6 +36,8 @@ namespace BRSReadout
         public double refZeroValue = 0;
         public double refValue = 0;
 
+        public IntPtr mainHandle;
+
         double refLastValue;
         double angleLastValue;
 
@@ -126,6 +128,7 @@ namespace BRSReadout
             try
             {
                 initTime = DateTime.Now;
+                mainHandle = mainHandle = this.Handle;
                 //Calls calculation method for filters
                 highCoeff = filterCoeff(0.0005, 2000.0 / graphFrames, "High");
                 lowCoeff = filterCoeff(0.1, 2000.0 / graphFrames, "Low");
@@ -317,32 +320,29 @@ namespace BRSReadout
         //Camera initialization
         public void initCamera()
         {
-            try
-            {
+            //try
+            //{
                 myCamera = new Camera();
                 myCamera.cameraInit(cameraType);
-                if (cameraType == "mightex")
-                {
-                    myCamera.addToEngine(this.Handle);
-                }
+                myCamera.addToEngine(mainHandle);
                 Camera.dataDelegate dd = new Camera.dataDelegate(onNewData);
                 myCamera.startFrameGrab(0x8888, 0, dd, cameraType);
                 cameraStatus = 1;
-            }
-            catch (Exception ex)
-            {
-                cameraStatus = 0;
-                //Camera status bit
-                ds = new AdsStream(4);
-                BinaryWriter bw = new BinaryWriter(ds);
-                bw.Write(cameraStatus);
-                if (twinCatBool)
-                {
-                    tcAds.Write(0x4020, 40, ds);
-                }
-                EmailError.emailAlert(ex);
-                throw (ex);
-            }
+            //}
+            //catch (Exception ex)
+            //{
+            //    cameraStatus = 0;
+            //    //Camera status bit
+            //    ds = new AdsStream(4);
+            //    BinaryWriter bw = new BinaryWriter(ds);
+            //    bw.Write(cameraStatus);
+            //    if (twinCatBool)
+            //    {
+            //        tcAds.Write(0x4020, 40, ds);
+            //    }
+            //    EmailError.emailAlert(ex);
+            //    throw (ex);
+            //}
         }
 
         //GUI display of queue length, time, and capacitor voltage
