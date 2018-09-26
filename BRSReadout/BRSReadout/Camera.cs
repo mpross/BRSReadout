@@ -259,7 +259,8 @@ class Camera
                             }
                             if (i > 40 && i < 1540)
                             {
-                                data[i] = (ushort)(data[i] + Math.Pow(2, 11) + random.Next(0, 5));
+                                //data[i] = (ushort)(data[i] + Math.Pow(2, 11) + random.Next(0, 5));
+                                data[i] = (ushort)(data[i] + random.Next(0, 5));
                             }
                             if (i > 1540 && i < 1940 + offset)
                             {

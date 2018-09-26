@@ -25,6 +25,8 @@ namespace BRSReadout
         public bool twinCatBool = ("true" == ConfigurationManager.AppSettings.Get("twinCat"));
         public string cameraType = ConfigurationManager.AppSettings.Get("camera");
         public static int camWidth = int.Parse(ConfigurationManager.AppSettings.Get("cameraWidth"));
+        public bool singlePattern= bool.Parse(ConfigurationManager.AppSettings.Get("singlePattern"));
+        public int beginMainPattern = int.Parse(ConfigurationManager.AppSettings.Get("beginMainPattern"));
 
         public static Form2 graphWindow =null;
 
@@ -395,7 +397,7 @@ namespace BRSReadout
             int halflength = (int)Math.Floor(fitLength / 2) + 1;  // increased by 1 pixel to allow two fits
             int length = 1500; //Length of patterns
             double[] crossCor = new double[(int)fitLength + 2];   // increased by 2 pixels to allow two fits
-            int startIndex1 = 1600; //Beginning of left pattern
+            int startIndex1 = beginMainPattern; //Beginning of left pattern
             int startIndex1Ref = 60; //Beginning of left pattern
             int pixshift = 1;  // Direction of shift required to estimate slope of fit correction
 
@@ -429,9 +431,9 @@ namespace BRSReadout
                     {
                         refFrame = frame;
                         firstFrame = false;
-                        for (int j = 1600; j < frame.Length; j++)
+                        for (int j = beginMainPattern; j < frame.Length; j++)
                         {
-                            if (frame[j] > 1200)//&& j < 1600)
+                            if (frame[j] > 1200)
                             {
                                 startIndex2 = j - 30;
                                 break;
@@ -439,7 +441,7 @@ namespace BRSReadout
                         }
                         for (int j = 0; j < frame.Length; j++)
                         {
-                            if (frame[j] > 1200)//&& j < 1600)
+                            if (frame[j] > 1200)
                             {
                                 startIndex2Ref = j - 30;
                                 break;
@@ -460,9 +462,9 @@ namespace BRSReadout
                     //Finds beginning of pattern using a threshold
                     if (frameNo == 0)
                     {
-                        for (int j = 1600; j <= frame.Length; j++)
+                        for (int j = beginMainPattern; j <= frame.Length; j++)
                         {
-                            if (frame[j] > 1200)//&& j < 1600)
+                            if (frame[j] > 1200)
                             {
                                 startIndex1 = j - 30;
                                 break;
@@ -475,7 +477,7 @@ namespace BRSReadout
                         timestamps[frameNo] = data.TimeStamp(frameNo);
                         newdata[frameNo, 0] = angleLastValue - refLastValue;
                     }
-                    else if (startIndex1 <= 1600)
+                    else if (startIndex1 <= beginMainPattern)
                     {
                         timestamps[frameNo] = data.TimeStamp(frameNo);
                         newdata[frameNo, 0] = angleLastValue - refLastValue;
@@ -570,105 +572,112 @@ namespace BRSReadout
 
                         angleLastValue = mu + startIndex1;
 
-                    
 
-                        ////////////////////////////Reference Pattern/////////////////////
-                        y = 0;
-                        xy = 0;
-                        xxy = 0;
-                        //Finds beginning of pattern using a threshold
-
-                        // 11/08/17 - Changed code to online subtraction of Ref signal - Krishna
-                        //if (frameCount >= 10)
-                        //{
-                        //    frameCount = 0;
-
-                        for (int j = 0; j < frame.Length; j++)
+                        if (singlePattern == false)
                         {
-                            if (frame[j] > 1200)//&& j < 1600)
-                            {
-                                startIndex1Ref = j - 30;
-                                lightSourceStatus = 1;
-                                break;
-                            }
+                            ////////////////////////////Reference Pattern/////////////////////
+                            y = 0;
+                            xy = 0;
+                            xxy = 0;
+                            //Finds beginning of pattern using a threshold
 
-                            if (j == frame.Length - 1)
-                            {
-                                lightSourceStatus = 0;
-                            }
-                        }
-                        if (startIndex1Ref < halflength)
-                        {
-                            startIndex1Ref = 0;
-                        }
+                            // 11/08/17 - Changed code to online subtraction of Ref signal - Krishna
+                            //if (frameCount >= 10)
+                            //{
+                            //    frameCount = 0;
 
-                        //Calcualtes the crosscorrelation between the two patterns at shifts 
-                        for (int k = -halflength; k <= halflength; k++)
-                        {
-                            sum = 0;
-                            for (int m = 0; m < length; m++)
+                            for (int j = 0; j < frame.Length; j++)
                             {
-                                if ((m + startIndex1Ref + k) > 0 && (m + startIndex2Ref) > 0)
+                                if (frame[j] > 1200)
                                 {
-                                    sum += frame[m + startIndex1Ref + k] * refFrame[m + startIndex2Ref];
+                                    startIndex1Ref = j - 30;
+                                    lightSourceStatus = 1;
+                                    break;
+                                }
+
+                                if (j == frame.Length - 1)
+                                {
+                                    lightSourceStatus = 0;
                                 }
                             }
-                            crossCor[k + halflength] = sum;
-                        }
-                        //Sums x,x^2,x^3,x^4,ln(y),x ln(y),x^2 ln(y)
+                            if (startIndex1Ref < halflength)
+                            {
+                                startIndex1Ref = 0;
+                            }
 
-                        for (int j = 0; j < fitLength; j++)
-                        {
-                            y += Math.Log(crossCor[j + 1]);
-                            xy += j * Math.Log(crossCor[j + 1]);
-                            xxy += j * j * Math.Log(crossCor[j + 1]);
-                        }
-                        //Solves system of equations using Cramer's rule
-                        D = N * (xSquar * xFourth - xCube * xCube) - x * (x * xFourth - xCube * xSquar) + xSquar * (x * xCube - xSquar * xSquar);
-                        //Da = y * (xSquar * xFourth - xCube * xCube) - x * (xy * xFourth - xCube * xxy) + xSquar * (xy * xCube - xSquar * xxy);
-                        Db = N * (xy * xFourth - xCube * xxy) - y * (x * xFourth - xCube * xSquar) + xSquar * (x * xxy - xy * xSquar);
-                        Dc = N * (xSquar * xxy - xy * xCube) - x * (x * xxy - xy * xSquar) + y * (x * xCube - xSquar * xSquar);
-                        //a = Da / D;
-                        b = Db / D;
-                        c = Dc / D;
+                            //Calcualtes the crosscorrelation between the two patterns at shifts 
+                            for (int k = -halflength; k <= halflength; k++)
+                            {
+                                sum = 0;
+                                for (int m = 0; m < length; m++)
+                                {
+                                    if ((m + startIndex1Ref + k) > 0 && (m + startIndex2Ref) > 0)
+                                    {
+                                        sum += frame[m + startIndex1Ref + k] * refFrame[m + startIndex2Ref];
+                                    }
+                                }
+                                crossCor[k + halflength] = sum;
+                            }
+                            //Sums x,x^2,x^3,x^4,ln(y),x ln(y),x^2 ln(y)
 
-                        mu1 = -b / (2 * c);
+                            for (int j = 0; j < fitLength; j++)
+                            {
+                                y += Math.Log(crossCor[j + 1]);
+                                xy += j * Math.Log(crossCor[j + 1]);
+                                xxy += j * j * Math.Log(crossCor[j + 1]);
+                            }
+                            //Solves system of equations using Cramer's rule
+                            D = N * (xSquar * xFourth - xCube * xCube) - x * (x * xFourth - xCube * xSquar) + xSquar * (x * xCube - xSquar * xSquar);
+                            //Da = y * (xSquar * xFourth - xCube * xCube) - x * (xy * xFourth - xCube * xxy) + xSquar * (xy * xCube - xSquar * xxy);
+                            Db = N * (xy * xFourth - xCube * xxy) - y * (x * xFourth - xCube * xSquar) + xSquar * (x * xxy - xy * xSquar);
+                            Dc = N * (xSquar * xxy - xy * xCube) - x * (x * xxy - xy * xSquar) + y * (x * xCube - xSquar * xSquar);
+                            //a = Da / D;
+                            b = Db / D;
+                            c = Dc / D;
 
-                        // If fit-center is to left of center of crosscor pattern, shift cross-cor pattern by 1 pixel to right or vice versa
-                        if (mu1 < (halflength - 1))
-                        {
-                            pixshift = -1;
+                            mu1 = -b / (2 * c);
+
+                            // If fit-center is to left of center of crosscor pattern, shift cross-cor pattern by 1 pixel to right or vice versa
+                            if (mu1 < (halflength - 1))
+                            {
+                                pixshift = -1;
+                            }
+                            else
+                            {
+                                pixshift = 1;
+                            }
+
+                            //Redo the fit
+                            y = 0;
+                            xy = 0;
+                            xxy = 0;
+                            for (int j = 0; j < fitLength; j++)
+                            {
+                                y += Math.Log(crossCor[j + 1 + pixshift]);
+                                xy += j * Math.Log(crossCor[j + 1 + pixshift]);
+                                xxy += j * j * Math.Log(crossCor[j + 1 + pixshift]);
+                            }
+                            D = N * (xSquar * xFourth - xCube * xCube) - x * (x * xFourth - xCube * xSquar) + xSquar * (x * xCube - xSquar * xSquar);
+                            Db = N * (xy * xFourth - xCube * xxy) - y * (x * xFourth - xCube * xSquar) + xSquar * (x * xxy - xy * xSquar);
+                            Dc = N * (xSquar * xxy - xy * xCube) - x * (x * xxy - xy * xSquar) + y * (x * xCube - xSquar * xSquar);
+                            b = Db / D;
+                            c = Dc / D;
+
+                            mu2 = -b / (2 * c);
+
+                            mu = (halflength - 1) - (mu1 - (halflength - 1)) * pixshift / (mu2 - mu1);
+
+                            newdata[frameNo, 1] = mu + startIndex1Ref;
+                            refValue = mu + startIndex1Ref;
+                            newdata[frameNo, 0] = newdata[frameNo, 0] - refValue;
+
+                            refLastValue = refValue;
                         }
                         else
                         {
-                            pixshift = 1;
+                            newdata[frameNo, 1] = 0;
+                            refLastValue = 0;
                         }
-
-                        //Redo the fit
-                        y = 0;
-                        xy = 0;
-                        xxy = 0;
-                        for (int j = 0; j < fitLength; j++)
-                        {
-                            y += Math.Log(crossCor[j + 1 + pixshift]);
-                            xy += j * Math.Log(crossCor[j + 1 + pixshift]);
-                            xxy += j * j * Math.Log(crossCor[j + 1 + pixshift]);
-                        }
-                        D = N * (xSquar * xFourth - xCube * xCube) - x * (x * xFourth - xCube * xSquar) + xSquar * (x * xCube - xSquar * xSquar);
-                        Db = N * (xy * xFourth - xCube * xxy) - y * (x * xFourth - xCube * xSquar) + xSquar * (x * xxy - xy * xSquar);
-                        Dc = N * (xSquar * xxy - xy * xCube) - x * (x * xxy - xy * xSquar) + y * (x * xCube - xSquar * xSquar);
-                        b = Db / D;
-                        c = Dc / D;
-
-                        mu2 = -b / (2 * c);
-
-                        mu = (halflength - 1) - (mu1 - (halflength - 1)) * pixshift / (mu2 - mu1);
-
-                        newdata[frameNo, 1] = mu + startIndex1Ref;
-                        refValue = mu + startIndex1Ref;
-                        newdata[frameNo, 0] = newdata[frameNo, 0] - refValue;
-
-                        refLastValue = refValue;
                     }
                 }
 

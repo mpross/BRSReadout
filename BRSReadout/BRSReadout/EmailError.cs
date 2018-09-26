@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -33,7 +34,7 @@ namespace BRSReadout
 
             System.Net.Mail.MailMessage message = new System.Net.Mail.MailMessage();
             message.To.Add(toEmail);
-            message.Subject = "LLO Input-Y BRS Error Alert";
+            message.Subject = ConfigurationManager.AppSettings.Get("brsName") + " BRS Error Alert";
             message.From = new System.Net.Mail.MailAddress(fromEmail);
             message.Body = words.ToString();
             System.Net.Mail.SmtpClient smtp = new System.Net.Mail.SmtpClient("smtp.gmail.com");
