@@ -31,13 +31,8 @@ C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\bin\Debug\BRSReadout.p
 C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\bin\Debug\PylonC.NET.dll
 C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\bin\Debug\PylonC.NET.xml
 C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\obj\Debug\BRSReadout.csproj.CopyComplete
-C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\bin\Debug\LiveCharts.pdb
-C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\bin\Debug\LiveCharts.xml
-C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\bin\Debug\LiveCharts.WinForms.pdb
-C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\bin\Debug\LiveCharts.WinForms.xml
-C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\bin\Debug\LiveCharts.Wpf.pdb
-C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\bin\Debug\LiveCharts.Wpf.xml
 C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\obj\Debug\BRSReadout.Form2.resources
-C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\obj\Debug\BRSReadout.csprojAssemblyReference.cache
 C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\bin\Debug\TwinCAT.Ads.dll
 C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\bin\Debug\TwinCAT.Ads.xml
+C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\bin\Debug\BRSReadout.exe.CodeAnalysisLog.xml
+C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\bin\Debug\BRSReadout.exe.lastcodeanalysissucceeded
