@@ -13,7 +13,7 @@ We use the LiveCharts package to render all of the plots. Information and source
 ## Authors
 
 * **Michael Ross**
-(https://github.com/PurpleBooth)
+(https://github.com/mpross)
 
 ## License
 
