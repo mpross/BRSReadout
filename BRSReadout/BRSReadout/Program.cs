@@ -23,15 +23,9 @@ using System.Diagnostics;
 
 namespace BRSReadout
 {
-
-    /*
-    *  Program class, this class contain the main method. It initializes the GUI and then runs the program.
-    */
+    
     static class Program
     {
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
         [STAThread]
         static void Main()
         {

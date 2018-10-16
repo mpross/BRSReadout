@@ -14,7 +14,7 @@ using BRSReadout;
         private long[] timeStamp;
         int length;
         int queueLen;
-        int dataco; // The number of data frames in the Object, should fill up to 1024
+        int dataco; // The number of data frames in the Object
 
         public RawData(int Fr)
         {
@@ -26,15 +26,7 @@ using BRSReadout;
 
         public void Dispose()
         {
-            // Dispose logic here ...
-
-            // It's a bad error if someone forgets to call Dispose,
-            // so in Debug builds, we put a finalizer in to detect
-            // the error. If Dispose is called, we suppress the
-            // finalizer.
-//#if DEBUG
             GC.SuppressFinalize(this);
-//#endif
         }
 
 

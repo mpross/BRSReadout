@@ -27,6 +27,7 @@ class Camera
     dataDelegate masterDataDelegate;
     public static int camWidth = int.Parse(ConfigurationManager.AppSettings.Get("cameraWidth"));
     public ushort[] data = new ushort[camWidth];
+    public ushort[] sum = new ushort[camWidth];
 
     // Basler Camera stuff
     PYLON_DEVICE_HANDLE hDev = new PYLON_DEVICE_HANDLE();
@@ -46,7 +47,9 @@ class Camera
     string ip;
     string dir = Path.GetDirectoryName(Application.ExecutablePath);
     uint j;
+    int frameCount = 0;
 
+    int averageNum = int.Parse(ConfigurationManager.AppSettings.Get("frameAverageNum"));
     int exp = int.Parse(ConfigurationManager.AppSettings.Get("cameraExposureTime"));
 
     public Camera()
@@ -134,7 +137,20 @@ class Camera
                     bufferIndex = (int)grabResult.Context;
                     while (buffers.TryGetValue(grabResult.hBuffer, out buffer) != true) ;
                     Buffer.BlockCopy(buffer.Array, 0, data, 0, buffer.Array.Length);
-                    masterDataDelegate(data);
+
+                    // Frame averaging
+                    for (int i = 0; i <= data.Length; i++)
+                    {
+                        sum[i] += (ushort)(data[i] / averageNum);
+                    }
+                    frameCount++;
+
+                    if (frameCount >= averageNum)
+                    {
+                        masterDataDelegate(sum);
+                        frameCount = 0;
+                    }
+
                     Pylon.StreamGrabberQueueBuffer(hGrabber, grabResult.hBuffer, bufferIndex);
                 }
                 else if (cameraType == "none")
@@ -167,7 +183,19 @@ class Camera
                         }
                     }
                     Thread.Sleep(int.Parse(ConfigurationManager.AppSettings.Get("cameraExposureTime")) / 1000);
-                    masterDataDelegate(data);
+
+                    // Frame averaging
+                    for (int i = 0; i <= data.Length; i++)
+                    {
+                        sum[i] += (ushort)(data[i] / averageNum);
+                    }
+                    frameCount++;
+
+                    if (frameCount >= averageNum)
+                    {
+                        masterDataDelegate(sum);
+                        frameCount = 0;
+                    }
                 }
             }
         }

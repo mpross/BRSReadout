@@ -46,3 +46,12 @@ Log Entry : 12:22:17 PM Wednesday, September 26, 2018
  Target: Int32 CCDUSB_InitDevice()
  
 -------------------------------
+
+Log Entry : 3:47:27 PM Tuesday, October 16, 2018
+  :
+  :Message: Index was outside the bounds of the array.
+ Source: BRSReadout
+ Stack Trace:    at Camera.startFrameGrab(Int32 nr, Int32 trigmode, dataDelegate dd, String cameraType) in C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\Camera.cs:line 190
+ Target: Void startFrameGrab(Int32, Int32, dataDelegate, System.String)
+ 
+-------------------------------

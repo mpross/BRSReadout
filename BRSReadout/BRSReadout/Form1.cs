@@ -15,11 +15,6 @@ using TwinCAT.Ads;
 
 namespace BRSReadout
 {
-    /*
-     * 
-     * The primary declaration of the Form1 class that handels the primary functions and structure of the program
-     * 
-     */
     public partial class Form1 : Form
     {
         public bool twinCatBool = ("true" == ConfigurationManager.AppSettings.Get("twinCat"));
@@ -136,9 +131,10 @@ namespace BRSReadout
                 dayFrameCo0 = DayNr.GetDayNr(DateTime.Now);
                 
                 //Initialization of TwinCAT connection. 851 is the port for PLC runtime 1
-                //tcAds.Dispose();
+
                 if (twinCatBool)
                 {
+                    tcAds.Dispose();
                     tcAds.Connect(851);
                 }
 
@@ -198,7 +194,6 @@ namespace BRSReadout
                     {
                         return;
                     }
-
                     lock (((ICollection)dataWritingQueue).SyncRoot)
                     {
                         curItem = dataWritingQueue.Dequeue();
@@ -206,7 +201,6 @@ namespace BRSReadout
                         {
                             dataWritingSyncEvent.NewItemEvent.Set();
                         }
-
                     }
                     curTimeStamp = 0;
                     for (f = 0; f < graphFrames; f++)
@@ -434,7 +428,7 @@ namespace BRSReadout
                         firstFrame = false;
                         for (int j = 1600; j < frame.Length; j++)
                         {
-                            if (frame[j] > 1200)//&& j < 1600)
+                            if (frame[j] > 1200)
                             {
                                 startIndex2 = j - 30;
                                 break;
@@ -442,7 +436,7 @@ namespace BRSReadout
                         }
                         for (int j = 0; j < frame.Length; j++)
                         {
-                            if (frame[j] > 1200)//&& j < 1600)
+                            if (frame[j] > 1200)
                             {
                                 startIndex2Ref = j - 30;
                                 break;
@@ -465,7 +459,7 @@ namespace BRSReadout
                     {
                         for (int j = 1600; j <= frame.Length; j++)
                         {
-                            if (frame[j] > 1200)//&& j < 1600)
+                            if (frame[j] > 1200)
                             {
                                 startIndex1 = j - 30;
                                 break;
@@ -489,7 +483,6 @@ namespace BRSReadout
                         {
                             startIndex1 = 0;
                         }
-                        //}
                         //Cuts length of pattern down if the pattern extends beyond the frame
                         while (length + startIndex1 + halflength + 1 >= frame.Length)
                         {
@@ -580,15 +573,10 @@ namespace BRSReadout
                         xy = 0;
                         xxy = 0;
                         //Finds beginning of pattern using a threshold
-
-                        // 11/08/17 - Changed code to online subtraction of Ref signal - Krishna
-                        //if (frameCount >= 10)
-                        //{
-                        //    frameCount = 0;
-
+                        
                         for (int j = 0; j < frame.Length; j++)
                         {
-                            if (frame[j] > 1200)//&& j < 1600)
+                            if (frame[j] > 1200)
                             {
                                 startIndex1Ref = j - 30;
                                 lightSourceStatus = 1;
