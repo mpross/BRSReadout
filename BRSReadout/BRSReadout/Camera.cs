@@ -73,6 +73,7 @@ class Camera
             {
                 Pylon.DeviceOpen(hDev, Pylon.cPylonAccessModeControl | Pylon.cPylonAccessModeStream);
             }
+            catch (System.Threading.ThreadAbortException) { }
             catch (Exception ex)
             {
                 EmailError.emailAlert(ex);
@@ -170,6 +171,7 @@ class Camera
                 }
             }
         }
+        catch (System.Threading.ThreadAbortException) { }
         catch (Exception ex)
         {
             EmailError.emailAlert(ex);
