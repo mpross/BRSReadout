@@ -120,10 +120,10 @@ namespace BRSReadout
             {
                 initTime = DateTime.Now;
                 //Calls calculation method for filters
-                highCoeff = filterCoeff(0.0005, 2000.0 / graphFrames, "High");
-                lowCoeff = filterCoeff(0.1, 2000.0 / graphFrames, "Low");
-                bandHighCoeff = filterCoeff(0.002, 2000.0 / graphFrames, "High");
-                bandLowCoeff = filterCoeff(0.02, 2000.0 / graphFrames, "Low");//2*10^-2
+                highCoeff = filterCoeff(double.Parse(ConfigurationManager.AppSettings.Get("velocityLowPass")), sampFreq / graphFrames, "High");
+                lowCoeff = filterCoeff(double.Parse(ConfigurationManager.AppSettings.Get("velocityLowPass")), sampFreq / graphFrames, "Low");
+                bandHighCoeff = filterCoeff(double.Parse(ConfigurationManager.AppSettings.Get("velocityLowPass")), sampFreq / graphFrames, "High");
+                bandLowCoeff = filterCoeff(double.Parse(ConfigurationManager.AppSettings.Get("velocityLowPass")), sampFreq / graphFrames, "Low");//2*10^-2
 
                 InitializeComponent(); // Initializes the visual components
                 SetSize(); // Sets up the size of the window and the corresponding location of the components

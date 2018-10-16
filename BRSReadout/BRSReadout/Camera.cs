@@ -119,17 +119,24 @@ class Camera
     public void frameAveraging(ushort[] data)
     {
         // Frame averaging
-        for (int i = 0; i < data.Length; i++)
+        if (averageNum > 0)
         {
-            sum[i] += (ushort)(data[i] / averageNum);
-        }
-        frameCount++;
+            for (int i = 0; i < data.Length; i++)
+            {
+                sum[i] += (ushort)(data[i] / averageNum);
+            }
+            frameCount++;
 
-        if (frameCount >= averageNum)
+            if (frameCount >= averageNum)
+            {
+                masterDataDelegate(sum);
+                frameCount = 0;
+                sum = new ushort[camWidth];
+            }
+        }
+        else
         {
-            masterDataDelegate(sum);
-            frameCount = 0;
-            sum = new ushort[camWidth];
+            masterDataDelegate(data);
         }
     }
     public void startFrameGrab(int nr, int trigmode, dataDelegate dd, string cameraType)
@@ -160,7 +167,7 @@ class Camera
                     data = new ushort[camWidth];
                     Random random = new Random();
                     TimeSpan ts = DateTime.Now.Subtract(new DateTime(2011, 2, 1));
-                    double offset = 300 * Math.Sin(2 * Math.PI * 1 * ts.TotalSeconds);
+                    double offset = 300 * Math.Sin(2 * Math.PI * 0.01 * ts.TotalSeconds);
                     for (int i = 0; i < data.Length; i++)
                     {
                         if (i < 40)
