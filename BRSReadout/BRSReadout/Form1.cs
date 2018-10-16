@@ -65,7 +65,20 @@ namespace BRSReadout
         
         double dayFrameCo0;
 
+        static double refGain = double.Parse(ConfigurationManager.AppSettings.Get("refGain"));
+        static double angleGain = double.Parse(ConfigurationManager.AppSettings.Get("angleGain"));
+        static double velGain = double.Parse(ConfigurationManager.AppSettings.Get("velGain"));
+        static double driftGain = double.Parse(ConfigurationManager.AppSettings.Get("driftGain"));
+        static double driftOffset = double.Parse(ConfigurationManager.AppSettings.Get("driftOffset"));
+        static double driftOverGain = double.Parse(ConfigurationManager.AppSettings.Get("driftOverGain"));
+        static double driftOverOffset = double.Parse(ConfigurationManager.AppSettings.Get("driftOverOffset"));
+
+
         double voltagewrite = 0;
+        static int splitPixel = int.Parse(ConfigurationManager.AppSettings.Get("splitPixel"));
+        static int threshold = int.Parse(ConfigurationManager.AppSettings.Get("threshold"));
+        static int pixelMargin = int.Parse(ConfigurationManager.AppSettings.Get("pixelMargin"));
+        int patternLength = int.Parse(ConfigurationManager.AppSettings.Get("patternLength")); //Length of patterns
 
         static int graphFrames = int.Parse(ConfigurationManager.AppSettings.Get("graphingFrameNumber")); //Amount of frames collected before fitting and downsampling 
         public static double[,] newdata = new double[graphFrames, 2];
@@ -390,7 +403,7 @@ namespace BRSReadout
             long[] timestamps;
             double fitLength = 15; //Amount of pixels to be used in fit of correlation  - changed on 11/08/2017 by Krishna
             int halflength = (int)Math.Floor(fitLength / 2) + 1;  // increased by 1 pixel to allow two fits
-            int length = 1500; //Length of patterns
+            int length = patternLength; //Length of patterns
             double[] crossCor = new double[(int)fitLength + 2];   // increased by 2 pixels to allow two fits
             int startIndex1 = 1600; //Beginning of left pattern
             int startIndex1Ref = 60; //Beginning of left pattern
@@ -426,19 +439,19 @@ namespace BRSReadout
                     {
                         refFrame = frame;
                         firstFrame = false;
-                        for (int j = 1600; j < frame.Length; j++)
+                        for (int j = splitPixel; j < frame.Length; j++)
                         {
-                            if (frame[j] > 1200)
+                            if (frame[j] > threshold)
                             {
-                                startIndex2 = j - 30;
+                                startIndex2 = j - pixelMargin;
                                 break;
                             }
                         }
                         for (int j = 0; j < frame.Length; j++)
                         {
-                            if (frame[j] > 1200)
+                            if (frame[j] > threshold)
                             {
-                                startIndex2Ref = j - 30;
+                                startIndex2Ref = j - pixelMargin;
                                 break;
                             }
                         }
@@ -457,11 +470,11 @@ namespace BRSReadout
                     //Finds beginning of pattern using a threshold
                     if (frameNo == 0)
                     {
-                        for (int j = 1600; j <= frame.Length; j++)
+                        for (int j = splitPixel; j <= frame.Length; j++)
                         {
-                            if (frame[j] > 1200)
+                            if (frame[j] > threshold)
                             {
-                                startIndex1 = j - 30;
+                                startIndex1 = j - pixelMargin;
                                 break;
                             }
 
@@ -472,7 +485,7 @@ namespace BRSReadout
                         timestamps[frameNo] = data.TimeStamp(frameNo);
                         newdata[frameNo, 0] = angleLastValue - refLastValue;
                     }
-                    else if (startIndex1 <= 1600)
+                    else if (startIndex1 <= splitPixel)
                     {
                         timestamps[frameNo] = data.TimeStamp(frameNo);
                         newdata[frameNo, 0] = angleLastValue - refLastValue;
@@ -576,9 +589,9 @@ namespace BRSReadout
                         
                         for (int j = 0; j < frame.Length; j++)
                         {
-                            if (frame[j] > 1200)
+                            if (frame[j] > threshold)
                             {
-                                startIndex1Ref = j - 30;
+                                startIndex1Ref = j - pixelMargin;
                                 lightSourceStatus = 1;
                                 break;
                             }
@@ -698,7 +711,7 @@ namespace BRSReadout
             double angle = 0;
             double refAng = 0;
             angle = data[0];
-            refAng = 58.33 * 60 * (data[1] - refZeroValue);
+            refAng = refGain * (data[1] - refZeroValue);
             //Has a DC subtraction to help filters. Should be about the center of the signal.
             if (firstValueCounter < 40)
             {
@@ -712,11 +725,11 @@ namespace BRSReadout
             //Drift signal calculation, just scaled signal
             if (dampOverride)
             {
-                drift = 10 * (angle - 1802);
+                drift = driftOverGain * (angle - driftOverOffset);
             }
             else
             {
-                drift = 60 * (angle - 2100 + 80);
+                drift = driftGain * (angle - driftOffset);
             }
             Debug.WriteLine(drift);
             //Drift rail logic
@@ -728,29 +741,22 @@ namespace BRSReadout
 
             //Tilt signal calculations, high pass at 10^-3 Hz then scaling.
             yHighPass[0] = highCoeff[3] * yHighPass[1] + highCoeff[4] * yHighPass[2] + highCoeff[0] * xHighPass[0] + highCoeff[1] * xHighPass[1] + highCoeff[2] * xHighPass[2];
-            tilt = 0.729 * 5000 * yHighPass[0];
+            tilt = angleGain * yHighPass[0];
 
             //Capacitor signal calculations, low passed at Hz then high passed at Hz then differentiated and scaled
             yBandLowPass[0] = bandLowCoeff[3] * yBandLowPass[1] + bandLowCoeff[4] * yBandLowPass[2] + bandLowCoeff[0] * xBandLowPass[0] + bandLowCoeff[1] * xBandLowPass[1] + bandLowCoeff[2] * xBandLowPass[2];
             xBandHighPass[0] = yBandLowPass[0];
             yBandHighPass[0] = bandHighCoeff[3] * yBandHighPass[1] + bandHighCoeff[4] * yBandHighPass[2] + bandHighCoeff[0] * xBandHighPass[0] + bandHighCoeff[1] * xBandHighPass[1] + bandHighCoeff[2] * xBandHighPass[2];
-            velocity = -2000000 * Math.Round((double)200 / graphFrames) * (yBandHighPass[0] - yBandHighPass[1]);
+            velocity = velGain* Math.Round((double)200 / graphFrames) * (yBandHighPass[0] - yBandHighPass[1]);
 
-            //Contact potential check. If above contact potential, the force is approximately proportional to V^2. If below, to -V*Vcontact.
-            if (Math.Abs(velocity) > 00)
+           
+            if (velocity > 0)
             {
-                if (velocity > 0)
-                {
-                    velocity = 50 * Math.Sqrt(velocity);
-                }
-                else
-                {
-                    velocity = -50 * Math.Sqrt(-velocity);
-                }
+                velocity = Math.Sqrt(velocity);
             }
             else
             {
-                velocity *= -1.5;
+                velocity = -Math.Sqrt(-velocity);
             }
 
             if (Math.Abs(velocity) >= 30760)
