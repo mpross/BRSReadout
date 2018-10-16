@@ -4,7 +4,7 @@ Readout software for Beam Rotation Sensors developed by the Eöt-Wash group for t
 
 ## Getting Started
 
-This should be able to run from the executable in the /bin/debug but if not one can recompile the code using Visual Studio. All packages should already be in the repo
+The program should be able to run from the executable in the /bin/debug but if not one can recompile the code using Visual Studio. All packages should already be in the repo.
 
 ## Graphing Package
 
@@ -14,6 +14,9 @@ We use the LiveCharts package to render all of the plots. Information and source
 
 * **Michael Ross**
 (https://github.com/mpross)
+* **Trevor Arp**
+* **Stephan Schlamminger**
+* **Jenna Walrath**
 
 ## License
 
