@@ -116,7 +116,22 @@ class Camera
             Pylon.DeviceExecuteCommandFeature(hDev, "AcquisitionStart");
         }
     }
+    public void frameAveraging(ushort[] data)
+    {
+        // Frame averaging
+        for (int i = 0; i < data.Length; i++)
+        {
+            sum[i] += (ushort)(data[i] / averageNum);
+        }
+        frameCount++;
 
+        if (frameCount >= averageNum)
+        {
+            masterDataDelegate(sum);
+            frameCount = 0;
+            sum = new ushort[camWidth];
+        }
+    }
     public void startFrameGrab(int nr, int trigmode, dataDelegate dd, string cameraType)
     {
         //Start frame grabbing loop and pushes data into the data delegate as a ushort array.
@@ -137,20 +152,7 @@ class Camera
                     bufferIndex = (int)grabResult.Context;
                     while (buffers.TryGetValue(grabResult.hBuffer, out buffer) != true) ;
                     Buffer.BlockCopy(buffer.Array, 0, data, 0, buffer.Array.Length);
-
-                    // Frame averaging
-                    for (int i = 0; i <= data.Length; i++)
-                    {
-                        sum[i] += (ushort)(data[i] / averageNum);
-                    }
-                    frameCount++;
-
-                    if (frameCount >= averageNum)
-                    {
-                        masterDataDelegate(sum);
-                        frameCount = 0;
-                    }
-
+                    frameAveraging(data);
                     Pylon.StreamGrabberQueueBuffer(hGrabber, grabResult.hBuffer, bufferIndex);
                 }
                 else if (cameraType == "none")
@@ -158,7 +160,7 @@ class Camera
                     data = new ushort[camWidth];
                     Random random = new Random();
                     TimeSpan ts = DateTime.Now.Subtract(new DateTime(2011, 2, 1));
-                    double offset = 300 * Math.Sin(2 * Math.PI * 0.01 * ts.TotalSeconds);
+                    double offset = 300 * Math.Sin(2 * Math.PI * 1 * ts.TotalSeconds);
                     for (int i = 0; i < data.Length; i++)
                     {
                         if (i < 40)
@@ -183,19 +185,7 @@ class Camera
                         }
                     }
                     Thread.Sleep(int.Parse(ConfigurationManager.AppSettings.Get("cameraExposureTime")) / 1000);
-
-                    // Frame averaging
-                    for (int i = 0; i <= data.Length; i++)
-                    {
-                        sum[i] += (ushort)(data[i] / averageNum);
-                    }
-                    frameCount++;
-
-                    if (frameCount >= averageNum)
-                    {
-                        masterDataDelegate(sum);
-                        frameCount = 0;
-                    }
+                    frameAveraging(data);
                 }
             }
         }

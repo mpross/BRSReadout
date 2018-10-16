@@ -55,3 +55,31 @@ Log Entry : 3:47:27 PM Tuesday, October 16, 2018
  Target: Void startFrameGrab(Int32, Int32, dataDelegate, System.String)
  
 -------------------------------
+
+Log Entry : 3:48:31 PM Tuesday, October 16, 2018
+  :
+  :Message: Index was outside the bounds of the array.
+ Source: BRSReadout
+ Stack Trace:    at Camera.startFrameGrab(Int32 nr, Int32 trigmode, dataDelegate dd, String cameraType) in C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\Camera.cs:line 190
+ Target: Void startFrameGrab(Int32, Int32, dataDelegate, System.String)
+ 
+-------------------------------
+
+Log Entry : 3:49:11 PM Tuesday, October 16, 2018
+  :
+  :Message: Index was outside the bounds of the array.
+ Source: BRSReadout
+ Stack Trace:    at Camera.startFrameGrab(Int32 nr, Int32 trigmode, dataDelegate dd, String cameraType) in C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\Camera.cs:line 190
+ Target: Void startFrameGrab(Int32, Int32, dataDelegate, System.String)
+ 
+-------------------------------
+
+Log Entry : 3:57:56 PM Tuesday, October 16, 2018
+  :
+  :Message: Attempted to divide by zero.
+ Source: BRSReadout
+ Stack Trace:    at Camera.frameAveraging(UInt16[] data) in C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\Camera.cs:line 124
+   at Camera.startFrameGrab(Int32 nr, Int32 trigmode, dataDelegate dd, String cameraType) in C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\Camera.cs:line 188
+ Target: Void frameAveraging(UInt16[])
+ 
+-------------------------------
