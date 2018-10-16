@@ -34,5 +34,4 @@ C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\obj\Debug\BRSReadout.c
 C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\obj\Debug\BRSReadout.Form2.resources
 C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\bin\Debug\TwinCAT.Ads.dll
 C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\bin\Debug\TwinCAT.Ads.xml
-C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\bin\Debug\BRSReadout.exe.CodeAnalysisLog.xml
-C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\bin\Debug\BRSReadout.exe.lastcodeanalysissucceeded
+C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\obj\Debug\BRSReadout.csprojAssemblyReference.cache

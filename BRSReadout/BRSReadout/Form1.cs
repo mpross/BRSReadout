@@ -167,6 +167,7 @@ namespace BRSReadout
                 curDirec = System.IO.Path.GetDirectoryName(Application.ExecutablePath);
                 System.Diagnostics.Process.Start(curDirec + "\\AffinitySet.bat");
             }
+            catch (System.Threading.ThreadAbortException) { }
             catch (Exception ex)
             {
                 EmailError.emailAlert(ex);
@@ -304,6 +305,7 @@ namespace BRSReadout
                         consumerd[i].mySyncEvent.NewItemEvent.Set();
                     }
                 }
+                catch (System.Threading.ThreadAbortException) { }
                 catch (Exception ex)
                 {
                     EmailError.emailAlert(ex);
@@ -330,6 +332,7 @@ namespace BRSReadout
                 myCamera.startFrameGrab(0x8888, 0, dd, cameraType);
                 cameraStatus = 1;
             }
+            catch (System.Threading.ThreadAbortException) { }
             catch (Exception ex)
             {
                 cameraStatus = 0;
@@ -671,7 +674,7 @@ namespace BRSReadout
                         refLastValue = refValue;
                     }
                 }
-
+                catch (System.Threading.ThreadAbortException) { }
                 catch (Exception ex)
                 {
                     EmailError.emailAlert(ex);

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -13,7 +14,8 @@ namespace BRSReadout
         {
             StringBuilder words = new StringBuilder();
 
-            String toEmail = "mpross2@uw.edu";
+            string[] emailList = ConfigurationManager.AppSettings["emailList"].Split(',');
+            String location = ConfigurationManager.AppSettings["location"];
             String fromEmail = "beamrotation@gmail.com";
             String user = "beamrotation";
             String pass = "windyTilt";
@@ -31,16 +33,19 @@ namespace BRSReadout
             words.Append(ex.TargetSite);
             words.Append("\n ");
 
-            System.Net.Mail.MailMessage message = new System.Net.Mail.MailMessage();
-            message.To.Add(toEmail);
-            message.Subject = "LLO Input-Y BRS Error Alert";
-            message.From = new System.Net.Mail.MailAddress(fromEmail);
-            message.Body = words.ToString();
-            System.Net.Mail.SmtpClient smtp = new System.Net.Mail.SmtpClient("smtp.gmail.com");
-            smtp.Port = 25;
-            smtp.EnableSsl = true;
-            smtp.Credentials = new System.Net.NetworkCredential(user, pass);
-            //smtp.Send(message);
+            foreach (string toEmail in emailList)
+            {
+                System.Net.Mail.MailMessage message = new System.Net.Mail.MailMessage();
+                message.To.Add(toEmail);
+                message.Subject = location+" BRS Error Alert";
+                message.From = new System.Net.Mail.MailAddress(fromEmail);
+                message.Body = words.ToString();
+                System.Net.Mail.SmtpClient smtp = new System.Net.Mail.SmtpClient("smtp.gmail.com");
+                smtp.Port = 25;
+                smtp.EnableSsl = true;
+                smtp.Credentials = new System.Net.NetworkCredential(user, pass);
+                smtp.Send(message);
+            }
             string dir = Form1.curDirec + "\\BRSLog.txt";
             StreamWriter w = File.AppendText(dir);
             w.Write("\r\nLog Entry : ");
@@ -50,8 +55,6 @@ namespace BRSReadout
             w.WriteLine("  :{0}", words.ToString());
             w.WriteLine("-------------------------------");
             w.Flush();
-            
-
         }
     }
 }
