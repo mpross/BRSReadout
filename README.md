@@ -1,6 +1,10 @@
 # BRSReadout
 
-Readout software for Beam Rotation Sensors developed by the Eöt-Wash group for the LIGO seismic isolation systems.
+Readout software for Beam Rotation Sensors developed by the EÃ¶t-Wash group for the LIGO seismic isolation systems.
+
+![](https://github.com/mpross/BRSReadout/blob/master/BRSReadoutScreen.png)
+
+![](https://github.com/mpross/BRSReadout/blob/master/BRSReadoutScreenGraph.png)
 
 ## Getting Started
 
@@ -22,7 +26,7 @@ We use the LiveCharts package to render all of the plots. Information and source
 
 BRSReadout Non-commercial License
 
-© 2016-2018 University of Washington.
+Â© 2016-2018 University of Washington.
 
 Redistribution and use for noncommercial purposes in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
@@ -38,4 +42,4 @@ THIS SOFTWARE IS PROVIDED BY THE UNIVERSITY OF WASHINGTON AND CONTRIBUTORS "AS I
 
 ## Acknowledgments
 
-The entire Eöt-Wash group for coming up with many of ideas implemented in this software.
+The entire EÃ¶t-Wash group for coming up with many of ideas implemented in this software.
