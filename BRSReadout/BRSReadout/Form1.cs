@@ -50,6 +50,8 @@ namespace BRSReadout
         public volatile int Frameco = 0;        
         ushort[] refFrame = new ushort[camWidth];
         public static ushort[] frame = new ushort[camWidth];
+        public static ushort[] graphingFrame = new ushort[camWidth];
+        int graphFrameCount = 0;
 
         volatile bool dataWritingThreadBool;
         Thread dataWritingThread;
@@ -80,10 +82,11 @@ namespace BRSReadout
         static int pixelMargin = int.Parse(ConfigurationManager.AppSettings.Get("pixelMargin"));
         int patternLength = int.Parse(ConfigurationManager.AppSettings.Get("patternLength")); //Length of patterns
 
-        static int graphFrames = int.Parse(ConfigurationManager.AppSettings.Get("graphingFrameNumber")); //Amount of frames collected before fitting and downsampling 
-        public static double[,] newdata = new double[graphFrames, 2];
+        static int graphingFrameNumber = int.Parse(ConfigurationManager.AppSettings.Get("graphingFrameNumber")); //Amount of frames collected before fitting and downsampling 
+        static int bufferSize = int.Parse(ConfigurationManager.AppSettings.Get("bufferSize"));
+        public static double[,] newdata = new double[bufferSize, 2];
 
-        RawData currentData = new RawData(graphFrames);
+        RawData currentData = new RawData(bufferSize);
 
         static TcAdsClient tcAds = new TcAdsClient();
         static AdsStream ds = new AdsStream(16);
@@ -133,10 +136,10 @@ namespace BRSReadout
             {
                 initTime = DateTime.Now;
                 //Calls calculation method for filters
-                highCoeff = filterCoeff(double.Parse(ConfigurationManager.AppSettings.Get("angleHighPass")), sampFreq / graphFrames, "High");
-                lowCoeff = filterCoeff(double.Parse(ConfigurationManager.AppSettings.Get("angleLowPass")), sampFreq / graphFrames, "Low");
-                bandHighCoeff = filterCoeff(double.Parse(ConfigurationManager.AppSettings.Get("velocityHighPass")), sampFreq / graphFrames, "High");
-                bandLowCoeff = filterCoeff(double.Parse(ConfigurationManager.AppSettings.Get("velocityLowPass")), sampFreq / graphFrames, "Low");//2*10^-2
+                highCoeff = filterCoeff(double.Parse(ConfigurationManager.AppSettings.Get("angleHighPass")), sampFreq / bufferSize, "High");
+                lowCoeff = filterCoeff(double.Parse(ConfigurationManager.AppSettings.Get("angleLowPass")), sampFreq / bufferSize, "Low");
+                bandHighCoeff = filterCoeff(double.Parse(ConfigurationManager.AppSettings.Get("velocityHighPass")), sampFreq / bufferSize, "High");
+                bandLowCoeff = filterCoeff(double.Parse(ConfigurationManager.AppSettings.Get("velocityLowPass")), sampFreq / bufferSize, "Low");//2*10^-2
 
                 InitializeComponent(); // Initializes the visual components
                 SetSize(); // Sets up the size of the window and the corresponding location of the components
@@ -216,13 +219,13 @@ namespace BRSReadout
                         }
                     }
                     curTimeStamp = 0;
-                    for (f = 0; f < graphFrames; f++)
+                    for (f = 0; f < bufferSize; f++)
                     {
                         curTimeStamp = curItem.TimeStamp[f];
                         values[f, 0] = curItem.Data[f, 0]; //Diff
                         values[f, 1] = curItem.Data[f, 1]; //Ref
                     }
-                    lowPassedData = lp(values, graphFrames);
+                    lowPassedData = lp(values, bufferSize);
                     dataSend(lowPassedData);
 
                     f = f - 1;
@@ -240,7 +243,7 @@ namespace BRSReadout
                             }
                         }
                         graphSum = graphSum / ((double)newdata.GetLength(0));
-                        graphData outData = new graphData(frame, graphSum);
+                        graphData outData = new graphData(graphingFrame, graphSum);
                         lock (graphLock)
                         {
                             graphQueue.Enqueue(outData);
@@ -257,10 +260,10 @@ namespace BRSReadout
          */
         double[] lp(double[,] data, int frames)
         {
-            double[] output = new double[graphFrames];
+            double[] output = new double[bufferSize];
             double mainSum = 0;
             double refSum = 0;
-            for (int i = 0; i < graphFrames; i++)
+            for (int i = 0; i < bufferSize; i++)
             {
                 xLowPass1[0] = data[i, 0];
 
@@ -283,8 +286,8 @@ namespace BRSReadout
                 mainSum += yLowPass1[0];
                 refSum += yLowPass2[0];
             }
-            output[0] = mainSum / graphFrames;
-            output[1] = refSum / graphFrames;
+            output[0] = mainSum / bufferSize;
+            output[1] = refSum / bufferSize;
             return output;
         }
         // This method takes new data from the camera and inserts it, with proper timing, into the queue to be processed by the consumerd
@@ -299,7 +302,7 @@ namespace BRSReadout
                 return;
             }
             curFrame = currentData.AddData(data, Frameco); // Returns the number of frames in the RawData object
-            if (curFrame == graphFrames)
+            if (curFrame == bufferSize)
             {
                 try
                 {
@@ -318,7 +321,7 @@ namespace BRSReadout
                     EmailError.emailAlert(ex);
                     throw (ex);
                 }
-                currentData = new RawData(graphFrames);
+                currentData = new RawData(bufferSize);
             }
         }
         //Camera initialization
@@ -427,10 +430,10 @@ namespace BRSReadout
                 return;
             }
             
-            timestamps = new long[graphFrames];
-            newdata = new double[graphFrames, 2];
+            timestamps = new long[bufferSize];
+            newdata = new double[bufferSize, 2];
 
-            for (int frameNo = 0; frameNo < graphFrames; frameNo++)
+            for (int frameNo = 0; frameNo < bufferSize; frameNo++)
             {
                 try
                 {
@@ -485,11 +488,11 @@ namespace BRSReadout
                         timestamps[frameNo] = data.TimeStamp(frameNo);
                         newdata[frameNo, 0] = angleLastValue - refLastValue;
                     }
-                    else if (startIndex1 <= splitPixel)
-                    {
-                        timestamps[frameNo] = data.TimeStamp(frameNo);
-                        newdata[frameNo, 0] = angleLastValue - refLastValue;
-                    }
+                    //else if (startIndex1 <= splitPixel)
+                    //{
+                    //    timestamps[frameNo] = data.TimeStamp(frameNo);
+                    //    newdata[frameNo, 0] = angleLastValue - refLastValue;
+                    //}
                     else
                     {
                         if (startIndex1 < 0)
@@ -683,6 +686,15 @@ namespace BRSReadout
                     newdata[frameNo, 0] = angleLastValue;
                     newdata[frameNo, 1] = refLastValue;
                 }
+                if (graphFrameCount>=graphingFrameNumber)
+                {
+                    graphingFrame = frame;
+                    graphFrameCount = 0;
+                }
+                else
+                {
+                    graphFrameCount++;
+                }
             }
 
             quI = new PeakQueueItem(timestamps, newdata);
@@ -747,7 +759,7 @@ namespace BRSReadout
             yBandLowPass[0] = bandLowCoeff[3] * yBandLowPass[1] + bandLowCoeff[4] * yBandLowPass[2] + bandLowCoeff[0] * xBandLowPass[0] + bandLowCoeff[1] * xBandLowPass[1] + bandLowCoeff[2] * xBandLowPass[2];
             xBandHighPass[0] = yBandLowPass[0];
             yBandHighPass[0] = bandHighCoeff[3] * yBandHighPass[1] + bandHighCoeff[4] * yBandHighPass[2] + bandHighCoeff[0] * xBandHighPass[0] + bandHighCoeff[1] * xBandHighPass[1] + bandHighCoeff[2] * xBandHighPass[2];
-            velocity = velGain* Math.Round((double)200 / graphFrames) * (yBandHighPass[0] - yBandHighPass[1]);
+            velocity = velGain* Math.Round((double)200 / bufferSize) * (yBandHighPass[0] - yBandHighPass[1]);
 
            
             if (velocity > 0)
