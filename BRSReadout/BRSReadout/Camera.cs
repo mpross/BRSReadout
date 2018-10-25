@@ -64,13 +64,22 @@ class Camera
         {
             Pylon.Initialize();
             numDevices = Pylon.EnumerateDevices();
-            while (ip != ConfigurationManager.AppSettings.Get("ipAddress"))
+            if (ConfigurationManager.AppSettings.Get("ipAddress").Length > 0)
             {
-                hDev = Pylon.CreateDeviceByIndex(j);
-                prop = Pylon.DeviceGetDeviceInfoHandle(hDev);
-                ip = Pylon.DeviceInfoGetPropertyValueByIndex(prop, 8);
-                j++;
-                if (j > numDevices) { break; }
+                while (ip != ConfigurationManager.AppSettings.Get("ipAddress"))
+                {
+                    hDev = Pylon.CreateDeviceByIndex(j);
+                    prop = Pylon.DeviceGetDeviceInfoHandle(hDev);
+                    ip = Pylon.DeviceInfoGetPropertyValueByIndex(prop, 8);
+                    j++;
+                    if (j > numDevices) { break; }
+                }
+            }
+            else
+            {
+
+                numDevices = Pylon.EnumerateDevices();
+                hDev = Pylon.CreateDeviceByIndex(0);
             }
             try
             {
