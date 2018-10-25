@@ -266,8 +266,8 @@ namespace BRSReadout
                 anglePlot.AxisX[0].Separator.Step = dataPointNum / 10;
                 anglePlot.AxisX[1].Separator.Step = dataPointNum / 100.0;
 
-                double plotMax = Math.Round(angleMax * 1.01);
-                double plotMin = Math.Round(angleMin * 0.99);
+                double plotMax = Math.Round(angleMax) + 1;
+                double plotMin = Math.Round(angleMin) - 1;
                 anglePlot.AxisY[0].MaxValue = plotMax;
                 anglePlot.AxisY[0].MinValue = plotMin;
                 anglePlot.AxisY[1].MaxValue = plotMax;
