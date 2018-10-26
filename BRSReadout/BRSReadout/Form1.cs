@@ -231,14 +231,16 @@ namespace BRSReadout
                     }
                     if (graphWindow!=null && !graphWindow.IsDisposed)
                     {
+                        int sumN = 0;
                         for (int i = 0; i < newdata.GetLength(0); i++)
                         {
                             if (newdata[i, 0] > 0)
                             {
                                 graphSum += newdata[i, 0];
+                                sumN ++;
                             }
                         }
-                        graphSum = graphSum / ((double)newdata.GetLength(0));
+                        graphSum = graphSum / ((double)sumN);
                         graphData outData = new graphData(frame, graphSum);
                         lock (graphLock)
                         {
