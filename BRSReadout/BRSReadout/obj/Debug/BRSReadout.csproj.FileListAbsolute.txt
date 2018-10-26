@@ -35,3 +35,16 @@ C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\obj\Debug\BRSReadout.F
 C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\bin\Debug\TwinCAT.Ads.dll
 C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\bin\Debug\TwinCAT.Ads.xml
 C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\obj\Debug\BRSReadout.csprojAssemblyReference.cache
+C:\Users\controls\Downloads\BRSReadout\BRSReadout\BRSReadout\bin\Debug\BRSReadout.exe.config
+C:\Users\controls\Downloads\BRSReadout\BRSReadout\BRSReadout\obj\Debug\BRSReadout.exe
+C:\Users\controls\Downloads\BRSReadout\BRSReadout\BRSReadout\obj\Debug\BRSReadout.pdb
+C:\Users\controls\Downloads\BRSReadout\BRSReadout\BRSReadout\bin\Debug\BRSReadout.exe
+C:\Users\controls\Downloads\BRSReadout\BRSReadout\BRSReadout\bin\Debug\BRSReadout.pdb
+C:\Users\controls\Downloads\BRSReadout\BRSReadout\BRSReadout\bin\Debug\PylonC.NET.dll
+C:\Users\controls\Downloads\BRSReadout\BRSReadout\BRSReadout\bin\Debug\TwinCAT.Ads.dll
+C:\Users\controls\Downloads\BRSReadout\BRSReadout\BRSReadout\bin\Debug\PylonC.NET.xml
+C:\Users\controls\Downloads\BRSReadout\BRSReadout\BRSReadout\bin\Debug\TwinCAT.Ads.xml
+C:\Users\controls\Downloads\BRSReadout\BRSReadout\BRSReadout\obj\Debug\BRSReadout.Form1.resources
+C:\Users\controls\Downloads\BRSReadout\BRSReadout\BRSReadout\obj\Debug\BRSReadout.Form2.resources
+C:\Users\controls\Downloads\BRSReadout\BRSReadout\BRSReadout\obj\Debug\BRSReadout.Properties.Resources.resources
+C:\Users\controls\Downloads\BRSReadout\BRSReadout\BRSReadout\obj\Debug\BRSReadout.csproj.GenerateResource.Cache

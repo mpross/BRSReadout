@@ -14,9 +14,9 @@
             Creates a new callback handler for node callbacks.
             </summary>
         </member>
-        <member name="T:PylonC.NET.NodeCallbackHandler.NodeCallback">
+        <member name="M:PylonC.NET.NodeCallbackHandler.OnCallbackEvent(PylonC.NET.NODE_HANDLE)">
             <summary>
-            Prototype of a callback handling method
+            Notifies registered classes in case of a callback.
             </summary>
             <param name="hNode">Handle of the node causing the callback.</param>
         </member>
@@ -25,9 +25,9 @@
             Can be used to register for the callback event.
             </summary>
         </member>
-        <member name="M:PylonC.NET.NodeCallbackHandler.OnCallbackEvent(PylonC.NET.NODE_HANDLE)">
+        <member name="T:PylonC.NET.NodeCallbackHandler.NodeCallback">
             <summary>
-            Notifies registered classes in case of a callback.
+            Prototype of a callback handling method
             </summary>
             <param name="hNode">Handle of the node causing the callback.</param>
         </member>
@@ -41,9 +41,9 @@
             Creates a new callback handler for device removal callbacks.
             </summary>
         </member>
-        <member name="T:PylonC.NET.DeviceCallbackHandler.DeviceCallback">
+        <member name="M:PylonC.NET.DeviceCallbackHandler.OnCallbackEvent(PylonC.NET.PYLON_DEVICE_HANDLE)">
             <summary>
-            Prototype of a callback handling method
+            Notifies registered classes in case of a callback.
             </summary>
             <param name="hDev">Handle of the device causing the callback.</param>
         </member>
@@ -52,15 +52,71 @@
             Can be used to register for the callback event.
             </summary>
         </member>
-        <member name="M:PylonC.NET.DeviceCallbackHandler.OnCallbackEvent(PylonC.NET.PYLON_DEVICE_HANDLE)">
+        <member name="T:PylonC.NET.DeviceCallbackHandler.DeviceCallback">
             <summary>
-            Notifies registered classes in case of a callback.
+            Prototype of a callback handling method
             </summary>
             <param name="hDev">Handle of the device causing the callback.</param>
         </member>
         <member name="T:PylonC.NET.NODEMAP_HANDLE">
             <summary>
             A handle for a node map object.
+            </summary>
+        </member>
+        <member name="T:PylonC.NET.HandleBase">
+            <summary>
+            Provides the basic functionality of a handle.
+            </summary>
+        </member>
+        <member name="M:PylonC.NET.HandleBase.Equals(System.Object)">
+            <summary>
+            Overloaded. Determines whether two handles are equal.
+            </summary>
+            <param name="rhs">Determines whether the specified handle is equal to the current handle.</param>
+            <returns>True if equal.</returns>
+        </member>
+        <member name="M:PylonC.NET.HandleBase.op_Equality(PylonC.NET.HandleBase,PylonC.NET.HandleBase)">
+            <summary>
+            Determines whether two handles are equal.
+            </summary>
+            <param name="lhs">Handle A.</param>
+            <param name="rhs">Handle B.</param>
+            <returns>True if equal.</returns>
+        </member>
+        <member name="M:PylonC.NET.HandleBase.op_Inequality(PylonC.NET.HandleBase,PylonC.NET.HandleBase)">
+            <summary>
+            Determines whether two handles are not equal.
+            </summary>
+            <param name="lhs">Handle A.</param>
+            <param name="rhs">Handle B.</param>
+            <returns>True if not equal.</returns>
+        </member>
+        <member name="M:PylonC.NET.HandleBase.GetHashCode">
+            <summary>
+            Serves as a hash function for a particular type. GetHashCode is suitable for use in hashing algorithms and data structures like a hash table.
+            </summary>
+            <returns>Hash value</returns>
+        </member>
+        <member name="M:PylonC.NET.HandleBase.ToInt">
+            <summary>
+            Returns a unique integer value for the scope of object.
+            </summary>
+            <returns>Unique integer value for the scope of object</returns>
+        </member>
+        <member name="M:PylonC.NET.HandleBase.SetInvalid">
+            <summary>
+            Sets the handle invalid.
+            </summary>
+        </member>
+        <member name="M:PylonC.NET.HandleBase.FromInt(System.Int64)">
+            <summary>
+            Reserved, do not use
+            </summary>
+            <param name="handleAsInt">Reserved, do not use</param>
+        </member>
+        <member name="P:PylonC.NET.HandleBase.IsValid">
+            <summary>
+            Returns true if the handle is valid.
             </summary>
         </member>
         <member name="T:PylonC.NET.NODE_CALLBACK_HANDLE">
@@ -1241,62 +1297,6 @@
             
             Install a callback function, to be called whenever any of the node's attributes changes. This also includes the access mode of the node.
         </member>
-        <member name="T:PylonC.NET.HandleBase">
-            <summary>
-            Provides the basic functionality of a handle.
-            </summary>
-        </member>
-        <member name="P:PylonC.NET.HandleBase.IsValid">
-            <summary>
-            Returns true if the handle is valid.
-            </summary>
-        </member>
-        <member name="M:PylonC.NET.HandleBase.Equals(System.Object)">
-            <summary>
-            Overloaded. Determines whether two handles are equal.
-            </summary>
-            <param name="rhs">Determines whether the specified handle is equal to the current handle.</param>
-            <returns>True if equal.</returns>
-        </member>
-        <member name="M:PylonC.NET.HandleBase.op_Equality(PylonC.NET.HandleBase,PylonC.NET.HandleBase)">
-            <summary>
-            Determines whether two handles are equal.
-            </summary>
-            <param name="lhs">Handle A.</param>
-            <param name="rhs">Handle B.</param>
-            <returns>True if equal.</returns>
-        </member>
-        <member name="M:PylonC.NET.HandleBase.op_Inequality(PylonC.NET.HandleBase,PylonC.NET.HandleBase)">
-            <summary>
-            Determines whether two handles are not equal.
-            </summary>
-            <param name="lhs">Handle A.</param>
-            <param name="rhs">Handle B.</param>
-            <returns>True if not equal.</returns>
-        </member>
-        <member name="M:PylonC.NET.HandleBase.GetHashCode">
-            <summary>
-            Serves as a hash function for a particular type. GetHashCode is suitable for use in hashing algorithms and data structures like a hash table.
-            </summary>
-            <returns>Hash value</returns>
-        </member>
-        <member name="M:PylonC.NET.HandleBase.ToInt">
-            <summary>
-            Returns a unique integer value for the scope of object.
-            </summary>
-            <returns>Unique integer value for the scope of object</returns>
-        </member>
-        <member name="M:PylonC.NET.HandleBase.SetInvalid">
-            <summary>
-            Sets the handle invalid.
-            </summary>
-        </member>
-        <member name="M:PylonC.NET.HandleBase.FromInt(System.Int64)">
-            <summary>
-            Reserved, do not use
-            </summary>
-            <param name="handleAsInt">Reserved, do not use</param>
-        </member>
         <member name="T:PylonC.NET.PylonBuffer`1">
             <summary>
             The PylonBuffer support class eases the creation, the life time handling, and the pinning of a
@@ -1305,21 +1305,6 @@
             must not go out of scope while it is still registered.
             </summary>
             <typeparam name="T">Array element type SByte, Byte, Int16, UInt16, Int32, or UInt32</typeparam>
-        </member>
-        <member name="P:PylonC.NET.PylonBuffer`1.Array">
-            <summary>
-            Returns associated the array.
-            </summary>
-        </member>
-        <member name="P:PylonC.NET.PylonBuffer`1.Pointer">
-            <summary>
-            Returns the pointer to the array.
-            </summary>
-        </member>
-        <member name="P:PylonC.NET.PylonBuffer`1.SizeByte">
-            <summary>
-            Returns the size of the array in bytes.
-            </summary>
         </member>
         <member name="M:PylonC.NET.PylonBuffer`1.#ctor(System.UInt32,System.Boolean)">
             <summary>
@@ -1343,6 +1328,21 @@
         <member name="M:PylonC.NET.PylonBuffer`1.Dispose">
             <summary>
             Unpins and releases the array.
+            </summary>
+        </member>
+        <member name="P:PylonC.NET.PylonBuffer`1.Array">
+            <summary>
+            Returns associated the array.
+            </summary>
+        </member>
+        <member name="P:PylonC.NET.PylonBuffer`1.Pointer">
+            <summary>
+            Returns the pointer to the array.
+            </summary>
+        </member>
+        <member name="P:PylonC.NET.PylonBuffer`1.SizeByte">
+            <summary>
+            Returns the size of the array in bytes.
             </summary>
         </member>
         <member name="T:PylonC.NET.PylonGrabResult_t">

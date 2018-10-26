@@ -146,8 +146,7 @@ namespace BRSReadout
                 //Initialization of TwinCAT connection. 851 is the port for PLC runtime 1
 
                 if (twinCatBool)
-                {
-                    tcAds.Dispose();
+                {                    
                     tcAds.Connect(851);
                 }
 
@@ -487,6 +486,7 @@ namespace BRSReadout
                     {
                         timestamps[frameNo] = data.TimeStamp(frameNo);
                         newdata[frameNo, 0] = angleLastValue;
+                        newdata[frameNo, 1] = refLastValue;
                     }
                     else
                     {
@@ -675,14 +675,14 @@ namespace BRSReadout
                     }
                 }
                 catch (System.Threading.ThreadAbortException) { }
-                //catch (Exception ex)
-                //{
-                //    EmailError.emailAlert(ex);
-                //    timestamps[frameNo] = data.TimeStamp(frameNo);
-                //    newdata[frameNo, 0] = angleLastValue;
-                //    newdata[frameNo, 1] = refLastValue;
-                //    throw ex;
-                //}
+                catch (Exception ex)
+                {
+                    EmailError.emailAlert(ex);
+                    timestamps[frameNo] = data.TimeStamp(frameNo);
+                    newdata[frameNo, 0] = angleLastValue;
+                    newdata[frameNo, 1] = refLastValue;
+                    throw ex;
+                }
             }
 
             quI = new PeakQueueItem(timestamps, newdata);
