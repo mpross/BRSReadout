@@ -18,6 +18,9 @@ We use the LiveCharts package to render all of the plots. Information and source
 
 * **Michael Ross**
 (https://github.com/mpross)
+* **Krishna Venkateswara**
+* **Charlie Hagedorn**
+(https://github.com/4kbt)
 * **Trevor Arp**
 * **Stephan Schlamminger**
 * **Jenna Walrath**
