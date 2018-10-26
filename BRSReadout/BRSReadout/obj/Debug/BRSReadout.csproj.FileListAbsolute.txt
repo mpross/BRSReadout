@@ -48,3 +48,4 @@ C:\Users\controls\Downloads\BRSReadout\BRSReadout\BRSReadout\obj\Debug\BRSReadou
 C:\Users\controls\Downloads\BRSReadout\BRSReadout\BRSReadout\obj\Debug\BRSReadout.Form2.resources
 C:\Users\controls\Downloads\BRSReadout\BRSReadout\BRSReadout\obj\Debug\BRSReadout.Properties.Resources.resources
 C:\Users\controls\Downloads\BRSReadout\BRSReadout\BRSReadout\obj\Debug\BRSReadout.csproj.GenerateResource.Cache
+C:\Users\controls\Downloads\BRSReadout\BRSReadout\BRSReadout\obj\Debug\BRSReadout.csprojResolveAssemblyReference.cache

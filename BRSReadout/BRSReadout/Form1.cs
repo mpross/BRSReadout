@@ -170,7 +170,7 @@ namespace BRSReadout
                 Thread.Sleep(10);
 
                 cameraThread = new Thread(initCamera);
-                cameraThread.Priority = ThreadPriority.AboveNormal;
+                cameraThread.Priority = ThreadPriority.Highest;
                 cameraThread.Start();
                 curDirec = System.IO.Path.GetDirectoryName(Application.ExecutablePath);
                 System.Diagnostics.Process.Start(curDirec + "\\AffinitySet.bat");
@@ -735,7 +735,6 @@ namespace BRSReadout
             {
                 drift = driftGain * (angle - driftOffset);
             }
-            Debug.WriteLine(drift);
             //Drift rail logic
             if (Math.Abs(drift) >= 32760)
             {
@@ -941,7 +940,7 @@ namespace BRSReadout
                 graphThread.Start();
                 graphWindow.Show();
                 plotTimer.Tick+= new EventHandler(plotTime_Tick);
-                plotTimer.Interval = 1;
+                plotTimer.Interval = 5;
                 plotTimer.Enabled = true;
             }
             else

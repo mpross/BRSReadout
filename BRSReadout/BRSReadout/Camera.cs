@@ -96,7 +96,7 @@ class Camera
             Pylon.DeviceFeatureFromString(hDev, "PixelFormat", "Mono12");
             Pylon.DeviceFeatureFromString(hDev, "AcquisitionMode", "Continuous");
             Pylon.DeviceSetIntegerFeature(hDev, "Height", 1);
-            Pylon.DeviceSetFloatFeature(hDev, "ExposureTimeAbs", double.Parse(ConfigurationManager.AppSettings.Get("cameraExposureTime"))); //Exposure time is in microseconds and rounded to the closest 100 ns.
+            Pylon.DeviceSetFloatFeature(hDev, "ExposureTimeAbs", exp); //Exposure time is in microseconds and rounded to the closest 100 ns.
             isAvail = Pylon.DeviceFeatureIsWritable(hDev, "GevSCPSPacketSize");
             if (isAvail)
             {
