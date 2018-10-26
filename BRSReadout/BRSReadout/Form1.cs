@@ -50,8 +50,6 @@ namespace BRSReadout
         public volatile int Frameco = 0;        
         ushort[] refFrame = new ushort[camWidth];
         public static ushort[] frame = new ushort[camWidth];
-        public static ushort[] graphingFrame = new ushort[camWidth];
-        int graphFrameCount = 0;
 
         volatile bool dataWritingThreadBool;
         Thread dataWritingThread;
@@ -82,7 +80,6 @@ namespace BRSReadout
         static int pixelMargin = int.Parse(ConfigurationManager.AppSettings.Get("pixelMargin"));
         int patternLength = int.Parse(ConfigurationManager.AppSettings.Get("patternLength")); //Length of patterns
 
-        static int graphingFrameNumber = int.Parse(ConfigurationManager.AppSettings.Get("graphingFrameNumber")); //Amount of frames collected before fitting and downsampling 
         static int bufferSize = int.Parse(ConfigurationManager.AppSettings.Get("bufferSize"));
         public static double[,] newdata = new double[bufferSize, 2];
 
@@ -243,7 +240,7 @@ namespace BRSReadout
                             }
                         }
                         graphSum = graphSum / ((double)newdata.GetLength(0));
-                        graphData outData = new graphData(graphingFrame, graphSum);
+                        graphData outData = new graphData(frame, graphSum);
                         lock (graphLock)
                         {
                             graphQueue.Enqueue(outData);
@@ -686,15 +683,6 @@ namespace BRSReadout
                     newdata[frameNo, 0] = angleLastValue;
                     newdata[frameNo, 1] = refLastValue;
                 }
-                if (graphFrameCount>=graphingFrameNumber)
-                {
-                    graphingFrame = frame;
-                    graphFrameCount = 0;
-                }
-                else
-                {
-                    graphFrameCount++;
-                }
             }
 
             quI = new PeakQueueItem(timestamps, newdata);
@@ -949,6 +937,7 @@ namespace BRSReadout
                 graphThread.Start();
                 graphWindow.Show();
                 plotTimer.Tick+= new EventHandler(plotTime_Tick);
+                plotTimer.Interval = 1;
                 plotTimer.Enabled = true;
             }
             else

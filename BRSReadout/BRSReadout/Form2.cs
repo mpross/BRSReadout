@@ -21,6 +21,11 @@ namespace BRSReadout
         public double angleMin=Math.Pow(10,100);
         double numberPoints = double.Parse(ConfigurationManager.AppSettings.Get("numberOfGraphPoints"));
         public static int camWidth = int.Parse(ConfigurationManager.AppSettings.Get("cameraWidth"));
+        public static double bitDepth = double.Parse(ConfigurationManager.AppSettings.Get("cameraBitDepth"));
+        static int graphingFrameNumber = int.Parse(ConfigurationManager.AppSettings.Get("graphingFrameNumber"));
+        public int graphingFrameCount=0;
+
+        public Form1.graphData inData = new Form1.graphData();
 
         public void stopLoop()
         {
@@ -31,7 +36,6 @@ namespace BRSReadout
             while (true)
             {
                 graphSignal.WaitOne();
-                Form1.graphData inData = new Form1.graphData();
                 do
                 {
                     inData.frame = null;
@@ -43,7 +47,15 @@ namespace BRSReadout
                         }
                         if (inData.frame != null)
                         {
-                            updatePlot(inData.frame, inData.angle);
+                            if (graphingFrameCount >= graphingFrameNumber)
+                            {
+                                updatePlot(inData.frame, inData.angle);
+                                graphingFrameCount = 0;
+                            }
+                            else
+                            {
+                                graphingFrameCount++;
+                            }
                         }
                     }
                 }
@@ -93,7 +105,7 @@ namespace BRSReadout
                 {
                     StrokeThickness = 0.5,
                     Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0, 0, 0)),
-                    Step = Math.Pow(2, double.Parse(ConfigurationManager.AppSettings.Get("cameraBitDepth"))) / 8.0
+                    Step = Math.Pow(2, bitDepth) / 8.0
                 }
             });
             imagePlot.AxisX.Add(
@@ -106,7 +118,7 @@ namespace BRSReadout
                 {
                     StrokeThickness = 0.5,
                     Stroke = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(220, 220, 220)),
-                    Step = Math.Pow(2, double.Parse(ConfigurationManager.AppSettings.Get("cameraBitDepth"))) / 64.0
+                    Step = Math.Pow(2, bitDepth) / 64.0
                 }
             });
 
@@ -117,7 +129,7 @@ namespace BRSReadout
                 FontSize = 16,
                 Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0, 0, 0)),
                 MinValue = 0,
-                MaxValue = Math.Pow(2, double.Parse(ConfigurationManager.AppSettings.Get("cameraBitDepth"))),
+                MaxValue = Math.Pow(2, bitDepth),
                 Separator = new Separator
                 {
                     StrokeThickness=0.5,
@@ -242,10 +254,10 @@ namespace BRSReadout
                 anglePlot.Series[0].Values.Add(data);
                 dataPointNum++;
             }
-
             imagePlot.Series[0].Values.Clear();
             var inFrame = Array.ConvertAll(rawFrame, item => (int)item);
             imagePlot.Series[0].Values.AddRange(ToEnumerable<object>(inFrame));
+
             if (data > angleMax)
             {
                 angleMax = data;
