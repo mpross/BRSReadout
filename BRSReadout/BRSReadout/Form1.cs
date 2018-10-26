@@ -29,8 +29,8 @@ namespace BRSReadout
         public double refZeroValue = 0;
         public double refValue = 0;
 
-        double refLastValue;
-        double angleLastValue;
+        public double refLastValue;
+        public double angleLastValue;
 
         Camera myCamera;
         DataConsumerDelegate[] consumerd;
@@ -38,8 +38,8 @@ namespace BRSReadout
         Stopwatch myStopwatch;
         DataWriting myDataWriter;
 
-        int startIndex2 = 1800; //Beginning of right pattern
-        int startIndex2Ref = 0; //Beginning of right pattern
+        int startIndexRightRef = 1800; //Beginning of right pattern
+        int startIndexLeftRef = 0; //Beginning of right pattern
 
         bool dampOverride = false;
         volatile bool quittingBool = false;
@@ -405,8 +405,8 @@ namespace BRSReadout
             int halflength = (int)Math.Floor(fitLength / 2) + 1;  // increased by 1 pixel to allow two fits
             int length = patternLength; //Length of patterns
             double[] crossCor = new double[(int)fitLength + 2];   // increased by 2 pixels to allow two fits
-            int startIndex1 = 1600; //Beginning of left pattern
-            int startIndex1Ref = 60; //Beginning of left pattern
+            int startIndexRight = 0; //Beginning of left pattern
+            int startIndexLeft = 0; //Beginning of left pattern
             int pixshift = 1;  // Direction of shift required to estimate slope of fit correction
 
 
@@ -443,7 +443,7 @@ namespace BRSReadout
                         {
                             if (frame[j] > threshold)
                             {
-                                startIndex2 = j - pixelMargin;
+                                startIndexRightRef = j - pixelMargin;
                                 break;
                             }
                         }
@@ -451,7 +451,7 @@ namespace BRSReadout
                         {
                             if (frame[j] > threshold)
                             {
-                                startIndex2Ref = j - pixelMargin;
+                                startIndexLeftRef = j - pixelMargin;
                                 break;
                             }
                         }
@@ -470,34 +470,32 @@ namespace BRSReadout
                     //Finds beginning of pattern using a threshold
                     if (frameNo == 0)
                     {
-                        for (int j = splitPixel; j <= frame.Length; j++)
+                        for (int j = splitPixel; j < frame.Length; j++)
                         {
                             if (frame[j] > threshold)
                             {
-                                startIndex1 = j - pixelMargin;
+                                startIndexRight = j - pixelMargin;
                                 break;
                             }
-
+                            if (j == frame.Length-1)
+                            {
+                                startIndexRight = 0;
+                            }
                         }
                     }
-                    if (startIndex1 >= frame.Length)
+                    if (startIndexRight >= frame.Length - 10 || startIndexRight <= splitPixel)
                     {
                         timestamps[frameNo] = data.TimeStamp(frameNo);
-                        newdata[frameNo, 0] = angleLastValue - refLastValue;
+                        newdata[frameNo, 0] = angleLastValue;
                     }
-                    //else if (startIndex1 <= splitPixel)
-                    //{
-                    //    timestamps[frameNo] = data.TimeStamp(frameNo);
-                    //    newdata[frameNo, 0] = angleLastValue - refLastValue;
-                    //}
                     else
                     {
-                        if (startIndex1 < 0)
+                        if (startIndexRight < 0)
                         {
-                            startIndex1 = 0;
+                            startIndexRight = 0;
                         }
                         //Cuts length of pattern down if the pattern extends beyond the frame
-                        while (length + startIndex1 + halflength + 1 >= frame.Length)
+                        while (length + startIndexRight + halflength + 1 >= frame.Length)
                         {
                             length = (int)Math.Round(length / 1.1);
                         }
@@ -507,9 +505,12 @@ namespace BRSReadout
                             sum = 0;
                             for (int m = 0; m < length; m++)
                             {
-                                if ((m + startIndex1 + k) > 0 && (m + startIndex2) > 0)
+                                if ((m + startIndexRight + k) > 0 && (m + startIndexRightRef) > 0)
                                 {
-                                    sum += frame[m + startIndex1 + k] * refFrame[m + startIndex2];
+                                    if ((m + startIndexRight + k) < frame.Length && (m + startIndexRightRef) < refFrame.Length)
+                                    {
+                                        sum += frame[m + startIndexRight + k] * refFrame[m + startIndexRightRef];
+                                    }
                                 }
                             }
                             if (sum == 0)
@@ -574,24 +575,23 @@ namespace BRSReadout
 
                         mu = (halflength - 1) - (mu1 - (halflength - 1)) * pixshift / (mu2 - mu1);
 
-                        newdata[frameNo, 0] = mu + startIndex1;
+                        newdata[frameNo, 0] = mu + startIndexRight;
                         timestamps[frameNo] = data.TimeStamp(frameNo);
 
-                        angleLastValue = mu + startIndex1;
+                        angleLastValue = mu + startIndexRight;
 
-                    
 
-                        ////////////////////////////Reference Pattern/////////////////////
+
                         y = 0;
                         xy = 0;
                         xxy = 0;
                         //Finds beginning of pattern using a threshold
-                        
+
                         for (int j = 0; j < frame.Length; j++)
                         {
                             if (frame[j] > threshold)
                             {
-                                startIndex1Ref = j - pixelMargin;
+                                startIndexLeft = j - pixelMargin;
                                 lightSourceStatus = 1;
                                 break;
                             }
@@ -601,9 +601,9 @@ namespace BRSReadout
                                 lightSourceStatus = 0;
                             }
                         }
-                        if (startIndex1Ref < halflength)
+                        if (startIndexLeft < halflength)
                         {
-                            startIndex1Ref = 0;
+                            startIndexLeft = 0;
                         }
 
                         //Calcualtes the crosscorrelation between the two patterns at shifts 
@@ -612,9 +612,9 @@ namespace BRSReadout
                             sum = 0;
                             for (int m = 0; m < length; m++)
                             {
-                                if ((m + startIndex1Ref + k) > 0 && (m + startIndex2Ref) > 0)
+                                if ((m + startIndexLeft + k) > 0 && (m + startIndexLeftRef) > 0)
                                 {
-                                    sum += frame[m + startIndex1Ref + k] * refFrame[m + startIndex2Ref];
+                                    sum += frame[m + startIndexLeft + k] * refFrame[m + startIndexLeftRef];
                                 }
                             }
                             crossCor[k + halflength] = sum;
@@ -668,26 +668,30 @@ namespace BRSReadout
 
                         mu = (halflength - 1) - (mu1 - (halflength - 1)) * pixshift / (mu2 - mu1);
 
-                        newdata[frameNo, 1] = mu + startIndex1Ref;
-                        refValue = mu + startIndex1Ref;
+                        newdata[frameNo, 1] = mu + startIndexLeft;
+                        refValue = mu + startIndexLeft;
                         newdata[frameNo, 0] = newdata[frameNo, 0] - refValue;
-
                         refLastValue = refValue;
                     }
                 }
                 catch (System.Threading.ThreadAbortException) { }
-                catch (Exception ex)
-                {
-                    EmailError.emailAlert(ex);
-                    timestamps[frameNo] = data.TimeStamp(frameNo);
-                    newdata[frameNo, 0] = angleLastValue;
-                    newdata[frameNo, 1] = refLastValue;
-                }
+                //catch (Exception ex)
+                //{
+                //    EmailError.emailAlert(ex);
+                //    timestamps[frameNo] = data.TimeStamp(frameNo);
+                //    newdata[frameNo, 0] = angleLastValue;
+                //    newdata[frameNo, 1] = refLastValue;
+                //    throw ex;
+                //}
             }
 
             quI = new PeakQueueItem(timestamps, newdata);
             lock (((ICollection)dataWritingQueue).SyncRoot)
             {
+                while (dataWritingQueue.Count>10)
+                {
+                    dataWritingQueue.Dequeue();
+                }
                 dataWritingQueue.Enqueue(quI);
                 ql = dataWritingQueue.Count;
             }
