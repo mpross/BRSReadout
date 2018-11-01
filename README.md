@@ -21,9 +21,12 @@ We use the LiveCharts package to render all of the plots. Information and source
 * **Krishna Venkateswara**
 * **Charlie Hagedorn**
 (https://github.com/4kbt)
+* **Erik Shaw**
 * **Trevor Arp**
 * **Stephan Schlamminger**
 * **Jenna Walrath**
+
+This software had been developed significantly before being moved to this repository so some of the authors listed are not represented in the git history.
 
 ## License
 
