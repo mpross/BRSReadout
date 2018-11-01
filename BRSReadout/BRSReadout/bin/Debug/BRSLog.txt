@@ -20,3 +20,33 @@ Log Entry : 12:32:26 PM Friday, October 26, 2018
  Target: Void PylonCreateDeviceByIndex(IntPtr, IntPtr ByRef)
  
 -------------------------------
+
+Log Entry : 1:25:23 PM Monday, October 29, 2018
+  :
+  :Message: Could not load file or assembly 'PylonC.NET, Version=4.1.0.0, Culture=neutral, PublicKeyToken=a77e8471c5919d5a' or one of its dependencies. The located assembly's manifest definition does not match the assembly reference. (Exception from HRESULT: 0x80131040)
+ Source: BRSReadout
+ Stack Trace:    at Camera..ctor()
+   at BRSReadout.Form1.initCamera() in C:\Users\controls\Downloads\BRSReadout\BRSReadout\BRSReadout\Form1.cs:line 330
+ Target: Void .ctor()
+ 
+-------------------------------
+
+Log Entry : 1:25:52 PM Monday, October 29, 2018
+  :
+  :Message: Could not load file or assembly 'PylonC.NET, Version=4.1.0.0, Culture=neutral, PublicKeyToken=a77e8471c5919d5a' or one of its dependencies. The located assembly's manifest definition does not match the assembly reference. (Exception from HRESULT: 0x80131040)
+ Source: BRSReadout
+ Stack Trace:    at Camera..ctor()
+   at BRSReadout.Form1.initCamera() in C:\Users\controls\Downloads\BRSReadout\BRSReadout\BRSReadout\Form1.cs:line 330
+ Target: Void .ctor()
+ 
+-------------------------------
+
+Log Entry : 1:26:25 PM Monday, October 29, 2018
+  :
+  :Message: Could not load file or assembly 'PylonC.NET, Version=4.1.0.0, Culture=neutral, PublicKeyToken=a77e8471c5919d5a' or one of its dependencies. The located assembly's manifest definition does not match the assembly reference. (Exception from HRESULT: 0x80131040)
+ Source: BRSReadout
+ Stack Trace:    at Camera..ctor()
+   at BRSReadout.Form1.initCamera() in C:\Users\controls\Downloads\BRSReadout\BRSReadout\BRSReadout\Form1.cs:line 330
+ Target: Void .ctor()
+ 
+-------------------------------

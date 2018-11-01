@@ -41,7 +41,7 @@ namespace BRSReadout
                     inData.frame = null;
                     lock (graphLock)
                     {
-                        if (graphQueue.Count > 0)
+                        if (graphQueue.Count > 10)
                         {
                             inData = graphQueue.Dequeue();
                         }
