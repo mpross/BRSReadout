@@ -45,7 +45,7 @@ namespace BRSReadout
         volatile bool quittingBool = false;
         public volatile bool recordBool = false;
 
-        double sampFreq = Math.Pow(10, 6) / double.Parse(ConfigurationManager.AppSettings.Get("cameraExposureTime"));
+        double sampFreq = Math.Pow(10, 6) / double.Parse(ConfigurationManager.AppSettings.Get("cameraExposureTime"))/ double.Parse(ConfigurationManager.AppSettings.Get("frameAverageNum"));
 
         public volatile int Frameco = 0;        
         ushort[] refFrame = new ushort[camWidth];
@@ -328,14 +328,7 @@ namespace BRSReadout
             try
             {
                 myCamera = new Camera();
-                if (cameraType == "mightex")
-                {
-                    myCamera.cameraInit(cameraType);
-                }
-                else
-                {
-                    myCamera.cameraInit(cameraType);
-                }
+                myCamera.cameraInit(cameraType);
                 Camera.dataDelegate dd = new Camera.dataDelegate(onNewData);
                 myCamera.startFrameGrab(0x8888, 0, dd, cameraType);
                 cameraStatus = 1;
@@ -402,7 +395,7 @@ namespace BRSReadout
             PeakQueueItem quI;
             int ql;
             long[] timestamps;
-            double fitLength = 15; //Amount of pixels to be used in fit of correlation  - changed on 11/08/2017 by Krishna
+            double fitLength = 15; //Amount of pixels to be used in fit of correlation 
             int halflength = (int)Math.Floor(fitLength / 2) + 1;  // increased by 1 pixel to allow two fits
             int length = patternLength; //Length of patterns
             double[] crossCor = new double[(int)fitLength + 2];   // increased by 2 pixels to allow two fits
@@ -484,7 +477,8 @@ namespace BRSReadout
                             }
                         }
                     }
-                    if (startIndexRight >= frame.Length - 10 || startIndexRight <= splitPixel)
+                    //if (startIndexRight >= frame.Length - 10 || startIndexRight <= splitPixel)
+                    if(startIndexRight < 0)
                     {
                         timestamps[frameNo] = data.TimeStamp(frameNo);
                         newdata[frameNo, 0] = angleLastValue;
