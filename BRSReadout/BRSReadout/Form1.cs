@@ -486,10 +486,6 @@ namespace BRSReadout
                     }
                     else
                     {
-                        if (startIndexRight < 0)
-                        {
-                            startIndexRight = 0;
-                        }
                         //Cuts length of pattern down if the pattern extends beyond the frame
                         while (length + startIndexRight + halflength + 1 >= frame.Length)
                         {
@@ -582,24 +578,26 @@ namespace BRSReadout
                         xy = 0;
                         xxy = 0;
                         //Finds beginning of pattern using a threshold
-
-                        for (int j = 0; j < frame.Length; j++)
+                        if (frameNo == 0)
                         {
-                            if (frame[j] > threshold)
+                            for (int j = 0; j < frame.Length; j++)
                             {
-                                startIndexLeft = j - pixelMargin;
-                                lightSourceStatus = 1;
-                                break;
-                            }
+                                if (frame[j] > threshold)
+                                {
+                                    startIndexLeft = j - pixelMargin;
+                                    lightSourceStatus = 1;
+                                    break;
+                                }
 
-                            if (j == frame.Length - 1)
-                            {
-                                lightSourceStatus = 0;
+                                if (j == frame.Length - 1)
+                                {
+                                    lightSourceStatus = 0;
+                                }
                             }
-                        }
-                        if (startIndexLeft < halflength)
-                        {
-                            startIndexLeft = 0;
+                            if (startIndexLeft < 0)
+                            {
+                                startIndexLeft = 0;
+                            }
                         }
 
                         //Calcualtes the crosscorrelation between the two patterns at shifts 
