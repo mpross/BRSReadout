@@ -1,4 +1,6 @@
-﻿namespace BRSReadout
+﻿using System.Configuration;
+
+namespace BRSReadout
 {
     partial class Form1
     {
@@ -34,6 +36,7 @@
 
         private void InitializeComponent()
         {
+            string location = ConfigurationManager.AppSettings.Get("location");
             this.components = new System.ComponentModel.Container();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.buRecord = new System.Windows.Forms.Button();
@@ -235,7 +238,7 @@
             this.Controls.Add(this.textBox1);
             this.MinimumSize = new System.Drawing.Size(550, 150); // Original 550, 350
             this.Name = "Form1";
-            this.Text = "BRS Readout";
+            this.Text = "BRS " + location;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Resize += new System.EventHandler(this.Form1_Resize);
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
