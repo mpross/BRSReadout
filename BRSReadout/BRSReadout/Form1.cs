@@ -462,23 +462,20 @@ namespace BRSReadout
                         }
                     }
                     //Finds beginning of pattern using a threshold
-                    if (frameNo == 0)
+                    
+                    for (int j = splitPixel; j < frame.Length; j++)
                     {
-                        for (int j = splitPixel; j < frame.Length; j++)
+                        if (frame[j] > threshold)
                         {
-                            if (frame[j] > threshold)
-                            {
-                                startIndexRight = j - pixelMargin;
-                                break;
-                            }
-                            if (j == frame.Length-1)
-                            {
-                                startIndexRight = 0;
-                            }
+                            startIndexRight = j - pixelMargin;
+                            break;
+                        }
+                        if (j == frame.Length-1)
+                        {
+                            startIndexRight = 0;
                         }
                     }
-                    //if (startIndexRight >= frame.Length - 10 || startIndexRight <= splitPixel)
-                    if(startIndexRight < 0)
+                    if (startIndexRight >= frame.Length+splitPixel || startIndexRight <= splitPixel)                    
                     {
                         timestamps[frameNo] = data.TimeStamp(frameNo);
                         newdata[frameNo, 0] = angleLastValue;

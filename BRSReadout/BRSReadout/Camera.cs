@@ -28,6 +28,7 @@ class Camera
     public static int camWidth = int.Parse(ConfigurationManager.AppSettings.Get("cameraWidth"));
     public ushort[] data = new ushort[camWidth];
     public ushort[] sum = new ushort[camWidth];
+    bool frameReverse =bool.Parse(ConfigurationManager.AppSettings.Get("frameReverse"));
 
     // Basler Camera stuff
     PYLON_DEVICE_HANDLE hDev = new PYLON_DEVICE_HANDLE();
@@ -168,6 +169,10 @@ class Camera
                     bufferIndex = (int)grabResult.Context;
                     while (buffers.TryGetValue(grabResult.hBuffer, out buffer) != true) ;
                     Buffer.BlockCopy(buffer.Array, 0, data, 0, buffer.Array.Length);
+                    if (frameReverse)
+                    {
+                        Array.Reverse(data);
+                    }
                     frameAveraging(data);
                     Pylon.StreamGrabberQueueBuffer(hGrabber, grabResult.hBuffer, bufferIndex);
                 }

@@ -46,15 +46,19 @@ namespace BRSReadout
                 smtp.Credentials = new System.Net.NetworkCredential(user, pass);
                 smtp.Send(message);
             }
-            string dir = Form1.curDirec + "\\BRSLog.txt";
-            StreamWriter w = File.AppendText(dir);
-            w.Write("\r\nLog Entry : ");
-            w.WriteLine("{0} {1}", DateTime.Now.ToLongTimeString(),
-                DateTime.Now.ToLongDateString());
-            w.WriteLine("  :");
-            w.WriteLine("  :{0}", words.ToString());
-            w.WriteLine("-------------------------------");
-            w.Flush();
+            try
+            {
+                string dir = Form1.curDirec + "\\BRSLog.txt";
+                StreamWriter w = File.AppendText(dir);
+                w.Write("\r\nLog Entry : ");
+                w.WriteLine("{0} {1}", DateTime.Now.ToLongTimeString(),
+                    DateTime.Now.ToLongDateString());
+                w.WriteLine("  :");
+                w.WriteLine("  :{0}", words.ToString());
+                w.WriteLine("-------------------------------");
+                w.Flush();
+            }
+            catch (Exception){ }
         }
     }
 }
