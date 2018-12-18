@@ -60,3 +60,13 @@ Log Entry : 1:31:58 PM Wednesday, November 21, 2018
  Target: Void PylonDeviceOpen(IntPtr, Int32)
  
 -------------------------------
+
+Log Entry : 1:54:11 PM Tuesday, December 18, 2018
+  :
+  :Message: Exception from HRESULT: 0xC2000001
+ Source: PylonC.NET
+ Stack Trace:    at PylonC.NET.Pylon.PylonDeviceOpen(IntPtr hDev, Int32 accessMode)
+   at Camera.cameraInit(String cameraType) in C:\SlowControls\BRS2 C#\BRSReadout\BRSReadout\BRSReadout\Camera.cs:line 87
+ Target: Void PylonDeviceOpen(IntPtr, Int32)
+ 
+-------------------------------

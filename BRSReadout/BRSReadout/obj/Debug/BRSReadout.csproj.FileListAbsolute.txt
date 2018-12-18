@@ -49,3 +49,16 @@ C:\Users\controls\Downloads\BRSReadout\BRSReadout\BRSReadout\obj\Debug\BRSReadou
 C:\Users\controls\Downloads\BRSReadout\BRSReadout\BRSReadout\obj\Debug\BRSReadout.Properties.Resources.resources
 C:\Users\controls\Downloads\BRSReadout\BRSReadout\BRSReadout\obj\Debug\BRSReadout.csproj.GenerateResource.Cache
 C:\Users\controls\Downloads\BRSReadout\BRSReadout\BRSReadout\obj\Debug\BRSReadout.csprojResolveAssemblyReference.cache
+C:\SlowControls\BRS2 C#\BRSReadout\BRSReadout\BRSReadout\bin\Debug\BRSReadout.exe.config
+C:\SlowControls\BRS2 C#\BRSReadout\BRSReadout\BRSReadout\obj\Debug\BRSReadout.exe
+C:\SlowControls\BRS2 C#\BRSReadout\BRSReadout\BRSReadout\obj\Debug\BRSReadout.pdb
+C:\SlowControls\BRS2 C#\BRSReadout\BRSReadout\BRSReadout\bin\Debug\BRSReadout.exe
+C:\SlowControls\BRS2 C#\BRSReadout\BRSReadout\BRSReadout\bin\Debug\BRSReadout.pdb
+C:\SlowControls\BRS2 C#\BRSReadout\BRSReadout\BRSReadout\bin\Debug\PylonC.NET.dll
+C:\SlowControls\BRS2 C#\BRSReadout\BRSReadout\BRSReadout\bin\Debug\TwinCAT.Ads.dll
+C:\SlowControls\BRS2 C#\BRSReadout\BRSReadout\BRSReadout\bin\Debug\PylonC.NET.xml
+C:\SlowControls\BRS2 C#\BRSReadout\BRSReadout\BRSReadout\bin\Debug\TwinCAT.Ads.xml
+C:\SlowControls\BRS2 C#\BRSReadout\BRSReadout\BRSReadout\obj\Debug\BRSReadout.Form1.resources
+C:\SlowControls\BRS2 C#\BRSReadout\BRSReadout\BRSReadout\obj\Debug\BRSReadout.Form2.resources
+C:\SlowControls\BRS2 C#\BRSReadout\BRSReadout\BRSReadout\obj\Debug\BRSReadout.Properties.Resources.resources
+C:\SlowControls\BRS2 C#\BRSReadout\BRSReadout\BRSReadout\obj\Debug\BRSReadout.csproj.GenerateResource.Cache

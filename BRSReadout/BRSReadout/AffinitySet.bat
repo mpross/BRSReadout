@@ -1,2 +1,2 @@
 cd C:\
-Powershell "$Process = Get-Process BRSReadout $Process.ProcessorAffinity=14"
+Powershell "$Process = Get-Process BRSReadout; $Process.ProcessorAffinity=14"

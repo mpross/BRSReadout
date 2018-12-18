@@ -16,7 +16,7 @@ namespace BRSReadout
         public static AutoResetEvent graphSignal = Form1.graphSignal;
         public bool run=true;
         Thread dataLoopThread;
-        double dataPointNum;
+        public double dataPointNum;
         public double angleMax;
         public double angleMin=Math.Pow(10,100);
         double numberPoints = double.Parse(ConfigurationManager.AppSettings.Get("numberOfGraphPoints"));
@@ -208,10 +208,12 @@ namespace BRSReadout
             imagePlot.DisableAnimations = true;
             imagePlot.Hoverable = false;
             imagePlot.DataTooltip = null;
+            imagePlot.Zoom = ZoomingOptions.X;
 
             anglePlot.DisableAnimations = true;
             anglePlot.Hoverable = false;
             anglePlot.DataTooltip = null;
+            anglePlot.Zoom = ZoomingOptions.X;
 
             imagePlot.Anchor = AnchorStyles.Left;
             anglePlot.Anchor = AnchorStyles.Right;

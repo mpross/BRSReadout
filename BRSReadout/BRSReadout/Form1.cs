@@ -29,9 +29,6 @@ namespace BRSReadout
         public double refZeroValue = 0;
         public double refValue = 0;
 
-        public double refLastValue;
-        public double angleLastValue;
-
         Camera myCamera;
         DataConsumerDelegate[] consumerd;
 
@@ -87,6 +84,9 @@ namespace BRSReadout
 
         static TcAdsClient tcAds = new TcAdsClient();
         static AdsStream ds = new AdsStream(16);
+
+        public double refLastValue = 0;
+        public double angleLastValue = splitPixel;
 
         double x = 0;
         double xSquar = 0;
@@ -399,7 +399,7 @@ namespace BRSReadout
             int halflength = (int)Math.Floor(fitLength / 2) + 1;  // increased by 1 pixel to allow two fits
             int length = patternLength; //Length of patterns
             double[] crossCor = new double[(int)fitLength + 2];   // increased by 2 pixels to allow two fits
-            int startIndexRight = 0; //Beginning of left pattern
+            int startIndexRight = splitPixel; //Beginning of left pattern
             int startIndexLeft = 0; //Beginning of left pattern
             int pixshift = 1;  // Direction of shift required to estimate slope of fit correction
 
@@ -475,7 +475,7 @@ namespace BRSReadout
                             startIndexRight = 0;
                         }
                     }
-                    if (startIndexRight >= frame.Length+splitPixel || startIndexRight <= splitPixel)                    
+                    if (startIndexRight >= frame.Length || startIndexRight <= splitPixel)                    
                     {
                         timestamps[frameNo] = data.TimeStamp(frameNo);
                         newdata[frameNo, 0] = angleLastValue;
@@ -501,14 +501,6 @@ namespace BRSReadout
                                         sum += frame[m + startIndexRight + k] * refFrame[m + startIndexRightRef];
                                     }
                                 }
-                            }
-                            if (sum == 0)
-                            {
-                                cameraStatus = 0;
-                            }
-                            else
-                            {
-                                cameraStatus = 1;
                             }
                             crossCor[k + halflength] = sum;
                         }
@@ -673,6 +665,17 @@ namespace BRSReadout
                     newdata[frameNo, 0] = angleLastValue;
                     newdata[frameNo, 1] = refLastValue;
                     throw ex;
+                }
+
+                sum = frame.Select(x => (int)x).Sum();
+                Debug.WriteLine(sum);
+                if (sum == 0)
+                {
+                    lightSourceStatus = 0;
+                }
+                else
+                {
+                    lightSourceStatus = 1;
                 }
             }
 
@@ -966,6 +969,7 @@ namespace BRSReadout
         {
             try {
                 graphWindow.anglePlot.Series[0].Values.Clear();
+                graphWindow.dataPointNum = 0;
                 graphWindow.angleMax = 0;
                 graphWindow.angleMin = Math.Pow(10, 100);
             }
