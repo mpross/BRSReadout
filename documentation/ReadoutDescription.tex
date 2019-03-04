@@ -17,7 +17,7 @@ This document describes the ``BRSReadout'' software which was developed by the E
 \section{Overview}
 The code is split between a number of simultaneous threads to allow for increased functionality while maintaining performance. The core of the software is the Form1.cs class which analyzes the images as described in the Image Analysis section, calculates the various signals and status bits, and handles all of the data communication with other threads and the accompanying TwinCAT code. The graphing (Form2.cs), frame capturing (Camera.cs), and data writing (DataWriting.cs) are all handled in their own threads to allow the various subroutines to run at different rates while also decoupling the performance of the threads.
 
-Upon initialization, the main loop starts the other threads, reads a collection of settings from the configuration files, and triggers the camera to begin continuous acquisition. After which is waits for a frame to come into the buffer before running the frame through the analysis, calculating signals, then sending the signals to the other threads and the TwinCAT code. It then waits for another frame and repeats until the software is closed. It should be noted that the analysis is highly CPU intensive and requires a dedicated core to achieve maximal rate while avoiding interrupts from other processes. This is achieved by utilizing the CPU Affinity setting in Windows which is set using a the AffinitySet.bat script on startup. 
+Upon initialization, the main loop starts the other threads, reads a collection of settings from the configuration files, and triggers the camera to begin continuous acquisition. After which is waits for a frame to come into the queue before running the frame through the analysis, calculating signals, then sending the signals to the other threads and the TwinCAT code. It then waits for another frame and repeats until the software is closed. It should be noted that the analysis is highly CPU intensive and requires a dedicated core to achieve maximal rate while avoiding interrupts from other processes. This is achieved by utilizing the CPU Affinity setting in Windows which is set using a the AffinitySet.bat script on startup. 
 \begin{center}
 \includegraphics[width=0.75\textwidth]{BRSReadoutFlow.png}\\
 \end{center}
@@ -31,7 +31,7 @@ The multi-slit autocollimator shines light from a fiber coupled LED through a ma
 
 As the angle between the beam and the housing change, the main pattern (shown above on the left) translates across the CCD while the reference pattern stays stationary. The program now needs to take these images and turn it a data stream of angular readings by measuring the distance between the patterns for each frame.
 
-The frames are recorded by the camera as a 4096 element vector of 12 bit numbers representing the intensity of each CCD pixel. The control of the camera and initial frame handling is done in the Camera.cs class which pulls the frames from the camera using the Basler Pylon APIs, averages a small number of frames together to decrease downstream load, and puts them in a buffer to be ready by the main loop. Additionally, for some of the BRSs the cameras were intentionally installed backwards. To account for this each frame is reversed before being sent on.\\
+The frames are recorded by the camera as a 4096 element vector of 12 bit numbers representing the intensity of each CCD pixel. The control of the camera and initial frame handling is done in the Camera.cs class which pulls the frames from the camera using the Basler Pylon APIs, averages a small number of frames together to decrease downstream load, and puts them in a queue to be ready by the main loop. Additionally, for some of the BRSs the cameras were intentionally installed backwards. To account for this each frame is reversed before being sent on.\\
 
 \textbf{Frame recording code (Camera.startFrameGrab)}:
 \begin{lstlisting}{sharpc}
@@ -59,7 +59,7 @@ while (true)
 }
 \end{lstlisting}
 
-Once a frame is placed in the buffer the main loop (Form1.cs) retrieves it and under goes a series of steps to extract the position of each pattern. The first step of this process is to split the frame in half and designating one side at the reference pattern and the other as the main pattern. This splitting is done at a static location that can be set by changing the "splitPixel" parameter in the configuration file and is normally set to be as close to the reference pattern as possible. This is to give the main pattern, which will be moving during operation, the most room possible. From here on the patterns are treated as separate and undergo identical analyses to yield two channels, the main channel and the reference channel, which correspond to the location of the respective patterns.
+Once a frame is placed in the queue the main loop (Form1.cs) retrieves it and under goes a series of steps to extract the position of each pattern. The first step of this process is to split the frame in half and designating one side at the reference pattern and the other as the main pattern. This splitting is done at a static location that can be set by changing the "splitPixel" parameter in the configuration file and is normally set to be as close to the reference pattern as possible. This is to give the main pattern, which will be moving during operation, the most room possible. From here on the patterns are treated as separate and undergo identical analyses to yield two channels, the main channel and the reference channel, which correspond to the location of the respective patterns.
 
 To give the algorithm a frame to compare with, the first frame that comes into the algorithm is saved and treated as a standard against which all future frames will be compared. Since this frame is captured on the given instrument, it will contain similar nuance features as future frames and thus be  a better standard than any theoretical pattern. This frame is stored and used until either the software is restarted or the "Recapture Frame" button is pressing. This recapture function is only necessary if the first frame is corrupted due to a bad camera frame or if either pattern is out of range.
 
@@ -238,9 +238,16 @@ if (twinCatBool)
 
 \section{User Interface}
 
+The user interface is design to mainly to allow a local user to monitor the status of the software and device while also allow some limited user controls. It is split between two separate windows, "BRS Readout" and "BRS Graph", corresponding to the Form1.cs and Form2.cs classes. These run in independent threads to decouple the performance of the graphing from the main loop while also utilizing multiple cores.
+
+"BRS Readout" is the main window which will be open whenever the software is running and holds all of the user controls. It displays four statistics at the top of the panel: time since the code was run in seconds, the length of the camera queue and the graphing queue, and the voltage being written to the capacitor plates. These are used as diagnostics to ensure that the code is running as expected. The panel also has five buttons which give the user the ability to record the data to the local disk, clear the angle graph, recapture the first frame, open the graphing window, and to turn on the damping override. The ability to record to disk does not affect the output data streams but is intended to allow the BRS to collect data without communicating with the LIGO systems. The frame recapture function can be used if the first frame captured by the camera is corrupted while the damping override will allow the BRS to damp the beam motion even if the main pattern is slightly off the CCD. \textbf{This compromises the fidelity of the tilt channel and should only be used during diagnostics.}
+
 \begin{center}
 \includegraphics[width=0.5\textwidth]{BRSReadoutScreen.png}\\
 \end{center}
+
+The "BRS Graph" window hold two panes which show plots of the current frame on the left and a time series of the angular output on the right. This allows the user to get a image of the patterns 
+
 \includegraphics[width=\textwidth]{BRSReadoutScreenGraph.png}
 \section{Configuration File}
 
