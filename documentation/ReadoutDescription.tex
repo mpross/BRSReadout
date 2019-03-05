@@ -6,14 +6,42 @@
 \usepackage{url}
 \usepackage{listings}
 \usepackage[margin=0.5in]{geometry}
+\usepackage{color}
+
+%\setmonofont{Consolas} %to be used with XeLaTeX or LuaLaTeX
+\definecolor{bluekeywords}{rgb}{0,0,1}
+\definecolor{greencomments}{rgb}{0,0.5,0}
+\definecolor{redstrings}{rgb}{0.64,0.08,0.08}
+\definecolor{xmlcomments}{rgb}{0.5,0.5,0.5}
+\definecolor{types}{rgb}{0.17,0.57,0.68}
+
+\usepackage{listings}
+\lstset{language=[Sharp]C,
+captionpos=b,
+%numbers=left, %Nummerierung
+%numberstyle=\tiny, % kleine Zeilennummern
+frame=lines, % Oberhalb und unterhalb des Listings ist eine Linie
+showspaces=false,
+showtabs=false,
+breaklines=true,
+showstringspaces=false,
+breakatwhitespace=true,
+escapeinside={(*@}{@*)},
+commentstyle=\color{greencomments},
+morekeywords={partial, var, value, get, set},
+keywordstyle=\color{bluekeywords},
+stringstyle=\color{redstrings},
+basicstyle=\ttfamily\small,
+}
 
 \title{BRS Readout Description}
 \author{M.P.Ross}
 \begin{document}
 \maketitle
 \section{Introduction}
-This document describes the ``BRSReadout'' software which was developed by the E{\"o}t-Wash group as the readout software of the Beam Rotation Sensor (BRS). The BRS's angular readout is achieved using a multi-slit autocollimator refined from the device described in \cite{autoCol}. The goal of the software is to turn line camera images into an number of angular readout channels, which are set to the accompanying TwinCAT code, while also giving the user an interface to view the camera images, plot the angular data, record data to disk, and monitor performance. The source for BRSReadout software can be found here: \url{https://github.com/mpross/BRSReadout} or \url{slowcontrols/trunk/BRS2 C#/BRSReadout/}. The accompanying TwinCAT code can be found at \url{slowcontrols/trunk/TwinCAT3/BRS/} with a version for each BRS deployed at the observatories.
-
+This document describes the ``BRSReadout'' software which was developed by the E{\"o}t-Wash group as the readout software of the Beam Rotation Sensor (BRS). The BRS's angular readout is achieved using a multi-slit autocollimator refined from the device described in \cite{autoCol}. The goal of the software is to turn line camera images into an number of angular readout channels, which are sent to the accompanying TwinCAT code, while also giving the user an interface to view the camera images, plot the angular data, record data to disk, and monitor performance. The source for BRSReadout software can be found here: \url{https://github.com/mpross/BRSReadout} or \url{slowcontrols/trunk/BRS2 C#/BRSReadout/}. The accompanying TwinCAT code can be found at \url{https://github.com/mpross/BRS-Controls} or \url{slowcontrols/trunk/TwinCAT3/BRS/}  with a version for each BRS deployed at the observatories. The executable can be found under \url{BRSReadout/BRSReadout/bin/Debug/BRSReadout.exe}.
+\section{Installation}
+Once the software is downloaded either through git or svn, there are a few minor steps that need to be completed to finished the installation. For each device there is a install batch script in the main directory which replaces the configuration file (\url{BRSReadout/BRSReadout/bin/Debug/BRSReadout.exe.config}) with the file corresponding to the given device held in the \url{configs/} directory. It additionally adds a shortcut on the desktop to \url{BRSReadout/BRSReadout/bin/Debug/BRSReadout.exe} for convenience.
 \section{Overview}
 The code is split between a number of simultaneous threads to allow for increased functionality while maintaining performance. The core of the software is the Form1.cs class which analyzes the images as described in the Image Analysis section, calculates the various signals and status bits, and handles all of the data communication with other threads and the accompanying TwinCAT code. The graphing (Form2.cs), frame capturing (Camera.cs), and data writing (DataWriting.cs) are all handled in their own threads to allow the various subroutines to run at different rates while also decoupling the performance of the threads.
 
@@ -34,7 +62,7 @@ As the angle between the beam and the housing change, the main pattern (shown ab
 The frames are recorded by the camera as a 4096 element vector of 12 bit numbers representing the intensity of each CCD pixel. The control of the camera and initial frame handling is done in the Camera.cs class which pulls the frames from the camera using the Basler Pylon APIs, averages a small number of frames together to decrease downstream load, and puts them in a queue to be ready by the main loop. Additionally, for some of the BRSs the cameras were intentionally installed backwards. To account for this each frame is reversed before being sent on.\\
 
 \textbf{Frame recording code (Camera.startFrameGrab)}:
-\begin{lstlisting}{sharpc}
+\begin{lstlisting}
 while (true)
 {
 	if (cameraType == "basler")
@@ -66,7 +94,7 @@ To give the algorithm a frame to compare with, the first frame that comes into t
 Once another frame comes in, the algorithm must extract the current position of the two patterns with respective to their position in the first frame. This is done by combining two methods: a course threshold based edge finder and a fine cross correlation based center calculation. The edge finder finds the first pixel that has an intensity greater than the threshold that is set by the "threshold" parameter in the configuration file. A number set by the "pixelMargin" parameter is subtracted from this pixel number to ensure that the entire pattern is used in the cross correlation step. This is then saved as the "startIndex" and provides a measure of the patterns location to within a pixel. \\
 
 \textbf{Edge finding code (Form1.Pattern)}:
-\begin{lstlisting}{sharpc}                    
+\begin{lstlisting}                 
 for (int j = splitPixel; j < frame.Length; j++)
 {
 	if (frame[j] > threshold)
@@ -84,7 +112,7 @@ for (int j = splitPixel; j < frame.Length; j++)
 To get sub-pixel resolution of the position, we take the cross correlation of the section of the current frame from the start index to the start index plus the pattern length (which is set by the "patternLength" parameter) and the corresponding section in the first frame. This gives us a oscillating pattern with a central peak that is displaced from zero by the distance between the patterns. A gaussian is then fit to a number of points around this central peak. The mean value of this gaussian then corresponds to the sub-pixel displacement of the pattern and it's respective first frame pattern. This is then added to the start index to yield an accurate measure of the patterns location.\\
 
 \textbf{Cross correlation code (Form1.Pattern)}:
-\begin{lstlisting}{sharpc}    
+\begin{lstlisting}  
 for (int k = -halflength; k <= halflength; k++)
 {
 	sum = 0;
@@ -152,7 +180,7 @@ The tilt, drift, velocity, and reference channels are then sent out to the accom
 \\
 
 \textbf{Signal processing code (Form1.dataSend)}:
-\begin{lstlisting}{sharpc}   
+\begin{lstlisting}
 angle = data[0];
 refAng = refGain * (data[1] - refZeroValue);
 //Has a DC subtraction to help filters. Should be about the center of the signal.
@@ -246,11 +274,13 @@ The user interface is design to mainly to allow a local user to monitor the stat
 \includegraphics[width=0.5\textwidth]{BRSReadoutScreen.png}\\
 \end{center}
 
-The "BRS Graph" window hold two panes which show plots of the current frame on the left and a time series of the angular output on the right. This allows the user to get a image of the patterns 
+The "BRS Graph" window can be opened using the "Graph" button and holds two panes which show plots of the current frame on the left and a time series of the angular output on the right. This allows the user to get a image of the current patterns while also monitoring performance of the tilt channel. The angular plot can be cleared by using the "Clear Graph" button and plots the number of points set by the "numberOfGraphPoints" configuration parameter. To decrease the CPU load of this thread, the graphs are updated after a number of frames set by the "graphingFrameNumber" parameter. It should also be noted that the graph can experience glitches when the CPU load is too high such as when a user begins a remote desktop instance.\\
 
 \includegraphics[width=\textwidth]{BRSReadoutScreenGraph.png}
 \section{Configuration File}
 
+The parameters for each instance of the software are stored in a configuration file under \url{BRSReadout/BRSReadout/bin/Debug/BRSReadout.exe.config} and are loaded into the software on startup. These files can be edited manually using a standard text editor and are also initialized with default setting during the install process. The default configuration files for each device are held under \url{configs/}. Each parameter has a line such as \lstinline{<add key="name"  value="value" />} which is imported with the following: \lstinline{ConfigurationManager.AppSettings.Get("name")}. This outputs a string which then must be parsed into the correct data type for the given variable.\\
+\\
 General settings
 \begin{itemize}
 \item location - Device location name. Example: LHO End-X
@@ -271,7 +301,9 @@ Graphing settings
 \item graphingFrameNumber - Number of frames to wait until graph is updated. Default: 5
 \item bufferSize - Number on frames in buffer. Default: 20
 \item numberOfGraphPoints - Number of points to graph. Default: 1000
+\end{itemize}
 Email settings
+\begin{itemize}
 \item emailList - List of emails to send crash reports to separated by ",".
 \end{itemize}
 Filter settings
@@ -294,12 +326,30 @@ Gain settings
 \item angleGain - Angle channel gain. Default: 3645
 \item velGain - Velocity channel gain. Default: -5000000000
 \item driftGain - Drift channel gain. Default: 60
-\item driftOffset - Drift channel offset. Default: 2146
+\item driftOffset - Drift channel zero pixel. Default: 2100
 \item driftOverGain - Drift channel gain during override. Default: 30
-\item driftOverOffset - Drift channel offset during override. Default: 2646
+\item driftOverOffset - Drift channel zero pixel during override. Default: 2600
 \end{itemize}
 
 \section{Troubleshooting}
+The software is designed to run with very little user input however there are a number of faults which have been observed that have simple solutions.
+\begin{itemize}
+\item Angular output is outputting pure noise
+\begin{enumerate}
+\item Ensure patterns are not overlapping by inspecting the pattern pane in the graphing window. If overlapping either recenter the beam balance or wait for it to drift back into range.
+\item Try recapturing the first frame. This will fix the issue of a corrupted first frame and should take immediate effect
+\end{enumerate}
+\item Angular output has sporadic glitches
+\begin{enumerate}
+\item Ensure patterns are not overlapping by inspecting the pattern pane in the graphing window. If overlapping either recenter the beam balance or wait for it to drift back into range.
+\item Check the queue numbers in the main window which should both be at either 1 or 0. These will rise when the CPU is heavily loaded which will cause the program to halt momentarily causing glitches. Either decrease the CPU load by exited spurious programs or by tweaking the "graphingFrameNumber" or "frameAverageNum" parameters.
+\end{enumerate}
+\item Angular output flat lines
+\begin{enumerate}
+\item Ensure that the main pattern is in range by inspecting the pattern pane in the graphing window. If not either recenter the beam balance or wait for it to drift back into range.
+\item Check that the time in the main window is ticking. If not the code is frozen and will likely need to be restarted.
+\end{enumerate}
+\end{itemize}
 \section{Previous Versions}
 Although this document was written specifically about the "BRSReadout" software, previous version such as the "FringeAutocollimator" software follow an almost identical image analysis and have similar GUI components.
 \bibliographystyle{plain}
