@@ -316,7 +316,7 @@ Filter settings
 Fitting settings
 \begin{itemize}
 \item threshold - Edge finder threshold. Default: 1200
-\item splitPixel - Pixel on which frame is split between patterns. Default: 1800
+\item splitPixel - Pixel on which frame is split between patterns. Should be set as close to the right edge of the reference pattern as possible Default: 1800
 \item pixelMargin - Margin to shift back by in edge finding to ensure entire pattern is captured. Default: 40
 \item patternLength - Pattern length. Default: 1500
 \end{itemize}
@@ -348,6 +348,7 @@ The software is designed to run with very little user input however there are a 
 \begin{enumerate}
 \item Ensure that the main pattern is in range by inspecting the pattern pane in the graphing window. If not either recenter the beam balance or wait for it to drift back into range.
 \item Check that the time in the main window is ticking. If not the code is frozen and will likely need to be restarted.
+\item Check the "splitPixel" parameter. It should be set to a pixel that is close to the reference pattern. If set too high the working range of the instrument will be decreased. To fix decrease the parameter to roughly ten pixels above edge of the reference pattern, save configuration file, and restart code.
 \end{enumerate}
 \end{itemize}
 \section{Previous Versions}
