@@ -47,6 +47,7 @@ namespace BRSReadout
         public volatile int Frameco = 0;        
         ushort[] refFrame = new ushort[camWidth];
         public static ushort[] frame = new ushort[camWidth];
+        public static ushort[] flipFrame = new ushort[camWidth];
 
         volatile bool dataWritingThreadBool;
         Thread dataWritingThread;
@@ -401,6 +402,7 @@ namespace BRSReadout
             double[] crossCor = new double[(int)fitLength + 2];   // increased by 2 pixels to allow two fits
             int startIndexRight = splitPixel; //Beginning of left pattern
             int startIndexLeft = 0; //Beginning of left pattern
+            int endIndexRight = camWidth;
             int pixshift = 1;  // Direction of shift required to estimate slope of fit correction
 
 
@@ -475,7 +477,23 @@ namespace BRSReadout
                             startIndexRight = 0;
                         }
                     }
-                    if (startIndexRight >= frame.Length || startIndexRight <= splitPixel)                    
+                    Array.Copy(frame, flipFrame, frame.Length);
+                    Array.Reverse(flipFrame);
+
+                    for (int j = 0; j < flipFrame.Length; j++)
+                    {
+                        if (flipFrame[j] > threshold)
+                        {
+                            endIndexRight = flipFrame.Length-j+pixelMargin;
+                            break;
+                        }
+                        if (j == frame.Length - 1)
+                        {
+                            endIndexRight = flipFrame.Length;
+                        }
+                    }
+
+                    if (startIndexRight >= frame.Length || startIndexRight <= splitPixel || (endIndexRight-startIndexRight) < length)                    
                     {
                         timestamps[frameNo] = data.TimeStamp(frameNo);
                         newdata[frameNo, 0] = angleLastValue;

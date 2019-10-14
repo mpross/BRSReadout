@@ -70,3 +70,27 @@ Log Entry : 1:54:11 PM Tuesday, December 18, 2018
  Target: Void PylonDeviceOpen(IntPtr, Int32)
  
 -------------------------------
+
+Log Entry : 11:07:07 AM Monday, October 14, 2019
+  :
+  :Message: Value cannot be null.
+Parameter name: value
+ Source: mscorlib
+ Stack Trace:    at System.Boolean.Parse(String value)
+   at Camera..ctor() in C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\Camera.cs:line 31
+   at BRSReadout.Form1.initCamera() in C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\Form1.cs:line 330
+ Target: Boolean Parse(System.String)
+ 
+-------------------------------
+
+Log Entry : 11:08:10 AM Monday, October 14, 2019
+  :
+  :Message: Value cannot be null.
+Parameter name: value
+ Source: mscorlib
+ Stack Trace:    at System.Boolean.Parse(String value)
+   at Camera..ctor() in C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\Camera.cs:line 31
+   at BRSReadout.Form1.initCamera() in C:\Users\mross\OneDrive\Desktop\brs\BRSReadout\BRSReadout\Form1.cs:line 330
+ Target: Boolean Parse(System.String)
+ 
+-------------------------------

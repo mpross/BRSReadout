@@ -181,7 +181,7 @@ class Camera
                     data = new ushort[camWidth];
                     Random random = new Random();
                     TimeSpan ts = DateTime.Now.Subtract(new DateTime(2011, 2, 1));
-                    double offset = 2200 * Math.Sin(2 * Math.PI * 0.01 * ts.TotalSeconds);
+                    double offset = 300 * Math.Sin(2 * Math.PI * 0.01 * ts.TotalSeconds)-500;
                     for (int i = 0; i < data.Length; i++)
                     {
                         if (i < 40)
@@ -190,7 +190,7 @@ class Camera
                         }
                         if (i > 40 && i < 1540)
                         {
-                            data[i] = (ushort)(data[i] + Math.Pow(2, 11) + random.Next(0, 5));
+                            data[i] = (ushort)(data[i] + Math.Pow(2, 11)*Math.Abs(Math.Sin(2*Math.PI* i / 300.0)) + random.Next(0, 5));
                         }
                         if (i > 1540 && i < 1940 + offset)
                         {
@@ -198,7 +198,7 @@ class Camera
                         }
                         if (i > 1940 + offset && i < 3440 + offset)
                         {
-                            data[i] = (ushort)(data[i] + Math.Pow(2, 11) + random.Next(0, 5));
+                            data[i] = (ushort)(data[i] + Math.Pow(2, 11) * Math.Abs(Math.Sin(2 * Math.PI * (i-offset) / 300.0)) + random.Next(0, 5));
                         }
                         if (i > 3440 + offset)
                         {
